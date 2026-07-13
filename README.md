@@ -8,6 +8,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 ### Basic Repo Structure
+```
+.
 blue-team-mfa-portal/
 ├── docker-compose.yml
 ├── .env                          # secrets (gitignored)
@@ -61,3 +63,4 @@ blue-team-mfa-portal/
     ├── 01-design-report.md
     ├── 02-hardening-report.md
     └── 03-incident-response.md
+```
