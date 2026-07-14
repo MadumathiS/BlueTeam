@@ -7,18 +7,33 @@ import platform
 import re
 import os
 from crypto_utils import hash_password, encrypt_secret
-from models import db, User
+from models import db, User, TOTPSeed
+import json
 import pyotp
 from pathlib import Path
 from urllib.parse import urlparse
 import psycopg2
 import time
+from urllib.parse import quote_plus
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-    'DATABASE_URL', 'postgresql://driftlock_admin:devpass@localhost:5433/driftlock'
-)
+# Build SQLALCHEMY_DATABASE_URI safely from env vars to avoid parsing issues
+env_db_url = os.getenv('DATABASE_URL')
+# If DB_PASSWORD is provided via env, prefer building the URL from components
+# This avoids issues when the password contains characters like '@' that break parsing
+if env_db_url and not os.getenv('DB_PASSWORD'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = env_db_url
+else:
+    db_user = os.getenv('POSTGRES_USER', 'driftlock_admin')
+    db_pass = os.getenv('DB_PASSWORD') or os.getenv('POSTGRES_PASSWORD') or 'devpass'
+    db_host = os.getenv('DB_HOST', 'db')
+    db_port = os.getenv('DB_PORT', '5432')
+    db_name = os.getenv('POSTGRES_DB', 'driftlock')
+    safe_pass = quote_plus(db_pass)
+    constructed = f"postgresql://{db_user}:{safe_pass}@{db_host}:{db_port}/{db_name}"
+    app.logger.info(f"Using database URL: postgresql://{db_user}:***@{db_host}:{db_port}/{db_name}")
+    app.config['SQLALCHEMY_DATABASE_URI'] = constructed
 
 
 def ensure_database_exists(database_url, retries=5, delay=2):
@@ -115,32 +130,67 @@ def home():
 @app.route('/api/register', methods=['POST'])
 @limiter.limit("5 per minute")
 def register():
+    print("Register endpoint hit")
     data = request.get_json()
+    if not data or not isinstance(data, dict):
+        return jsonify({"error": "Invalid or missing JSON body"}), 400
+    print(data)
     username = data.get('username', '')
     password = data.get('password', '')
 
-    if not is_valid_username(username) or len(password) < 8:
-        return jsonify({"error": "Invalid username or password"}), 400
+    # Input validation
+    if not is_valid_username(username):
+        return jsonify({"error": "Invalid username format"}), 400
+    if not isinstance(password, str) or len(password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters"}), 400
 
-    if User.query.filter_by(username=username).first():
-        return jsonify({"error": "Username already exists"}), 409
+    try:
+        # Check for existing user
+        if User.query.filter_by(username=username).first():
+            app.logger.warning(f"Duplicate registration attempt: {username} from {request.remote_addr}")
+            return jsonify({"error": "Username already exists"}), 409
 
-    totp_secret = pyotp.random_base32()
-    user = User(
-        username=username,
-        password_hash=hash_password(password),
-        totp_secret_encrypted=encrypt_secret(totp_secret)
-    )
-    db.session.add(user)
-    db.session.commit()
+        # Create the user
+        new_user = User(
+            username=username,
+            password_hash=hash_password(password),
+            mfa_enabled=False
+        )
+        db.session.add(new_user)
+        db.session.flush()  # gets new_user.id before commit, without ending the transaction
 
-    app.logger.info(f"New user registered: {username}")
+        # Generate TOTP secret + backup codes
+        totp_secret = pyotp.random_base32()
+        backup_codes = [pyotp.random_base32()[:8] for _ in range(5)]
 
-    # In real flow, show this as a QR code for scanning into an authenticator app
-    provisioning_uri = pyotp.totp.TOTP(totp_secret).provisioning_uri(
-        name=username, issuer_name="BlueTeamPortal"
-    )
-    return jsonify({"message": "Registered", "provisioning_uri": provisioning_uri})
+        new_seed = TOTPSeed(
+            user_id=new_user.id,
+            encrypted_seed=encrypt_secret(totp_secret),
+            backup_codes=json.dumps(backup_codes)
+        )
+        db.session.add(new_seed)
+        db.session.commit()
+
+        app.logger.info(f"New user registered: {username}")
+
+        # Provisioning URI - used to generate the QR code for authenticator apps
+        provisioning_uri = pyotp.totp.TOTP(totp_secret).provisioning_uri(
+            name=username, issuer_name="DriftlockPortal"
+        )
+
+        return jsonify({
+            "message": "User registered successfully",
+            "provisioning_uri": provisioning_uri,
+            "backup_codes": backup_codes  # shown once, user should save these
+        }), 201
+    except Exception as e:
+        app.logger.exception("Error during registration: %s", e)
+        test = e
+        print (test)
+        print(f"Error during registration: {e}", flush=True)
+        db.session.rollback()
+        return jsonify({"error": "Internal server error", "detail": str(e)}), 500
+
 
 @app.route('/api/status')
 def status():

@@ -22,9 +22,14 @@ services:
     ports:
       - "4325:4325"
     environment:
-      DATABASE_URL: postgresql://driftlock_admin:${DB_PASSWORD}@db:5432/driftlock
+      DB_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: driftlock_admin
+      POSTGRES_DB: driftlock
+      DB_HOST: db
+      DB_PORT: 5432
       RATELIMIT_STORAGE_URI: redis://redis:6379/0
       MASTER_KEY: ${MASTER_KEY}
+    restart: always
     depends_on:
       db:
         condition: service_healthy

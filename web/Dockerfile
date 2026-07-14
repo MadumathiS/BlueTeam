@@ -17,5 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . .
 
 EXPOSE 4325
+EXPOSE 5678
 
-CMD ["python3", "app.py"]
+CMD ["sh", "-c", "if [ \"${ENABLE_DEBUGPY:-0}\" = \"1\" ]; then exec python -m debugpy --listen 0.0.0.0:5678 app.py; else exec python3 app.py; fi"]
+#CMD ["python3", "app.py"]
