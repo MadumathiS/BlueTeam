@@ -20,7 +20,7 @@ services:
   web:
     build: ./web
     ports:
-      - "4326:4325"
+      - "4325:4325"
     environment:
       DATABASE_URL: postgresql://driftlock_admin:${DB_PASSWORD}@db:5432/driftlock
       RATELIMIT_STORAGE_URI: redis://redis:6379/0
