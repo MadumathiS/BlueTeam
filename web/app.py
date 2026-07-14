@@ -6,9 +6,57 @@ import sys
 import platform
 import re
 import os
+from crypto_utils import hash_password, encrypt_secret
+from models import db, User
+import pyotp
 from pathlib import Path
+from urllib.parse import urlparse
+import psycopg2
+import time
 
 app = Flask(__name__)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    'DATABASE_URL', 'postgresql://driftlock_admin:devpass@localhost:5433/driftlock'
+)
+
+
+def ensure_database_exists(database_url, retries=5, delay=2):
+    """Ensure the target Postgres database exists; create it if missing.
+
+    This connects to the server's default `postgres` database and issues
+    a CREATE DATABASE if needed. Retries a few times to wait for the
+    server to be ready.
+    """
+    parsed = urlparse(database_url)
+    target_db = parsed.path.lstrip('/') or 'postgres'
+    user = parsed.username or os.getenv('POSTGRES_USER')
+    password = parsed.password or os.getenv('POSTGRES_PASSWORD')
+    host = parsed.hostname or 'localhost'
+    port = parsed.port or 5432
+
+    for attempt in range(retries):
+        try:
+            conn = psycopg2.connect(dbname='postgres', user=user, password=password, host=host, port=port)
+            conn.autocommit = True
+            cur = conn.cursor()
+            cur.execute("SELECT 1 FROM pg_database WHERE datname=%s;", (target_db,))
+            if not cur.fetchone():
+                cur.execute('CREATE DATABASE "{}";'.format(target_db))
+                app.logger.info(f"Created database {target_db}")
+            cur.close()
+            conn.close()
+            return
+        except Exception as e:
+            # Wait and retry while DB container starts
+            app.logger.warning(f"Database not ready yet ({e}), retrying in {delay}s...")
+            time.sleep(delay)
+    app.logger.error(f"Could not ensure database {target_db} exists after {retries} attempts")
+
+
+ensure_database_exists(app.config['SQLALCHEMY_DATABASE_URI'])
+db.init_app(app)
+
 
 # --- Logging setup (for Incident Response Report) ---
 # Ensure logs directory exists (relative to project BlueTeam/)
@@ -44,7 +92,12 @@ app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
 
 # --- Rate limiting (security control) ---
-limiter = Limiter(app=app, key_func=get_remote_address, default_limits=["100 per minute"])
+# Configure storage for Flask-Limiter (prefer Redis in production)
+ratelimit_uri = os.getenv('RATELIMIT_STORAGE_URI')
+if ratelimit_uri:
+    limiter = Limiter(app=app, key_func=get_remote_address, default_limits=["100 per minute"], storage_uri=ratelimit_uri)
+else:
+    limiter = Limiter(app=app, key_func=get_remote_address, default_limits=["100 per minute"])  # falls back to in-memory
 
 @app.before_request
 def log_request():
@@ -58,6 +111,36 @@ def is_valid_username(username):
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/api/register', methods=['POST'])
+@limiter.limit("5 per minute")
+def register():
+    data = request.get_json()
+    username = data.get('username', '')
+    password = data.get('password', '')
+
+    if not is_valid_username(username) or len(password) < 8:
+        return jsonify({"error": "Invalid username or password"}), 400
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({"error": "Username already exists"}), 409
+
+    totp_secret = pyotp.random_base32()
+    user = User(
+        username=username,
+        password_hash=hash_password(password),
+        totp_secret_encrypted=encrypt_secret(totp_secret)
+    )
+    db.session.add(user)
+    db.session.commit()
+
+    app.logger.info(f"New user registered: {username}")
+
+    # In real flow, show this as a QR code for scanning into an authenticator app
+    provisioning_uri = pyotp.totp.TOTP(totp_secret).provisioning_uri(
+        name=username, issuer_name="BlueTeamPortal"
+    )
+    return jsonify({"message": "Registered", "provisioning_uri": provisioning_uri})
 
 @app.route('/api/status')
 def status():

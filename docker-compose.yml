@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: driftlock_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: driftlock
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U driftlock_admin -d driftlock"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: ./web
+    ports:
+      - "4326:4325"
+    environment:
+      DATABASE_URL: postgresql://driftlock_admin:${DB_PASSWORD}@db:5432/driftlock
+      RATELIMIT_STORAGE_URI: redis://redis:6379/0
+      MASTER_KEY: ${MASTER_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./logs:/app/logs
+
+  redis:
+    image: redis:7
+    container_name: driftlock-redis-1
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:
