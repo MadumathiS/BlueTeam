@@ -32,3 +32,15 @@ CREATE TABLE activity_logs (
     session_id VARCHAR(128),
     timestamp TIMESTAMP DEFAULT NOW()
 );
+CREATE TABLE IF NOT EXISTS honeypot_logs (
+    id          BIGSERIAL PRIMARY KEY,
+    "timestamp" TIMESTAMPTZ NOT NULL DEFAULT now(),
+    severity    VARCHAR(20) NOT NULL DEFAULT 'CRITICAL',
+    source_ip   VARCHAR(64),
+    path        VARCHAR(255) NOT NULL,
+    user_agent  TEXT,
+    details     TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_honeypot_logs_timestamp
+    ON honeypot_logs ("timestamp" DESC);

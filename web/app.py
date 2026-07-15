@@ -73,6 +73,8 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+from honeypot import honeypot_bp
+app.register_blueprint(honeypot_bp)
 
 # --- Logging setup (for Incident Response Report) ---
 # Ensure logs directory exists (relative to project BlueTeam/)
