@@ -121,6 +121,7 @@ def log_request():
 
 # --- Normal routes ---
 @app.route('/')
+@app.route('/home')
 def home():
     return render_template('index.html')
 
@@ -131,7 +132,11 @@ def login_page():
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
-    
+
+@app.route('/support', methods=['GET'])    
+def support_page():
+    return render_template('support.html')
+
 @app.route('/admin/dashboard', methods=['GET', 'POST'])
 def admin_dashboard():
     # Placeholder for admin dashboard logic
