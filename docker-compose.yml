@@ -38,7 +38,7 @@ services:
       redis:
         condition: service_started
     volumes:
-      - ./logs:/app/logs
+      - ./logs:/logs
 
   redis:
     image: redis:7

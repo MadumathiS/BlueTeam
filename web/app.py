@@ -12,6 +12,8 @@ import psycopg2
 import time
 from urllib.parse import quote_plus
 from auth import register as register_handler
+from mfa import totp_bp
+
 
 app = Flask(__name__)
 
@@ -137,6 +139,8 @@ app.add_url_rule('/api/register', endpoint='api_register', view_func=register_vi
 @app.route('/support', methods=['GET'])    
 def support_page():
     return render_template('support.html')
+# --- Register the TOTP Blueprint for MFA routes ---
+app.register_blueprint(totp_bp)
 
 @app.route('/admin/dashboard', methods=['GET', 'POST'])
 def admin_dashboard():
