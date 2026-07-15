@@ -4,17 +4,14 @@ from flask_limiter.util import get_remote_address
 import logging
 import sys
 import platform
-import re
 import os
-from crypto_utils import hash_password, encrypt_secret
-from models import db, User, TOTPSeed, PasswordResetToken, ActivityLog
-import json
-import pyotp
+from models import db
 from pathlib import Path
 from urllib.parse import urlparse
 import psycopg2
 import time
 from urllib.parse import quote_plus
+from auth import register as register_handler
 
 app = Flask(__name__)
 
@@ -122,13 +119,6 @@ else:
 def log_request():
     app.logger.info("Incoming request")
 
-# --- Input validation helper ---
-def is_valid_username(username):
-    return bool(re.match(r'^[a-zA-Z0-9_]{3,20}$', username))
-
-def is_valid_email(email):
-    return bool(re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email))
-
 # --- Normal routes ---
 @app.route('/')
 def home():
@@ -138,99 +128,9 @@ def home():
 def login_page():
     return render_template('login.html')
 
-@app.route('/register', methods=['GET', 'POST'])
-@app.route('/api/register', methods=['POST'])
-@limiter.limit("5 per minute")
-def register():
-    if session.get('logged_in'):
-        return redirect(url_for('home'))
-
-    if request.method == 'GET':
-        return render_template('register.html')
-
-    # --- POST request handling ---
-    print("Register endpoint hit")
-
-    if request.is_json:
-        data = request.get_json(silent=True) or {}
-    else:
-        data = request.form.to_dict(flat=True)
-
-    if not data or not isinstance(data, dict):
-        return jsonify({"error": "Invalid or missing request body"}), 400
-
-    username = str(data.get('username', '')).strip()
-    email = str(data.get('email', '')).strip().lower()
-    password = data.get('password', '')
-    confirm_password = data.get('confirm_password', '')
-
-    if not isinstance(password, str):
-        password = ''
-    if not isinstance(confirm_password, str):
-        confirm_password = ''
-
-    # Input validation
-    if not email:
-        return jsonify({"error": "Email is required"}), 400
-    if not is_valid_email(email):
-        return jsonify({"error": "Invalid email format"}), 400
-    if not is_valid_username(username):
-        return jsonify({"error": "Invalid username format"}), 400
-    if not isinstance(password, str) or len(password) < 8:
-        return jsonify({"error": "Password must be at least 8 characters"}), 400
-    if password != confirm_password:
-        return jsonify({"error": "Passwords do not match"}), 400
-
-    try:
-        # Check for existing user
-        if User.query.filter_by(username=username).first():
-            app.logger.warning(f"Duplicate registration attempt: {username} from {request.remote_addr}")
-            return jsonify({"error": "Username already exists"}), 409
-        if User.query.filter_by(email=email).first():
-            app.logger.warning(f"Duplicate email registration attempt: {email} from {request.remote_addr}")
-            return jsonify({"error": "Email already exists"}), 409
-
-        # Create the user
-        new_user = User(
-            username=username,
-            email=email,
-            password_hash=hash_password(password),
-            mfa_enabled=False
-        )
-        db.session.add(new_user)
-        db.session.flush()  # gets new_user.id before commit, without ending the transaction
-
-        # Generate TOTP secret + backup codes
-        totp_secret = pyotp.random_base32()
-        backup_codes = [pyotp.random_base32()[:8] for _ in range(5)]
-
-        new_seed = TOTPSeed(
-            user_id=new_user.id,
-            encrypted_seed=encrypt_secret(totp_secret),
-            backup_codes=json.dumps(backup_codes)
-        )
-        db.session.add(new_seed)
-        db.session.commit()
-
-        app.logger.info(f"New user registered: {username}")
-
-        # Provisioning URI - used to generate the QR code for authenticator apps
-        provisioning_uri = pyotp.totp.TOTP(totp_secret).provisioning_uri(
-            name=username, issuer_name="DriftlockPortal"
-        )
-
-        return jsonify({
-            "message": "User registered successfully",
-            "provisioning_uri": provisioning_uri,
-            "backup_codes": backup_codes  # shown once, user should save these
-        }), 201
-    except Exception as e:
-        app.logger.exception("Error during registration: %s", e)
-        test = e
-        print (test)
-        print(f"Error during registration: {e}", flush=True)
-        db.session.rollback()
-        return jsonify({"error": "Internal server error", "detail": str(e)}), 500
+register_view = limiter.limit("5 per minute")(register_handler)
+app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
+app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
     
 @app.route('/admin/dashboard', methods=['GET', 'POST'])
 def admin_dashboard():
