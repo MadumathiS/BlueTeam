@@ -127,6 +127,11 @@ def is_valid_username(username):
 def home():
     return render_template('index.html')
 
+@app.route('/login', methods=['GET'])
+@app.route('/login.html', methods=['GET'])
+def login_page():
+    return render_template('login.html')
+
 @app.route('/api/register', methods=['POST'])
 @limiter.limit("5 per minute")
 def register():
@@ -206,6 +211,7 @@ def profile():
         abort(401)
     return jsonify({"user": "demo_user", "role": "member"})
 
+
 # --- INTENTIONAL VULNERABILITY: exposed debug endpoint, no auth required ---
 @app.route('/api/debug')
 def debug():
@@ -227,4 +233,4 @@ def not_found(e):
     return jsonify({"error": "Not found"}), 404
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=4325)
+    app.run(host='0.0.0.0', port=4325, debug=True) #remove debug true in production
