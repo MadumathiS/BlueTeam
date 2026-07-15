@@ -11,9 +11,9 @@
 <img src="/static/images/DriftLockALPHA.png" alt="DriftLock Alpha" class="site-logo-top-left">
 
 <nav class="top-auth-nav" aria-label="Authentication links">
-    <a href="index.html" class="top-auth-link">HOME</a>
+    <a href="{{ url_for('home') }}" class="top-auth-link">HOME</a>
     <span class="top-auth-separator">/</span>
-    <a href="login.html" class="top-auth-link">LOGIN</a>
+    <a href="{{ url_for('login') }}" class="top-auth-link">LOGIN</a>
 </nav>
 
 <section class="vault-home">
