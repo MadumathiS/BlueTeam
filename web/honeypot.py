@@ -12,8 +12,8 @@ honeypot_bp = Blueprint("honeypot", __name__)
 # Same base_dir convention app.py uses: repo_root/logs, one level up from
 # web/. Kept self-contained here rather than importing app.py's base_dir
 # so this module has no dependency on app.py's internals.
-BASE_DIR = Path(__file__).resolve().parent.parent
-LOGS_DIR = BASE_DIR / "logs"
+# Force the logs to save inside /app/logs where permissions are mapped correctly
+LOGS_DIR = Path("/app/logs")
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
 HONEYPOT_LOG = LOGS_DIR / "honeypot.log"
 
