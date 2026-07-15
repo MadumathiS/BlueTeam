@@ -125,7 +125,7 @@ def home():
     return render_template('index.html')
 
 @app.route('/login', methods=['GET'])
-def login_page():
+def login():
     return render_template('login.html')
 
 register_view = limiter.limit("5 per minute")(register_handler)
