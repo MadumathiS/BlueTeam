@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, abort, has_request_context
+from flask import Flask, redirect, render_template, url_for, session, request, jsonify, abort, has_request_context
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import logging
@@ -25,11 +25,11 @@ env_db_url = os.getenv('DATABASE_URL')
 if env_db_url and not os.getenv('DB_PASSWORD'):
     app.config['SQLALCHEMY_DATABASE_URI'] = env_db_url
 else:
-    db_user = os.getenv('POSTGRES_USER', 'driftlock_admin')
-    db_pass = os.getenv('DB_PASSWORD') or os.getenv('POSTGRES_PASSWORD') or 'devpass'
-    db_host = os.getenv('DB_HOST', 'db')
-    db_port = os.getenv('DB_PORT', '5432')
-    db_name = os.getenv('POSTGRES_DB', 'driftlock')
+    db_user = os.getenv('DB_USER')
+    db_pass = os.getenv('DB_PASSWORD')
+    db_host = os.getenv('DB_HOST')
+    db_port = os.getenv('DB_PORT')
+    db_name = os.getenv('DB_NAME')
     safe_pass = quote_plus(db_pass)
     constructed = f"postgresql://{db_user}:{safe_pass}@{db_host}:{db_port}/{db_name}"
     app.logger.info(f"Using database URL: postgresql://{db_user}:***@{db_host}:{db_port}/{db_name}")
@@ -45,8 +45,8 @@ def ensure_database_exists(database_url, retries=5, delay=2):
     """
     parsed = urlparse(database_url)
     target_db = parsed.path.lstrip('/') or 'postgres'
-    user = parsed.username or os.getenv('POSTGRES_USER')
-    password = parsed.password or os.getenv('POSTGRES_PASSWORD')
+    user = parsed.username or os.getenv('DB_USER')
+    password = parsed.password or os.getenv('DB_PASSWORD')
     host = parsed.hostname or 'localhost'
     port = parsed.port or 5432
 
@@ -69,7 +69,8 @@ def ensure_database_exists(database_url, retries=5, delay=2):
     app.logger.error(f"Could not ensure database {target_db} exists after {retries} attempts")
 
 
-ensure_database_exists(app.config['SQLALCHEMY_DATABASE_URI'])
+if os.getenv('ENSURE_DATABASE_EXISTS', '0') == '1':
+    ensure_database_exists(app.config['SQLALCHEMY_DATABASE_URI'])
 db.init_app(app)
 
 
@@ -122,42 +123,74 @@ def log_request():
 def is_valid_username(username):
     return bool(re.match(r'^[a-zA-Z0-9_]{3,20}$', username))
 
+def is_valid_email(email):
+    return bool(re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email))
+
 # --- Normal routes ---
 @app.route('/')
 def home():
     return render_template('index.html')
 
 @app.route('/login', methods=['GET'])
-@app.route('/login.html', methods=['GET'])
 def login_page():
     return render_template('login.html')
 
+@app.route('/register', methods=['GET', 'POST'])
 @app.route('/api/register', methods=['POST'])
 @limiter.limit("5 per minute")
 def register():
+    if session.get('logged_in'):
+        return redirect(url_for('home'))
+
+    if request.method == 'GET':
+        return render_template('register.html')
+
+    # --- POST request handling ---
     print("Register endpoint hit")
-    data = request.get_json()
+
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+    else:
+        data = request.form.to_dict(flat=True)
+
     if not data or not isinstance(data, dict):
-        return jsonify({"error": "Invalid or missing JSON body"}), 400
-    print(data)
-    username = data.get('username', '')
+        return jsonify({"error": "Invalid or missing request body"}), 400
+
+    username = str(data.get('username', '')).strip()
+    email = str(data.get('email', '')).strip().lower()
     password = data.get('password', '')
+    confirm_password = data.get('confirm_password', '')
+
+    if not isinstance(password, str):
+        password = ''
+    if not isinstance(confirm_password, str):
+        confirm_password = ''
 
     # Input validation
+    if not email:
+        return jsonify({"error": "Email is required"}), 400
+    if not is_valid_email(email):
+        return jsonify({"error": "Invalid email format"}), 400
     if not is_valid_username(username):
         return jsonify({"error": "Invalid username format"}), 400
     if not isinstance(password, str) or len(password) < 8:
         return jsonify({"error": "Password must be at least 8 characters"}), 400
+    if password != confirm_password:
+        return jsonify({"error": "Passwords do not match"}), 400
 
     try:
         # Check for existing user
         if User.query.filter_by(username=username).first():
             app.logger.warning(f"Duplicate registration attempt: {username} from {request.remote_addr}")
             return jsonify({"error": "Username already exists"}), 409
+        if User.query.filter_by(email=email).first():
+            app.logger.warning(f"Duplicate email registration attempt: {email} from {request.remote_addr}")
+            return jsonify({"error": "Email already exists"}), 409
 
         # Create the user
         new_user = User(
             username=username,
+            email=email,
             password_hash=hash_password(password),
             mfa_enabled=False
         )
@@ -222,7 +255,6 @@ def debug():
         "flask_env": "development",
         "app_secret_hint": "check .env file"  # intentionally leaky
     })
-
 @app.errorhandler(401)
 def unauthorized(e):
     return jsonify({"error": "Unauthorized"}), 401
