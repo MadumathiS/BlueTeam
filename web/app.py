@@ -7,7 +7,7 @@ import platform
 import re
 import os
 from crypto_utils import hash_password, encrypt_secret
-from models import db, User, TOTPSeed
+from models import db, User, TOTPSeed, PasswordResetToken, ActivityLog
 import json
 import pyotp
 from pathlib import Path
@@ -72,6 +72,9 @@ def ensure_database_exists(database_url, retries=5, delay=2):
 if os.getenv('ENSURE_DATABASE_EXISTS', '0') == '1':
     ensure_database_exists(app.config['SQLALCHEMY_DATABASE_URI'])
 db.init_app(app)
+
+with app.app_context():
+    db.create_all()
 
 
 # --- Logging setup (for Incident Response Report) ---
