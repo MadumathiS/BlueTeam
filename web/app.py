@@ -25,11 +25,11 @@ env_db_url = os.getenv('DATABASE_URL')
 if env_db_url and not os.getenv('DB_PASSWORD'):
     app.config['SQLALCHEMY_DATABASE_URI'] = env_db_url
 else:
-    db_user = os.getenv('DB_USER')
-    db_pass = os.getenv('DB_PASSWORD')
-    db_host = os.getenv('DB_HOST')
-    db_port = os.getenv('DB_PORT')
-    db_name = os.getenv('DB_NAME')
+    db_user = os.getenv('DB_USER', 'driftlock_admin')
+    db_pass = os.getenv('DB_PASSWORD', 'devpass')
+    db_host = os.getenv('DB_HOST', 'db')
+    db_port = os.getenv('DB_PORT', '5432')
+    db_name = os.getenv('DB_NAME', os.getenv('POSTGRES_DB', 'driftlock'))
     safe_pass = quote_plus(db_pass)
     constructed = f"postgresql://{db_user}:{safe_pass}@{db_host}:{db_port}/{db_name}"
     app.logger.info(f"Using database URL: postgresql://{db_user}:***@{db_host}:{db_port}/{db_name}")
@@ -231,7 +231,11 @@ def register():
         print(f"Error during registration: {e}", flush=True)
         db.session.rollback()
         return jsonify({"error": "Internal server error", "detail": str(e)}), 500
-
+    
+@app.route('/admin/dashboard', methods=['GET', 'POST'])
+def admin_dashboard():
+    # Placeholder for admin dashboard logic
+    return render_template('admin_dashboard.html')  
 
 @app.route('/api/status')
 def status():

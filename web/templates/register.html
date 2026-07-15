@@ -59,7 +59,7 @@ registerForm.addEventListener('submit', async (event) => {
     }
 
     try {
-        const response = await fetch('/api/register', {
+        const response = await fetch("{{ url_for('register') }}", {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password, confirm_password: confirmPassword })
