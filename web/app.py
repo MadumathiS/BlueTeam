@@ -80,7 +80,8 @@ app.register_blueprint(honeypot_bp)
 
 # --- Logging setup (for Incident Response Report) ---
 # Ensure logs directory exists (relative to project BlueTeam/)
-logs_dir = '/app/logs'
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+logs_dir = os.path.join(base_dir, 'logs')
 Path(logs_dir).mkdir(parents=True, exist_ok=True)
 logfile = os.path.join(logs_dir, 'access.log')
 

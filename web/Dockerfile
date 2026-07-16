@@ -17,9 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY . .
 
 # Create a non-root user and switch to it
-RUN useradd --create-home --shell /bin/bash appuser \
-	&& mkdir -p /logs \
-	&& chown -R appuser:appuser /app /logs
+RUN useradd --create-home --uid 1000 --shell /bin/bash appuser \
+	&& chown -R appuser:appuser /app
 
 USER appuser
 
