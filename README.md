@@ -37,8 +37,14 @@ blue-team-mfa-portal/
 ├── db/
 │   └── init.sql                  # users, totp_seeds, password_reset_tokens,
 │                                 #   activity_logs, honeypot_logs
-├── secrets/
-│   └── master_key.txt
+│
+├── elk/
+│   └── logstash/
+│       └── pipeline/
+│           └── logstash.conf     # grok-parses access.log,
+│                                 #   JSON-parses honeypot.log,
+│                                 #   tags /backup_secrets/ as honeypot_hit
+│
 ├── logs/
 │   ├── access.log
 │   ├── honeypot.log

@@ -103,12 +103,14 @@ class RequestFormatter(logging.Formatter):
             record.path = 'N/A'
         return super().format(record)
 
+app.logger.handlers.clear()
 handler = logging.FileHandler(logfile)
 handler.setFormatter(RequestFormatter(
     '%(asctime)s | %(levelname)s | %(remote_addr)s | %(method)s %(path)s'
 ))
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
+app.logger.propagate = False
 
 # --- Rate limiting (security control) ---
 # Configure storage for Flask-Limiter (prefer Redis in production)
