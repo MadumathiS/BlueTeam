@@ -16,6 +16,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY . .
 
+# Create a non-root user and switch to it
+RUN useradd --create-home --shell /bin/bash appuser \
+    && chown -R appuser:appuser /app
+
+USER appuser
+#chmod 777 logs
+#apply these permissions to the logs directory so that the non-root user can write to it
+
 EXPOSE 4325
 EXPOSE 5678
 
