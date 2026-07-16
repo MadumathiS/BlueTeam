@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftLock - Mon compte 2FA</title>
+    <link rel="stylesheet" href="/static/css/home.css">
+    <style>
+        /* --- Styles spécifiques à la page 2FA, réutilise les variables de home.css --- */
+
+        .mfa-card {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .mfa-account-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .mfa-account-name {
+            font-size: 1rem;
+            color: var(--market-text);
+        }
+
+        .mfa-account-issuer {
+            color: var(--market-muted);
+            font-size: 0.78rem;
+        }
+
+        /* Cadran / anneau de compte à rebours façon coffre-fort */
+        .mfa-dial-wrap {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 1.75rem;
+        }
+
+        .mfa-dial-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .mfa-dial-track {
+            fill: none;
+            stroke: var(--market-border);
+            stroke-width: 8;
+        }
+
+        .mfa-dial-progress {
+            fill: none;
+            stroke: var(--market-gold);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+        }
+
+        .mfa-dial-progress.is-urgent {
+            stroke: #ef4444;
+        }
+
+        .mfa-dial-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+        }
+
+        .mfa-code {
+            font-size: 2.1rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: var(--market-text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .mfa-code.is-loading {
+            color: var(--market-muted);
+            font-size: 1rem;
+            letter-spacing: normal;
+        }
+
+        .mfa-seconds {
+            font-size: 0.8rem;
+            color: var(--market-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .mfa-actions {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--market-gold);
+            border: 1px solid var(--market-border);
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: "Liberation Mono", monospace;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--market-gold);
+        }
+
+        .mfa-copy-feedback {
+            display: block;
+            text-align: center;
+            font-size: 0.78rem;
+            color: #4ade80;
+            min-height: 1.1rem;
+            margin-top: -0.75rem;
+            margin-bottom: 1rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .mfa-copy-feedback.is-visible {
+            opacity: 1;
+        }
+
+        .mfa-error-banner {
+            display: none;
+            padding: 0.75rem 1rem;
+            background: #4c1d1d;
+            border: 1px solid #ef4444;
+            border-radius: 0.5rem;
+            color: #f87171;
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <a href="{{ url_for('home') }}" class="site-logo-link" aria-label="Retour à l'accueil">
+        <img src="/static/images/DriftLockALPHA.png" alt="DriftLock Alpha" class="site-logo-top-left">
+    </a>
+
+    <nav class="top-auth-nav" aria-label="Authentication links">
+        <span class="user-chip">
+            <span class="user-dot"></span>
+            <span id="username-display">{{ current_user.username }}</span>
+        </span>
+    </nav>
+</header>
+
+<section class="vault-home">
+
+    <div class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mfa-card">
+
+        <div class="mfa-account-label">
+            <div>
+                <p class="text-lg text-white font-bold mb-1">Mon compte 2FA</p>
+                <p class="mfa-account-issuer">DriftLock &mdash; authentification à usage unique</p>
+            </div>
+        </div>
+
+        <div class="mfa-error-banner" id="mfa-error-banner">
+            Impossible de récupérer le code depuis le serveur. Nouvelle tentative en cours&hellip;
+        </div>
+
+        <div class="mfa-dial-wrap">
+            <svg class="mfa-dial-svg" viewBox="0 0 220 220">
+                <circle class="mfa-dial-track" cx="110" cy="110" r="98"></circle>
+                <circle class="mfa-dial-progress" id="mfa-dial-progress" cx="110" cy="110" r="98"></circle>
+            </svg>
+            <div class="mfa-dial-center">
+                <span class="mfa-code is-loading" id="mfa-code">Chargement&hellip;</span>
+                <span class="mfa-seconds" id="mfa-seconds">--</span>
+            </div>
+        </div>
+
+        <span class="mfa-copy-feedback" id="mfa-copy-feedback">Code copié</span>
+
+        <div class="mfa-actions">
+            <button type="button" class="btn-secondary" id="mfa-copy-btn">Copier le code</button>
+        </div>
+
+    </div>
+
+</section>
+
+<script>
+(function () {
+    const PERIOD = 30; // durée du cycle en secondes, doit correspondre au back-end
+
+    const codeEl = document.getElementById('mfa-code');
+    const secondsEl = document.getElementById('mfa-seconds');
+    const progressEl = document.getElementById('mfa-dial-progress');
+    const errorBanner = document.getElementById('mfa-error-banner');
+    const copyBtn = document.getElementById('mfa-copy-btn');
+    const copyFeedback = document.getElementById('mfa-copy-feedback');
+
+    const radius = 98;
+    const circumference = 2 * Math.PI * radius;
+    progressEl.style.strokeDasharray = circumference;
+
+    let currentCode = null;
+    let secondsRemaining = PERIOD;
+    let tickInterval = null;
+
+    function setDial(remaining) {
+        const fraction = Math.max(0, Math.min(1, remaining / PERIOD));
+        const offset = circumference * (1 - fraction);
+        progressEl.style.strokeDashoffset = offset;
+        progressEl.classList.toggle('is-urgent', remaining <= 5);
+        secondsEl.textContent = remaining + 's';
+    }
+
+    function renderCode(code) {
+        currentCode = code;
+        codeEl.textContent = code.match(/.{1,3}/g).join(' ');
+        codeEl.classList.remove('is-loading');
+    }
+
+    /*
+     * Endpoint attendu côté back-end :
+     * GET /api/mfa/current-code
+     * Réponse JSON attendue :
+     * {
+     *   "code": "123456",          // le code TOTP courant, en clair
+     *   "time_remaining": 17       // secondes restantes avant le prochain code (0-30)
+     * }
+     *
+     * Le front resynchronise systématiquement son compte à rebours local
+     * sur "time_remaining" reçu du serveur, pour éviter tout décalage
+     * d'horloge entre client et serveur.
+     */
+    async function fetchCode() {
+        try {
+            const res = await fetch('/api/mfa/current-code', {
+                credentials: 'same-origin'
+            });
+
+            if (!res.ok) {
+                throw new Error('Réponse serveur invalide: ' + res.status);
+            }
+
+            const data = await res.json();
+            renderCode(data.code);
+            secondsRemaining = data.time_remaining;
+            setDial(secondsRemaining);
+            errorBanner.style.display = 'none';
+        } catch (err) {
+            console.error('Erreur récupération code 2FA:', err);
+            errorBanner.style.display = 'block';
+        }
+    }
+
+    function tick() {
+        secondsRemaining -= 1;
+
+        if (secondsRemaining <= 0) {
+            fetchCode();
+            return;
+        }
+
+        setDial(secondsRemaining);
+    }
+
+    copyBtn.addEventListener('click', async () => {
+        if (!currentCode) return;
+        try {
+            await navigator.clipboard.writeText(currentCode);
+            copyFeedback.classList.add('is-visible');
+            setTimeout(() => copyFeedback.classList.remove('is-visible'), 1500);
+        } catch (err) {
+            console.error('Impossible de copier le code:', err);
+        }
+    });
+
+    fetchCode();
+    tickInterval = setInterval(tick, 1000);
+
+    window.addEventListener('beforeunload', () => clearInterval(tickInterval));
+})();
+</script>
+
+</body>
+</html>
