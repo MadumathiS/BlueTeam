@@ -20,6 +20,9 @@ from auth import register as register_handler, login as login_handler, logout as
 
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
+if not app.secret_key:
+    raise RuntimeError("SECRET_KEY is not set")
 
 # Build SQLALCHEMY_DATABASE_URI safely from env vars to avoid parsing issues
 env_db_url = os.getenv('DATABASE_URL')
@@ -133,9 +136,7 @@ def log_request():
 def home():
     return render_template('index.html')
 
-@app.route('/login', methods=['GET'])
-def login():
-    return render_template('login.html')
+
 
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
