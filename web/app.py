@@ -11,8 +11,12 @@ from urllib.parse import urlparse
 import psycopg2
 import time
 from urllib.parse import quote_plus
+
 from auth import register as register_handler
 from mfa import totp_bp
+
+
+from auth import register as register_handler, login as login_handler, logout as logout_handler
 
 
 app = Flask(__name__)
@@ -136,6 +140,10 @@ def login():
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
+login_view = limiter.limit("5 per minute")(login_handler)
+app.add_url_rule('/login', endpoint='login', view_func=login_view, methods=['GET', 'POST'])
+app.add_url_rule('/api/login', endpoint='api_login', view_func=login_view, methods=['POST'])
+app.add_url_rule('/logout', endpoint='logout', view_func=logout_handler, methods=['GET'])
 
 @app.route('/support', methods=['GET'])    
 def support_page():

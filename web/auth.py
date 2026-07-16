@@ -1,5 +1,5 @@
 from flask import current_app, redirect, render_template, url_for, session, request, jsonify
-from crypto_utils import hash_password, encrypt_secret
+from crypto_utils import hash_password, encrypt_secret, verify_password
 from models import db, User, TOTPSeed
 import json
 import pyotp
@@ -97,3 +97,58 @@ def register():
         print(f"Error during registration: {e}", flush=True)
         db.session.rollback()
         return jsonify({"error": "Internal server error", "detail": str(e)}), 500
+    
+DUMMY_HASH = hash_password('dummy_password_for_timing')
+
+
+def login():
+    if session.get('logged_in'):
+        return redirect(url_for('home'))
+
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    current_app.logger.info('Login endpoint hit')
+
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+    else:
+        data = request.form.to_dict(flat=True)
+
+    if not data or not isinstance(data, dict):
+        return jsonify({"error": "Invalid or missing request body"}), 400
+
+    username = str(data.get('username', '')).strip()
+    password = data.get('password', '')
+    if not isinstance(password, str):
+        password = ''
+
+    try:
+        user = User.query.filter_by(username=username).first()
+
+        if user is None:
+            verify_password(password, DUMMY_HASH)
+            current_app.logger.warning(f"Login failed (no such user) from {request.remote_addr}")
+            return jsonify({"error": "Invalid username or password"}), 401
+
+        if not verify_password(password, user.password_hash):
+            current_app.logger.warning(f"Login failed for {username} from {request.remote_addr}")
+            return jsonify({"error": "Invalid username or password"}), 401
+
+        session.clear()
+        session['logged_in'] = True
+        session['user_id'] = user.id
+        session['username'] = user.username
+        current_app.logger.info(f"Login success: {username}")
+        if request.is_json:
+            return jsonify({"message": "Login successful"}), 200
+        return redirect(url_for('home'))
+
+    except Exception as e:
+        current_app.logger.exception("Error during login: %s", e)
+        return jsonify({"error": "Internal server error"}), 500
+
+
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
