@@ -9,58 +9,51 @@ pip install -r requirements.txt
 
 ### Basic Repo Structure
 ```
-.
+## Repository Structure
+
+### Current (as built)
+
 blue-team-mfa-portal/
-├── docker-compose.yml
+├── docker-compose.yml            # web + db + redis; mounts ./logs:/app/logs
 ├── .env                          # secrets (gitignored)
 ├── .gitignore
 ├── README.md
 │
 ├── web/
-│   ├── app.py                    # main Flask app, routes, session handling
-│   ├── auth.py                   # login, password verification, session logic
-│   ├── totp_utils.py             # HOTP/TOTP generation + verification (pyotp or custom HMAC)
-│   ├── crypto_utils.py           # password hashing (bcrypt/argon2), TOTP seed encryption
-│   ├── models.py                 # DB models (User, Session, etc.)
-│   ├── decorators.py             # e.g. @login_required, @rate_limited
+│   ├── app.py                    # Flask app, routes, logging, rate limiting;
+│   │                             #   /api/debug = intentional vuln
+│   ├── auth.py                   # registration / login / password verification
+│   ├── crypto_utils.py           # password hashing + TOTP seed encryption
+│   ├── mfa.py                    # TOTP blueprint (totp_bp): MFA setup + verify
+│   ├── models.py                 # DB models (User, etc.)
+│   ├── honeypot.py               # honeypot blueprint: robots.txt bait +
+│   │                             #   /backup_secrets/ trap, embedded decoy
+│   ├── robots.txt                # discloses /backup_secrets/ — bait
 │   ├── requirements.txt
 │   ├── Dockerfile
 │   ├── templates/
-│   │   ├── login.html
-│   │   ├── mfa_setup.html
-│   │   ├── mfa_verify.html
-│   │   └── dashboard.html
-│   ├── static/
-│   │   ├── css/
-│   │   │   └── output.css        # Tailwind (CDN or built)
-│   │   └── js/
-│   └── robots.txt                # discloses /backup_secrets/ — bait for honeypot
-│
-├── internal-api/
-│   ├── api.py                    # e.g. /api/v1/users/setup-status (the intentional vuln lives here)
-│   ├── requirements.txt
-│   ├── Dockerfile
-│
-├── honeypot/
-│   ├── decoy_app.py              # serves fake /backup_secrets/ content, logs access
-│   ├── backup_secrets/
-│   │   └── db_backup_2024.sql.bak   # fake, convincing decoy file
-│   ├── requirements.txt
-│   ├── Dockerfile
+│   └── static/
 │
 ├── db/
-│   ├── init.sql                  # users, sessions, honeypot_logs tables
-│
+│   └── init.sql                  # users, totp_seeds, password_reset_tokens,
+│                                 #   activity_logs, honeypot_logs
 ├── secrets/
-│   └── master_key.txt            # Docker secret, encrypts TOTP seeds at rest
-│
+│   └── master_key.txt
 ├── logs/
 │   ├── access.log
-│   ├── honeypot.log               # separate high-priority alert log
-│   └── captures/                  # .pcap files go here
-│
+│   ├── honeypot.log
+│   └── captures/
 └── reports/
     ├── 01-design-report.md
     ├── 02-hardening-report.md
     └── 03-incident-response.md
+
+
+### Planned / target architecture
+
+Items below are part of the intended design but not yet built:
+
+- internal-api/          # separate service; will host /api/v1/users/setup-status
+                         #   (moves the intentional vuln out of web/app.py)
+- web/decorators.py      # @login_required, @rate_limited helpers
 ```
