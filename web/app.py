@@ -17,7 +17,7 @@ from mfa import totp_bp
 
 
 from auth import register as register_handler, login as login_handler, logout as logout_handler
-
+from decorators import login_required
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
@@ -141,7 +141,20 @@ def home():
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
-login_view = limiter.limit("5 per minute")(login_handler)
+def login_key():
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+    else:
+        data = request.form
+    username = (data.get('username') or '').strip().lower()
+    return username or get_remote_address()
+
+
+login_view = limiter.limit(
+    "3 per minute",
+    key_func=login_key,
+    deduct_when=lambda response: response.status_code == 401
+)(login_handler)
 app.add_url_rule('/login', endpoint='login', view_func=login_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/login', endpoint='api_login', view_func=login_view, methods=['POST'])
 app.add_url_rule('/logout', endpoint='logout', view_func=logout_handler, methods=['GET'])
@@ -153,6 +166,7 @@ def support_page():
 app.register_blueprint(totp_bp)
 
 @app.route('/admin/dashboard', methods=['GET', 'POST'])
+@login_required
 def admin_dashboard():
     # Placeholder for admin dashboard logic
     return render_template('admin_dashboard.html')  
