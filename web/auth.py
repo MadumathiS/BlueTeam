@@ -4,9 +4,9 @@ from models import db, User, TOTPSeed
 import json
 import pyotp
 import re
-import qrcode
-import io
-import base64
+#import qrcode
+#import io
+#import base64
 
 
 def is_valid_username(username):
