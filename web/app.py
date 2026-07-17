@@ -13,6 +13,8 @@ import time
 from urllib.parse import quote_plus
 from auth import register as register_handler
 from mfa import totp_bp
+from auth import confirm_mfa_setup as confirm_mfa_handler
+
 
 
 app = Flask(__name__)
@@ -137,6 +139,8 @@ def login():
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
+app.add_url_rule('/register/confirm-mfa', endpoint='confirm_mfa_setup',
+                  view_func=confirm_mfa_handler, methods=['POST'])
 
 @app.route('/support', methods=['GET'])    
 def support_page():
@@ -182,6 +186,11 @@ def unauthorized(e):
 def not_found(e):
     app.logger.info(f"404 hit: {request.path} from {request.remote_addr}")
     return jsonify({"error": "Not found"}), 404
+
+@app.errorhandler(500) #manage internal server errors
+def internal_error(e):
+    app.logger.error(f"Unhandled exception: {e}")
+    return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4325, debug=True) #remove debug true in production
