@@ -1,0 +1,11 @@
+<!doctype html>
+<html>
+<head><meta charset="UTF-8"><title>DriftLock - Verify</title></head>
+<body>
+<h1>Enter your 6-digit code</h1>
+<form method="POST" action="/verify-mfa">
+    <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autofocus>
+    <button type="submit">Verify</button>
+</form>
+</body>
+</html>
