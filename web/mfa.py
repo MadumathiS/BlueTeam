@@ -9,7 +9,7 @@ totp_bp = Blueprint('totp', __name__)
 
 @totp_bp.route('/dashboard')
 def dashboard():
-    user_id = 2 #session.get('user_id')
+    user_id = 1 #session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))  # adjust to your actual login route name
     user = User.query.get(user_id)
@@ -19,7 +19,7 @@ def dashboard():
 
 @totp_bp.route('/api/current-code')
 def current_code():
-    user_id = 2 #session.get('user_id')
+    user_id = 1 #session.get('user_id')
     if not user_id:
         return jsonify({"error": "Not authenticated"}), 401
 
