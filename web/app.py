@@ -16,9 +16,7 @@ from auth import register as register_handler
 from mfa import totp_bp
 from auth import confirm_mfa_setup as confirm_mfa_handler
 
-
-
-from auth import register as register_handler, login as login_handler, logout as logout_handler
+from auth import register as register_handler, login as login_handler, logout as logout_handler, verify_mfa as verify_mfa_handler
 from decorators import login_required
 
 app = Flask(__name__)
@@ -162,6 +160,9 @@ login_view = limiter.limit(
 app.add_url_rule('/login', endpoint='login', view_func=login_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/login', endpoint='api_login', view_func=login_view, methods=['POST'])
 app.add_url_rule('/logout', endpoint='logout', view_func=logout_handler, methods=['GET'])
+verify_mfa_view = limiter.limit("5 per minute")(verify_mfa_handler)
+app.add_url_rule('/verify-mfa', endpoint='verify_mfa', view_func=verify_mfa_view, methods=['GET', 'POST'])
+app.add_url_rule('/api/verify-mfa', endpoint='api_verify_mfa', view_func=verify_mfa_view, methods=['POST'])
 
 app.add_url_rule('/register/confirm-mfa', endpoint='confirm_mfa_setup',
                   view_func=confirm_mfa_handler, methods=['POST'])
