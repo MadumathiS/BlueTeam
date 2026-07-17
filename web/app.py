@@ -13,7 +13,7 @@ import time
 from urllib.parse import quote_plus
 from auth import register as register_handler
 from mfa import totp_bp
-from auth import confirm_mfa_setup as confirm_mfa_handler
+#from auth import confirm_mfa_setup as confirm_mfa_handler
 
 
 
@@ -139,8 +139,8 @@ def login():
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
-app.add_url_rule('/register/confirm-mfa', endpoint='confirm_mfa_setup',
-                  view_func=confirm_mfa_handler, methods=['POST'])
+#app.add_url_rule('/register/confirm-mfa', endpoint='confirm_mfa_setup',
+#                  view_func=confirm_mfa_handler, methods=['POST'])
 
 @app.route('/support', methods=['GET'])    
 def support_page():
