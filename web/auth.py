@@ -1,9 +1,12 @@
 from flask import current_app, redirect, render_template, url_for, session, request, jsonify
-from crypto_utils import hash_password, encrypt_secret, verify_password
+from crypto_utils import hash_password, encrypt_secret, verify_password, decrypt_secret
 from models import db, User, TOTPSeed
 import json
 import pyotp
 import re
+import qrcode
+import io
+import base64
 
 
 def is_valid_username(username):
@@ -15,8 +18,8 @@ def is_valid_email(email):
 
 
 def register():
-    if session.get('logged_in'):
-        return redirect(url_for('home'))
+   # if session.get('logged_in'):
+    #    return redirect(url_for('home'))
 
     if request.method == 'GET':
         return render_template('register.html')
@@ -81,15 +84,16 @@ def register():
         db.session.commit()
 
         current_app.logger.info(f"New user registered: {username}")
-
+    
         provisioning_uri = pyotp.totp.TOTP(totp_secret).provisioning_uri(
             name=username, issuer_name="DriftlockPortal"
         )
-
+        qr_base64 = generate_qr_base64(provisioning_uri)
         return jsonify({
             "message": "User registered successfully",
             "provisioning_uri": provisioning_uri,
-            "backup_codes": backup_codes
+            "backup_codes": backup_codes,
+            "qr_code": qr_base64
         }), 201
     except Exception as e:
         current_app.logger.exception("Error during registration: %s", e)
@@ -152,3 +156,34 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('home'))
+def confirm_mfa_setup():
+    user_id = 11#session.get('pending_setup_user_id')
+    if not user_id:
+        return jsonify({"error": "No pending MFA setup"}), 400
+
+    data = request.get_json(silent=True) or {}
+    code = str(data.get('code', '')).strip()
+
+    user = User.query.get(user_id)
+    if not user or not user.totp_seed:
+        return jsonify({"error": "Invalid session"}), 400
+
+    secret = decrypt_secret(user.totp_seed.encrypted_seed)
+    totp = pyotp.TOTP(secret)
+
+    if not totp.verify(code, valid_window=1):
+        return jsonify({"error": "Invalid code, try again"}), 401
+
+    user.mfa_enabled = True
+    db.session.commit()
+
+    #session.pop('pending_setup_user_id', None)
+    current_app.logger.info(f"MFA setup confirmed for user_id={user.id}")
+
+    return jsonify({"message": "MFA setup complete. You can now log in."}), 200
+
+def generate_qr_base64(data: str) -> str:
+    img = qrcode.make(data)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    return base64.b64encode(buf.getvalue()).decode()

@@ -14,6 +14,8 @@ from urllib.parse import quote_plus
 
 from auth import register as register_handler
 from mfa import totp_bp
+from auth import confirm_mfa_setup as confirm_mfa_handler
+
 
 
 from auth import register as register_handler, login as login_handler, logout as logout_handler
@@ -87,10 +89,9 @@ app.register_blueprint(honeypot_bp)
 
 # --- Logging setup (for Incident Response Report) ---
 # Ensure logs directory exists (relative to project BlueTeam/)
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-logs_dir = os.path.join(base_dir, 'logs')
-Path(logs_dir).mkdir(parents=True, exist_ok=True)
-logfile = os.path.join(logs_dir, 'access.log')
+LOGS_DIR = Path(os.getenv('LOGS_DIR', '/app/logs'))
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+logfile = str(LOGS_DIR / 'access.log')
 
 logging.basicConfig(
     filename=logfile,
@@ -111,12 +112,14 @@ class RequestFormatter(logging.Formatter):
             record.path = 'N/A'
         return super().format(record)
 
+app.logger.handlers.clear()
 handler = logging.FileHandler(logfile)
 handler.setFormatter(RequestFormatter(
     '%(asctime)s | %(levelname)s | %(remote_addr)s | %(method)s %(path)s'
 ))
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
+app.logger.propagate = False
 
 # --- Rate limiting (security control) ---
 # Configure storage for Flask-Limiter (prefer Redis in production)
@@ -141,6 +144,7 @@ def home():
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
+
 def login_key():
     if request.is_json:
         data = request.get_json(silent=True) or {}
@@ -158,6 +162,10 @@ login_view = limiter.limit(
 app.add_url_rule('/login', endpoint='login', view_func=login_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/login', endpoint='api_login', view_func=login_view, methods=['POST'])
 app.add_url_rule('/logout', endpoint='logout', view_func=logout_handler, methods=['GET'])
+
+app.add_url_rule('/register/confirm-mfa', endpoint='confirm_mfa_setup',
+                  view_func=confirm_mfa_handler, methods=['POST'])
+
 
 @app.route('/support', methods=['GET'])    
 def support_page():
@@ -204,6 +212,11 @@ def unauthorized(e):
 def not_found(e):
     app.logger.info(f"404 hit: {request.path} from {request.remote_addr}")
     return jsonify({"error": "Not found"}), 404
+
+@app.errorhandler(500) #manage internal server errors
+def internal_error(e):
+    app.logger.error(f"Unhandled exception: {e}")
+    return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4325, debug=True) #remove debug true in production
