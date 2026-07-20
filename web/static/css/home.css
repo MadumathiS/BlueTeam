@@ -1,5 +1,5 @@
 :root {
-    --market-bg: #333b49;
+    --market-bg: #0d0f14;
     --market-surface: #1a1d24;
     --market-border: #2f3542;
     --market-gold: #f17d2a;
@@ -11,6 +11,19 @@
 
 body {
     font-family: "Liberation Mono", monospace;
+    background: var(--market-bg);
+    color: var(--market-text);
+    min-height: 100vh;
+    margin: 0;
+}
+
+.site-header {
+    position: relative;
+    min-height: calc(var(--logo-size) + 80px);
+}
+
+.site-header + .vault-home {
+    padding-top: 6rem;
 }
 
 .site-logo-top-left {
@@ -44,6 +57,106 @@ body {
     color: #c95000;
 }
 
+.input-field {
+    width: 100%;
+    padding: 0.6rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--market-border);
+    background: #11141a;
+    color: #fff;
+    font-family: "Liberation Mono", monospace;
+    font-size: 0.875rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--market-gold);
+}
+
+textarea.input-field {
+    resize: vertical;
+    min-height: 130px;
+}
+
+.btn-submit {
+    background: var(--market-gold);
+    color: #1a1d24;
+    border: 0;
+    border-radius: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: "Liberation Mono", monospace;
+    font-size: 0.875rem;
+    transition: background 0.15s;
+}
+
+.btn-submit:hover { background: #c95000; }
+
+.ticket-history {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ticket-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid var(--market-border);
+    font-size: 0.85rem;
+}
+
+.ticket-item:last-child { border-bottom: none; }
+.ticket-subject { color: var(--market-text); }
+.ticket-meta { color: var(--market-muted); font-size: 0.78rem; }
+
+.badge {
+    display: inline-block;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.badge-open { background: #1e3a5f; color: #60a5fa; }
+.badge-closed { background: #14532d; color: #4ade80; }
+.badge-pending { background: #78350f; color: #fbbf24; }
+
+.success-banner {
+    display: none;
+    padding: 0.75rem 1rem;
+    background: #14532d;
+    border: 1px solid #16a34a;
+    border-radius: 0.5rem;
+    color: #4ade80;
+    font-size: 0.875rem;
+    margin-top: 1rem;
+}
+
+.user-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #11141a;
+    border: 1px solid var(--market-border);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--market-gold);
+}
+
+.user-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    display: inline-block;
+}
+
 .top-auth-separator {
     color: var(--market-muted);
 }
@@ -51,7 +164,7 @@ body {
 .vault-home {
     max-width: 1100px;
     margin: 0 auto;
-    padding: calc(var(--logo-size) + 48px) 1rem 2rem;
+    padding: 1rem 1rem 2rem;
     color: var(--market-text);
 }
 
@@ -89,6 +202,28 @@ body {
 .text-lg { font-size: 1.1rem; }
 .text-md { font-size: 1rem; }
 .text-sm { font-size: 0.875rem; }
+
+.site-footer {
+    background: var(--market-surface);
+    border-top: 1px solid var(--market-border);
+    margin-top: 2rem;
+    padding: 2rem 1rem 1rem;
+}
+
+.footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.footer-copy {
+    text-align: center;
+    color: var(--market-muted);
+    font-size: 0.8rem;
+    margin-top: 1.5rem;
+}
 .font-bold { font-weight: 700; }
 .font-semibold { font-weight: 600; }
 .block { display: block; }
