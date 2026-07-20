@@ -9,13 +9,12 @@ import pyotp
 totp_bp = Blueprint('totp', __name__)
 
 
-@totp_bp.route('/dashboard')
+@totp_bp.route('/authenticator')
 @login_required
-def dashboard():
+def authenticator():
     user_id = session.get('user_id')
     user = User.query.get(user_id)
     if not user:
-        # Session references a user that no longer exists — clear it out.
         session.clear()
         return redirect(url_for('login'))
     return render_template('mfa.html', current_user=user)
