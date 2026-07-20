@@ -31,6 +31,7 @@ services:
       DB_PORT: 5432
       RATELIMIT_STORAGE_URI: redis://redis:6379/0
       MASTER_KEY: ${MASTER_KEY}
+      SECRET_KEY: ${SECRET_KEY}
     restart: always
     depends_on:
       db:

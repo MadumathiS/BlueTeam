@@ -64,9 +64,14 @@ loginForm.addEventListener('submit', async (event) => {
             return;
         }
 
+        if (data.mfa_required) {
+            window.location.href = '/verify-mfa';
+            return;
+        }
         formMessage.className = 'text-market-gold text-sm mt-3';
         formMessage.textContent = 'Connexion reussie.';
         loginForm.reset();
+        window.location.href = '/';
     } catch (error) {
         formMessage.className = 'text-red-400 text-sm mt-3';
         formMessage.textContent = 'Erreur reseau, veuillez reessayer.';

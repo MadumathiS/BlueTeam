@@ -11,13 +11,18 @@ from urllib.parse import urlparse
 import psycopg2
 import time
 from urllib.parse import quote_plus
+
 from auth import register as register_handler
 from mfa import totp_bp
 from auth import confirm_mfa_setup as confirm_mfa_handler
 
-
+from auth import register as register_handler, login as login_handler, logout as logout_handler, verify_mfa as verify_mfa_handler
+from decorators import login_required
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
+if not app.secret_key:
+    raise RuntimeError("SECRET_KEY is not set")
 
 # Build SQLALCHEMY_DATABASE_URI safely from env vars to avoid parsing issues
 env_db_url = os.getenv('DATABASE_URL')
@@ -132,15 +137,36 @@ def log_request():
 def home():
     return render_template('index.html')
 
-@app.route('/login', methods=['GET'])
-def login():
-    return render_template('login.html')
+
 
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
+
+def login_key():
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+    else:
+        data = request.form
+    username = (data.get('username') or '').strip().lower()
+    return username or get_remote_address()
+
+
+login_view = limiter.limit(
+    "3 per minute",
+    key_func=login_key,
+    deduct_when=lambda response: response.status_code == 401
+)(login_handler)
+app.add_url_rule('/login', endpoint='login', view_func=login_view, methods=['GET', 'POST'])
+app.add_url_rule('/api/login', endpoint='api_login', view_func=login_view, methods=['POST'])
+app.add_url_rule('/logout', endpoint='logout', view_func=logout_handler, methods=['GET'])
+verify_mfa_view = limiter.limit("5 per minute")(verify_mfa_handler)
+app.add_url_rule('/verify-mfa', endpoint='verify_mfa', view_func=verify_mfa_view, methods=['GET', 'POST'])
+app.add_url_rule('/api/verify-mfa', endpoint='api_verify_mfa', view_func=verify_mfa_view, methods=['POST'])
+
 app.add_url_rule('/register/confirm-mfa', endpoint='confirm_mfa_setup',
                     view_func=confirm_mfa_handler, methods=['POST'])
+
 
 @app.route('/support', methods=['GET'])    
 def support_page():
@@ -149,6 +175,7 @@ def support_page():
 app.register_blueprint(totp_bp)
 
 @app.route('/admin/dashboard', methods=['GET', 'POST'])
+@login_required
 def admin_dashboard():
     # Placeholder for admin dashboard logic
     return render_template('admin_dashboard.html')  

@@ -1,5 +1,5 @@
 from flask import current_app, redirect, render_template, url_for, session, request, jsonify
-from crypto_utils import hash_password, encrypt_secret, decrypt_secret
+from crypto_utils import hash_password, encrypt_secret, verify_password, decrypt_secret
 from models import db, User, TOTPSeed
 import json
 import pyotp
@@ -102,6 +102,71 @@ def register():
         db.session.rollback()
         return jsonify({"error": "Internal server error", "detail": str(e)}), 500
     
+DUMMY_HASH = hash_password('dummy_password_for_timing')
+
+
+def login():
+    if session.get('logged_in'):
+        return redirect(url_for('home'))
+    
+    if session.get('pending_mfa_user_id'):
+        return redirect(url_for('verify_mfa'))
+
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    current_app.logger.info('Login endpoint hit')
+
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+    else:
+        data = request.form.to_dict(flat=True)
+
+    if not data or not isinstance(data, dict):
+        return jsonify({"error": "Invalid or missing request body"}), 400
+
+    username = str(data.get('username', '')).strip()
+    password = data.get('password', '')
+    if not isinstance(password, str):
+        password = ''
+
+    try:
+        user = User.query.filter_by(username=username).first()
+
+        if user is None:
+            verify_password(password, DUMMY_HASH)
+            current_app.logger.warning(f"Login failed (no such user) from {request.remote_addr}")
+            return jsonify({"error": "Invalid username or password"}), 401
+
+        if not verify_password(password, user.password_hash):
+            current_app.logger.warning(f"Login failed for {username} from {request.remote_addr}")
+            return jsonify({"error": "Invalid username or password"}), 401
+
+        session.clear()
+
+        if user.mfa_enabled:
+            session['pending_mfa_user_id'] = user.id
+            current_app.logger.info(f"Password OK, MFA pending: {username}")
+            if request.is_json:
+                return jsonify({"message": "MFA required", "mfa_required": True}), 200
+            return redirect(url_for('verify_mfa'))
+
+        session['logged_in'] = True
+        session['user_id'] = user.id
+        session['username'] = user.username
+        current_app.logger.info(f"Login success: {username}")
+        if request.is_json:
+            return jsonify({"message": "Login successful"}), 200
+        return redirect(url_for('home'))
+
+    except Exception as e:
+        current_app.logger.exception("Error during login: %s", e)
+        return jsonify({"error": "Internal server error"}), 500
+
+
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
 def confirm_mfa_setup():
     user_id = 1#session.get('pending_setup_user_id')
     if not user_id:
@@ -133,3 +198,45 @@ def generate_qr_base64(data: str) -> str:
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     return base64.b64encode(buf.getvalue()).decode()
+
+def verify_mfa():
+    user_id = session.get('pending_mfa_user_id')
+    if not user_id:
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        return render_template('mfa_verify.html')
+
+    if request.is_json:
+        data = request.get_json(silent=True) or {}
+    else:
+        data = request.form.to_dict(flat=True)
+
+    code = str(data.get('code', '')).strip()
+
+    try:
+        user = User.query.get(user_id)
+        if not user or not user.totp_seed:
+            session.clear()
+            return jsonify({"error": "Invalid session"}), 400
+
+        secret = decrypt_secret(user.totp_seed.encrypted_seed)
+        totp = pyotp.TOTP(secret)
+
+        if not totp.verify(code, valid_window=1):
+            current_app.logger.warning(
+                f"MFA verify failed for {user.username} from {request.remote_addr}")
+            return jsonify({"error": "Invalid code"}), 401
+
+        session.clear()
+        session['logged_in'] = True
+        session['user_id'] = user.id
+        session['username'] = user.username
+        current_app.logger.info(f"MFA verify success: {user.username}")
+        if request.is_json:
+            return jsonify({"message": "Login successful"}), 200
+        return redirect(url_for('home'))
+
+    except Exception as e:
+        current_app.logger.exception("Error during MFA verify: %s", e)
+        return jsonify({"error": "Internal server error"}), 500
