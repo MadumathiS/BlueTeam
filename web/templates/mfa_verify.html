@@ -13,15 +13,6 @@
         <img src="{{ url_for('static', filename='images/DriftLockALPHA.png') }}" alt="DriftLock Alpha" class="site-logo-top-left">
     </a>
 
-    <nav class="top-auth-nav" aria-label="Authentication links">
-        {% if is_logged_in %}
-            <span class="top-auth-link" style="color: var(--market-text); cursor: default;">{{ current_username }}</span>
-            <span class="top-auth-separator">/</span>
-            <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
-        {% else %}
-            <a href="{{ url_for('login') }}" class="top-auth-link">LOGIN</a>
-        {% endif %}
-    </nav>
 </header>
 
 <section class="vault-home">
