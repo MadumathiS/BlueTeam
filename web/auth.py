@@ -1,6 +1,7 @@
 from flask import current_app, redirect, render_template, url_for, session, request, jsonify
 from crypto_utils import hash_password, encrypt_secret, verify_password, decrypt_secret
 from models import db, User, TOTPSeed
+from detections import record_totp_use
 import json
 import pyotp
 import re
@@ -101,6 +102,7 @@ def register():
         print(f"Error during registration: {e}", flush=True)
         db.session.rollback()
         return jsonify({"error": "Internal server error", "detail": str(e)}), 500
+
     
 DUMMY_HASH = hash_password('dummy_password_for_timing')
 
@@ -167,6 +169,8 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('home'))
+
+
 def confirm_mfa_setup():
     user_id = session.get('pending_setup_user_id')
     if not user_id:
@@ -185,6 +189,10 @@ def confirm_mfa_setup():
     if not totp.verify(code, valid_window=1):
         return jsonify({"error": "Invalid code, try again"}), 401
 
+    # Record detection event on setup verification
+    client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+    record_totp_use(user.id, client_ip, context="mfa_setup")
+
     user.mfa_enabled = True
     db.session.commit()
 
@@ -193,11 +201,13 @@ def confirm_mfa_setup():
 
     return jsonify({"message": "MFA setup complete. You can now log in."}), 200
 
+
 def generate_qr_base64(data: str) -> str:
     img = qrcode.make(data)
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     return base64.b64encode(buf.getvalue()).decode()
+
 
 def verify_mfa():
     user_id = session.get('pending_mfa_user_id')
@@ -227,6 +237,12 @@ def verify_mfa():
             current_app.logger.warning(
                 f"MFA verify failed for {user.username} from {request.remote_addr}")
             return jsonify({"error": "Invalid code"}), 401
+
+        # Blue-side detection: record TOTP usage and check for replay attack
+        client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
+        is_replay = record_totp_use(user.id, client_ip, context="login")
+        if is_replay:
+            current_app.logger.warning(f"SUSPECTED TOTP REPLAY for user_id={user.id} from {client_ip}")
 
         session.clear()
         session['logged_in'] = True
