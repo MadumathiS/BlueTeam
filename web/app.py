@@ -17,6 +17,7 @@ from mfa import totp_bp
 from auth import confirm_mfa_setup as confirm_mfa_handler
 
 from auth import register as register_handler, login as login_handler, logout as logout_handler, verify_mfa as verify_mfa_handler
+from reset import request_reset, reset_password as reset_password_handler
 from decorators import login_required
 
 app = Flask(__name__)
@@ -141,6 +142,14 @@ def home():
 
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
+app.add_url_rule('/reset-password', endpoint='reset_request',
+                 view_func=request_reset, methods=['GET', 'POST'])
+app.add_url_rule('/api/reset-password', endpoint='api_reset_request',
+                 view_func=request_reset, methods=['POST'])
+app.add_url_rule('/reset-password/<token>', endpoint='reset_password',
+                 view_func=reset_password_handler, methods=['GET', 'POST'])
+app.add_url_rule('/api/reset-password/<token>', endpoint='api_reset_password',
+                 view_func=reset_password_handler, methods=['POST'])
 app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
 
 def login_key():

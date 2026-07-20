@@ -47,6 +47,12 @@ services:
     restart: always
     ports:
       - "6379:6379"
+      
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+      - "1025:1025"
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
@@ -85,3 +91,5 @@ services:
 volumes:
   pgdata:
   esdata:
+  
+ 

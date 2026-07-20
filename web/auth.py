@@ -1,13 +1,23 @@
 from flask import current_app, redirect, render_template, url_for, session, request, jsonify
 from crypto_utils import hash_password, encrypt_secret, verify_password, decrypt_secret
-from models import db, User, TOTPSeed
+from models import db, User, TOTPSeed, PasswordResetToken
+from sqlalchemy import or_
 import json
 import pyotp
 import re
 import qrcode
 import io
 import base64
+import os
+import redis
 
+_redis = redis.Redis(
+    host=os.getenv('REDIS_HOST', 'redis'),
+    port=int(os.getenv('REDIS_PORT', 6379)),
+    decode_responses=True
+)
+MAX_LOGIN_ATTEMPTS = 3
+LOCKOUT_SECONDS = 60
 
 def is_valid_username(username):
     return bool(re.match(r'^[a-zA-Z0-9_]{3,20}$', username))
@@ -108,7 +118,7 @@ DUMMY_HASH = hash_password('dummy_password_for_timing')
 def login():
     if session.get('logged_in'):
         return redirect(url_for('home'))
-    
+
     if session.get('pending_mfa_user_id'):
         return redirect(url_for('verify_mfa'))
 
@@ -130,17 +140,55 @@ def login():
     if not isinstance(password, str):
         password = ''
 
+    attempts_key = f"failed_login:{username.lower()}"
+
     try:
-        user = User.query.filter_by(username=username).first()
+        current_attempts = int(_redis.get(attempts_key) or 0)
+        if current_attempts >= MAX_LOGIN_ATTEMPTS:
+            current_app.logger.warning(
+                f"Locked-out login attempt for {username} from {request.remote_addr}"
+            )
+            return jsonify({
+                "error": "Account temporarily locked",
+                "locked": True
+            }), 401
+
+        user = User.query.filter(
+            or_(User.username == username, User.email == username.lower())
+        ).first()
 
         if user is None:
             verify_password(password, DUMMY_HASH)
-            current_app.logger.warning(f"Login failed (no such user) from {request.remote_addr}")
-            return jsonify({"error": "Invalid username or password"}), 401
+            current_app.logger.warning(
+                f"Login failed (no such user) from {request.remote_addr}"
+            )
+            attempts = _redis.incr(attempts_key)
+            if attempts == 1:
+                _redis.expire(attempts_key, LOCKOUT_SECONDS)
+            remaining = MAX_LOGIN_ATTEMPTS - attempts
+            if attempts >= MAX_LOGIN_ATTEMPTS:
+                return jsonify({"error": "Account temporarily locked", "locked": True}), 401
+            return jsonify({
+                "error": "Invalid username or password",
+                "attempts_remaining": remaining
+            }), 401
 
         if not verify_password(password, user.password_hash):
-            current_app.logger.warning(f"Login failed for {username} from {request.remote_addr}")
-            return jsonify({"error": "Invalid username or password"}), 401
+            current_app.logger.warning(
+                f"Login failed for {username} from {request.remote_addr}"
+            )
+            attempts = _redis.incr(attempts_key)
+            if attempts == 1:
+                _redis.expire(attempts_key, LOCKOUT_SECONDS)
+            remaining = MAX_LOGIN_ATTEMPTS - attempts
+            if attempts >= MAX_LOGIN_ATTEMPTS:
+                return jsonify({"error": "Account temporarily locked", "locked": True}), 401
+            return jsonify({
+                "error": "Invalid username or password",
+                "attempts_remaining": remaining
+            }), 401
+
+        _redis.delete(attempts_key)
 
         session.clear()
 
