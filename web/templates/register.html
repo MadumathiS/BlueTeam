@@ -86,7 +86,13 @@
     </div>
     <p class="footer-copy">&copy; 2026 DriftLock. All rights reserved.</p>
 </footer>
-
+{% if mfa_setup_only %}
+<script>
+    window.MFA_SETUP_ONLY = true;
+    window.MFA_QR_CODE = {{ qr_code | tojson }};
+    window.MFA_BACKUP_CODES = {{ backup_codes | tojson }};
+</script>
+{% endif %}
 <script>
 const registerForm = document.getElementById('register-form');
 const formMessage = document.getElementById('form-message');
@@ -94,7 +100,14 @@ const registerStep = document.getElementById('register-step');
 const mfaSetupStep = document.getElementById('mfa-setup-step');
 const mfaMessage = document.getElementById('mfa-message');
 const confirmMfaBtn = document.getElementById('confirm-mfa-btn');
-
+// If the server rendered this page in "MFA setup only" mode
+// (logged in, but MFA never completed), skip straight to step 2
+if (window.MFA_SETUP_ONLY) {
+    registerStep.style.display = 'none';
+    mfaSetupStep.style.display = 'block';
+    document.getElementById('qr-image').src = 'data:image/png;base64,' + window.MFA_QR_CODE;
+    document.getElementById('backup-codes').textContent = (window.MFA_BACKUP_CODES || []).join('  ·  ');
+}
 registerForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -170,7 +183,13 @@ confirmMfaBtn.addEventListener('click', async () => {
         mfaMessage.className = 'text-red-400 text-sm mt-3';
         mfaMessage.textContent = 'Erreur reseau, veuillez reessayer.';
     }
+    mfaMessage.textContent = 'MFA active. Redirection...';
+    setTimeout(() => {
+        window.location.href = "{{ url_for('totp.authenticator') }}";
+    }, 1500);
+
 });
+
 </script>
 
 </body>

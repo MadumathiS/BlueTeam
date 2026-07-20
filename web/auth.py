@@ -19,6 +19,34 @@ def is_valid_email(email):
 
 def register():
     if session.get('logged_in'):
+        user = User.query.get(session.get('user_id'))
+        if not user:
+            session.clear()
+            return redirect(url_for('login'))
+
+        if user.mfa_enabled:
+            # Fully set up already - nothing to do here
+            return redirect(url_for('home'))
+
+        # Logged in, but MFA setup was never completed - show the QR step
+        # directly instead of the registration form
+        if user.totp_seed:
+            secret = decrypt_secret(user.totp_seed.encrypted_seed)
+            provisioning_uri = pyotp.totp.TOTP(secret).provisioning_uri(
+                name=user.username, issuer_name="DriftlockPortal"
+            )
+            qr_base64 = generate_qr_base64(provisioning_uri)
+            backup_codes = json.loads(user.totp_seed.backup_codes)
+            session['pending_setup_user_id'] = user.id
+
+            return render_template(
+                'register.html',
+                mfa_setup_only=True,
+                qr_code=qr_base64,
+                backup_codes=backup_codes
+            )
+
+        # Edge case: logged in, no seed at all - shouldn't normally happen
         return redirect(url_for('home'))
 
     if request.method == 'GET':
@@ -107,7 +135,7 @@ DUMMY_HASH = hash_password('dummy_password_for_timing')
 
 def login():
     if session.get('logged_in'):
-        return redirect(url_for('home'))
+        return redirect(url_for('totp.authenticator'))  # Redirect to MFA setup if already logged in
     
     if session.get('pending_mfa_user_id'):
         return redirect(url_for('verify_mfa'))
@@ -157,7 +185,7 @@ def login():
         current_app.logger.info(f"Login success: {username}")
         if request.is_json:
             return jsonify({"message": "Login successful"}), 200
-        return redirect(url_for('home'))
+        return redirect(url_for('totp.authenticator'))
 
     except Exception as e:
         current_app.logger.exception("Error during login: %s", e)
@@ -235,7 +263,7 @@ def verify_mfa():
         current_app.logger.info(f"MFA verify success: {user.username}")
         if request.is_json:
             return jsonify({"message": "Login successful"}), 200
-        return redirect(url_for('home'))
+        return redirect(url_for('totp.authenticator'))
 
     except Exception as e:
         current_app.logger.exception("Error during MFA verify: %s", e)

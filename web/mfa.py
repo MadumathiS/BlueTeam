@@ -14,9 +14,12 @@ totp_bp = Blueprint('totp', __name__)
 def authenticator():
     user_id = session.get('user_id')
     user = User.query.get(user_id)
+    totp_enabled = user.mfa_enabled if user else False
     if not user:
         session.clear()
         return redirect(url_for('login'))
+    if not totp_enabled:
+        return redirect(url_for('register'))  # Redirect to registration if TOTP is not enabled
     return render_template('mfa.html', current_user=user)
 
 
