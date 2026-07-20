@@ -5,7 +5,7 @@ import logging
 import sys
 import platform
 import os
-from models import db
+from models import db, User
 from pathlib import Path
 from urllib.parse import urlparse
 import psycopg2
@@ -126,6 +126,13 @@ if ratelimit_uri:
     limiter = Limiter(app=app, key_func=get_remote_address, default_limits=["100 per minute"], storage_uri=ratelimit_uri)
 else:
     limiter = Limiter(app=app, key_func=get_remote_address, default_limits=["100 per minute"])  # falls back to in-memory
+
+@app.context_processor
+def inject_user_status():
+    return {
+        'is_logged_in': session.get('logged_in', False),
+        'current_username': User.query.get(session['user_id']).username if session.get('user_id') else None
+    }
 
 # --- Normal routes ---
 @app.route('/')
