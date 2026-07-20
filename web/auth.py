@@ -20,6 +20,31 @@ _redis = redis.Redis(
 MAX_LOGIN_ATTEMPTS = 3
 LOCKOUT_SECONDS = 60
 
+import smtplib
+from email.mime.text import MIMEText
+
+SMTP_HOST = os.getenv('SMTP_HOST', 'mailhog')
+SMTP_PORT = int(os.getenv('SMTP_PORT', 1025))
+
+def _send_mfa_code(to_email, username, code):
+    body = (
+        f"Hi {username},\n\n"
+        f"Your DriftLock verification code is: {code}\n\n"
+        f"This code expires in 30 seconds.\n\n"
+        f"If you did not attempt to log in, secure your account immediately.\n\n"
+        f"— DriftLock Security"
+    )
+    msg = MIMEText(body)
+    msg['Subject'] = 'DriftLock - Your Login Verification Code'
+    msg['From'] = 'security@driftlock.local'
+    msg['To'] = to_email
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.send_message(msg)
+        current_app.logger.info(f"MFA code sent to {to_email}")
+    except Exception as e:
+        current_app.logger.error(f"Failed to send MFA code: {e}")
+
 def is_valid_username(username):
     return bool(re.match(r'^[a-zA-Z0-9_]{3,20}$', username))
 
@@ -106,7 +131,7 @@ def register():
             username=username,
             email=email,
             password_hash=hash_password(password),
-            mfa_enabled=False
+            mfa_enabled=True
         )
         db.session.add(new_user)
         db.session.flush()
@@ -147,7 +172,7 @@ DUMMY_HASH = hash_password('dummy_password_for_timing')
 
 def login():
     if session.get('logged_in'):
-return redirect(url_for('totp.authenticator'))
+        return redirect(url_for('totp.authenticator'))
     if session.get('pending_mfa_user_id'):
         return redirect(url_for('verify_mfa'))
 
@@ -223,7 +248,12 @@ return redirect(url_for('totp.authenticator'))
 
         if user.mfa_enabled:
             session['pending_mfa_user_id'] = user.id
-            current_app.logger.info(f"Password OK, MFA pending: {username}")
+            # Compute the current TOTP code and email it
+            secret = decrypt_secret(user.totp_seed.encrypted_seed)
+            totp = pyotp.TOTP(secret)
+            code = totp.now()
+            _send_mfa_code(user.email, user.username, code)
+            current_app.logger.info(f"Password OK, MFA code emailed: {username}")
             if request.is_json:
                 return jsonify({"message": "MFA required", "mfa_required": True}), 200
             return redirect(url_for('verify_mfa'))
