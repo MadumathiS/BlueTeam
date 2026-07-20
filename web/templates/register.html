@@ -8,13 +8,17 @@
 </head>
 <body>
 
-<img src="/static/images/DriftLockALPHA.png" alt="DriftLock Alpha" class="site-logo-top-left">
+<header class="site-header">
+    <a href="{{ url_for('home') }}" class="site-logo-link" aria-label="Retour à l'accueil">
+        <img src="/static/images/DriftLockALPHA.png" alt="DriftLock Alpha" class="site-logo-top-left">
+    </a>
 
-<nav class="top-auth-nav" aria-label="Authentication links">
-    <a href="{{ url_for('home') }}" class="top-auth-link">HOME</a>
-    <span class="top-auth-separator">/</span>
-    <a href="{{ url_for('login') }}" class="top-auth-link">LOGIN</a>
-</nav>
+    <nav class="top-auth-nav" aria-label="Authentication links">
+        <a href="{{ url_for('register') }}" class="top-auth-link">REGISTER</a>
+        <span class="top-auth-separator">/</span>
+        <a href="{{ url_for('login') }}" class="top-auth-link">LOGIN</a>
+    </nav>
+</header>
 
 <section class="vault-home">
     <div class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mb-8" style="max-width: 540px; margin-left: auto; margin-right: auto;">
@@ -39,6 +43,21 @@
         <p id="form-message" class="text-sm mt-3"></p>
     </div>
 </section>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Support & Safety</h3>
+            <a href="/static/support.html" class="text-market-gold hover:text-white">Need Help?</a>
+        </div>
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Contact</h3>
+            <p class="text-gray-400">Email : contact@driftlock.io</p>
+            <p class="text-gray-400">Tél : +33 1 23 45 67 89</p>
+        </div>
+    </div>
+    <p class="footer-copy">&copy; 2026 DriftLock. Tous droits réservés.</p>
+</footer>
 
 <script>
 const registerForm = document.getElementById('register-form');
