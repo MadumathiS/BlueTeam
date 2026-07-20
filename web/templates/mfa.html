@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DriftLock - Mon compte 2FA</title>
+    <title>DriftLock - My 2FA Account</title>
     <link rel="stylesheet" href="/static/css/home.css">
     <style>
-        /* --- Styles spécifiques à la page 2FA, réutilise les variables de home.css --- */
+        /* --- Styles specific to the 2FA page, reuses home.css variables --- */
 
         .mfa-card {
             max-width: 480px;
@@ -148,7 +148,7 @@
 <body>
 
 <header class="site-header">
-    <a href="{{ url_for('home') }}" class="site-logo-link" aria-label="Retour à l'accueil">
+    <a href="{{ url_for('home') }}" class="site-logo-link" aria-label="Back to home">
         <img src="/static/images/DriftLockALPHA.png" alt="DriftLock Alpha" class="site-logo-top-left">
     </a>
 
@@ -157,6 +157,8 @@
             <span class="user-dot"></span>
             <span id="username-display">{{ current_user.username }}</span>
         </span>
+        <span class="top-auth-separator">/</span>
+        <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
     </nav>
 </header>
 
@@ -166,13 +168,13 @@
 
         <div class="mfa-account-label">
             <div>
-                <p class="text-lg text-white font-bold mb-1">Mon compte 2FA</p>
-                <p class="mfa-account-issuer">DriftLock &mdash; authentification à usage unique</p>
+                <p class="text-lg text-white font-bold mb-1">My 2FA Account</p>
+                <p class="mfa-account-issuer">DriftLock &mdash; one-time authentication</p>
             </div>
         </div>
 
         <div class="mfa-error-banner" id="mfa-error-banner">
-            Impossible de récupérer le code depuis le serveur. Nouvelle tentative en cours&hellip;
+            Unable to retrieve the code from the server. Retrying&hellip;
         </div>
 
         <div class="mfa-dial-wrap">
@@ -181,24 +183,39 @@
                 <circle class="mfa-dial-progress" id="mfa-dial-progress" cx="110" cy="110" r="98"></circle>
             </svg>
             <div class="mfa-dial-center">
-                <span class="mfa-code is-loading" id="mfa-code">Chargement&hellip;</span>
+                <span class="mfa-code is-loading" id="mfa-code">Loading&hellip;</span>
                 <span class="mfa-seconds" id="mfa-seconds">--</span>
             </div>
         </div>
 
-        <span class="mfa-copy-feedback" id="mfa-copy-feedback">Code copié</span>
+        <span class="mfa-copy-feedback" id="mfa-copy-feedback">Code copied</span>
 
         <div class="mfa-actions">
-            <button type="button" class="btn-secondary" id="mfa-copy-btn">Copier le code</button>
+            <button type="button" class="btn-secondary" id="mfa-copy-btn">Copy code</button>
         </div>
 
     </div>
 
 </section>
 
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Support & Safety</h3>
+            <a href="{{ url_for('support_page') }}" class="text-market-gold hover:text-white">Need Help?</a>
+        </div>
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Contact</h3>
+            <p class="text-gray-400">Email: contact@driftlock.io</p>
+            <p class="text-gray-400">Phone: +33 1 23 45 67 89</p>
+        </div>
+    </div>
+    <p class="footer-copy">&copy; 2026 DriftLock. All rights reserved.</p>
+</footer>
+
 <script>
 (function () {
-    const PERIOD = 30; // durée du cycle en secondes, doit correspondre au back-end
+    const PERIOD = 30; // cycle duration in seconds, must match the backend
 
     const codeEl = document.getElementById('mfa-code');
     const secondsEl = document.getElementById('mfa-seconds');
@@ -230,17 +247,17 @@
     }
 
     /*
-     * Endpoint attendu côté back-end :
+     * Expected backend endpoint:
      * GET /api/mfa/current-code
-     * Réponse JSON attendue :
+     * Expected JSON response:
      * {
-     *   "code": "123456",          // le code TOTP courant, en clair
-     *   "time_remaining": 17       // secondes restantes avant le prochain code (0-30)
+     *   "code": "123456",          // the current TOTP code, in plain text
+     *   "time_remaining": 17       // seconds remaining before the next code (0-30)
      * }
      *
-     * Le front resynchronise systématiquement son compte à rebours local
-     * sur "time_remaining" reçu du serveur, pour éviter tout décalage
-     * d'horloge entre client et serveur.
+     * The frontend always resynchronizes its local countdown
+     * to the "time_remaining" received from the server, to avoid any clock
+     * drift between client and server.
      */
     async function fetchCode() {
         try {
@@ -249,7 +266,7 @@
             });
 
             if (!res.ok) {
-                throw new Error('Réponse serveur invalide: ' + res.status);
+                throw new Error('Invalid server response: ' + res.status);
             }
 
             const data = await res.json();
@@ -258,7 +275,7 @@
             setDial(secondsRemaining);
             errorBanner.style.display = 'none';
         } catch (err) {
-            console.error('Erreur récupération code 2FA:', err);
+            console.error('Error retrieving 2FA code:', err);
             errorBanner.style.display = 'block';
         }
     }
@@ -274,14 +291,50 @@
         setDial(secondsRemaining);
     }
 
+    function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            return successful;
+        } catch (err) {
+            document.body.removeChild(textarea);
+            return false;
+        }
+    }
+
     copyBtn.addEventListener('click', async () => {
         if (!currentCode) return;
-        try {
-            await navigator.clipboard.writeText(currentCode);
+
+        let copied = false;
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(currentCode);
+                copied = true;
+            } catch (err) {
+                console.error('Clipboard API failed, falling back:', err);
+            }
+        }
+
+        if (!copied) {
+            copied = fallbackCopy(currentCode);
+        }
+
+        if (copied) {
+            copyFeedback.textContent = 'Code copied';
             copyFeedback.classList.add('is-visible');
             setTimeout(() => copyFeedback.classList.remove('is-visible'), 1500);
-        } catch (err) {
-            console.error('Impossible de copier le code:', err);
+        } else {
+            copyFeedback.textContent = 'Copy failed';
+            copyFeedback.classList.add('is-visible');
+            setTimeout(() => copyFeedback.classList.remove('is-visible'), 1500);
+            console.error('Unable to copy the code.');
         }
     });
 

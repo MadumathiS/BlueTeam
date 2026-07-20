@@ -28,8 +28,8 @@ def is_valid_email(email):
 
 
 def register():
-   # if session.get('logged_in'):
-    #    return redirect(url_for('home'))
+    if session.get('logged_in'):
+        return redirect(url_for('home'))
 
     if request.method == 'GET':
         return render_template('register.html')
@@ -94,11 +94,11 @@ def register():
         db.session.commit()
 
         current_app.logger.info(f"New user registered: {username}")
-    
+        session['pending_setup_user_id'] = new_user.id
         provisioning_uri = pyotp.totp.TOTP(totp_secret).provisioning_uri(
             name=username, issuer_name="DriftlockPortal"
         )
-        qr_base64 = generate_qr_base64(provisioning_uri)
+        qr_base64 = generate_qr_base64(provisioning_uri) 
         return jsonify({
             "message": "User registered successfully",
             "provisioning_uri": provisioning_uri,
@@ -216,7 +216,7 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 def confirm_mfa_setup():
-    user_id = 11#session.get('pending_setup_user_id')
+    user_id = session.get('pending_setup_user_id')
     if not user_id:
         return jsonify({"error": "No pending MFA setup"}), 400
 
@@ -236,7 +236,7 @@ def confirm_mfa_setup():
     user.mfa_enabled = True
     db.session.commit()
 
-    #session.pop('pending_setup_user_id', None)
+    session.pop('pending_setup_user_id', None)
     current_app.logger.info(f"MFA setup confirmed for user_id={user.id}")
 
     return jsonify({"message": "MFA setup complete. You can now log in."}), 200

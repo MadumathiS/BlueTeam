@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DriftLock - Admin Panel</title>
-    <link rel="stylesheet" href="/static/css/home.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
     <style>
         .admin-grid {
             display: grid;
@@ -122,52 +122,52 @@
 </head>
 <body>
 
-<img src="../static/images/DriftLockALPHA.png" alt="DriftLock Alpha" class="site-logo-top-left">
+<img src="{{ url_for('static', filename='images/DriftLockALPHA.png') }}" alt="DriftLock Alpha" class="site-logo-top-left">
 
 <nav class="top-auth-nav" aria-label="Navigation">
-    <a href="index.html" class="top-auth-link">HOME</a>
+    <a href="{{ url_for('home') }}" class="top-auth-link">HOME</a>
     <span class="top-auth-separator">/</span>
-    <a href="login.html" class="top-auth-link">LOGOUT</a>
+    <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
 </nav>
 
 <section class="vault-home">
 
     <!-- Header -->
     <div class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mb-8">
-        <p class="text-xl text-white font-bold mb-1">Panneau Administrateur</p>
-        <p class="text-gray-400 text-sm">DriftLock &mdash; vue d&apos;ensemble du système</p>
+        <p class="text-xl text-white font-bold mb-1">Admin Panel</p>
+        <p class="text-gray-400 text-sm">DriftLock &mdash; system overview</p>
     </div>
 
     <!-- Stat cards -->
     <div class="admin-grid" id="stat-cards">
         <div class="stat-card">
             <div class="stat-value" id="stat-status">—</div>
-            <div class="stat-label">ÉTAT DU SERVEUR</div>
+            <div class="stat-label">SERVER STATUS</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="stat-platform">—</div>
-            <div class="stat-label">PLATEFORME</div>
+            <div class="stat-label">PLATFORM</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="stat-env">—</div>
-            <div class="stat-label">ENVIRONNEMENT</div>
+            <div class="stat-label">ENVIRONMENT</div>
         </div>
         <div class="stat-card">
             <div class="stat-value" id="stat-python">—</div>
-            <div class="stat-label">VERSION PYTHON</div>
+            <div class="stat-label">PYTHON VERSION</div>
         </div>
     </div>
 
-    <!-- Endpoints API -->
+    <!-- API Endpoints -->
     <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
-        <div class="section-title">Endpoints API</div>
+        <div class="section-title">API Endpoints</div>
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>Méthode</th>
+                    <th>Method</th>
                     <th>Route</th>
                     <th>Description</th>
-                    <th>Statut</th>
+                    <th>Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -175,30 +175,30 @@
                 <tr>
                     <td><span class="badge badge-ok">GET</span></td>
                     <td>/api/status</td>
-                    <td>Santé de l'application</td>
+                    <td>Application health</td>
                     <td><span id="ep-status-badge" class="badge badge-warn">—</span></td>
                     <td><button class="btn-admin" onclick="pingEndpoint('/api/status', 'ep-status-badge')">Ping</button></td>
                 </tr>
                 <tr>
                     <td><span class="badge badge-warn">POST</span></td>
                     <td>/api/register</td>
-                    <td>Création de compte</td>
-                    <td><span class="badge badge-ok">Actif</span></td>
+                    <td>Account creation</td>
+                    <td><span class="badge badge-ok">Active</span></td>
                     <td>—</td>
                 </tr>
                 <tr>
                     <td><span class="badge badge-ok">GET</span></td>
                     <td>/api/profile</td>
-                    <td>Profil utilisateur (token requis)</td>
+                    <td>User profile (token required)</td>
                     <td><span id="ep-profile-badge" class="badge badge-warn">—</span></td>
                     <td><button class="btn-admin" onclick="pingEndpoint('/api/profile', 'ep-profile-badge')">Ping</button></td>
                 </tr>
                 <tr>
                     <td><span class="badge badge-danger">GET</span></td>
                     <td>/api/debug</td>
-                    <td>Informations système (non protégé)</td>
+                    <td>System information (unprotected)</td>
                     <td><span id="ep-debug-badge" class="badge badge-warn">—</span></td>
-                    <td><button class="btn-admin btn-danger" onclick="loadDebug()">Inspecter</button></td>
+                    <td><button class="btn-admin btn-danger" onclick="loadDebug()">Inspect</button></td>
                 </tr>
             </tbody>
         </table>
@@ -207,44 +207,59 @@
     <!-- Debug output -->
     <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8" id="debug-section" style="display:none;">
         <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
-            <span>Réponse /api/debug</span>
-            <button class="btn-admin btn-danger" onclick="document.getElementById('debug-section').style.display='none'">Fermer</button>
+            <span>/api/debug Response</span>
+            <button class="btn-admin btn-danger" onclick="document.getElementById('debug-section').style.display='none'">Close</button>
         </div>
-        <pre id="debug-output">Chargement...</pre>
+        <pre id="debug-output">Loading...</pre>
     </div>
 
-    <!-- Activité récente (simulée / indicateur) -->
+    <!-- Recent activity (simulated / indicator) -->
     <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
-        <div class="section-title">Activité récente</div>
+        <div class="section-title">Recent Activity</div>
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>Heure</th>
-                    <th>Événement</th>
-                    <th>Niveau</th>
+                    <th>Time</th>
+                    <th>Event</th>
+                    <th>Level</th>
                 </tr>
             </thead>
             <tbody id="activity-log">
-                <tr><td colspan="3" style="color:var(--market-muted); text-align:center; padding:1rem;">Chargement des logs…</td></tr>
+                <tr><td colspan="3" style="color:var(--market-muted); text-align:center; padding:1rem;">Loading logs&hellip;</td></tr>
             </tbody>
         </table>
     </div>
 
 </section>
 
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Support & Safety</h3>
+            <a href="{{ url_for('support_page') }}" class="text-market-gold hover:text-white">Need Help?</a>
+        </div>
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Contact</h3>
+            <p class="text-gray-400">Email: contact@driftlock.io</p>
+            <p class="text-gray-400">Phone: +33 1 23 45 67 89</p>
+        </div>
+    </div>
+    <p class="footer-copy">&copy; 2026 DriftLock. All rights reserved.</p>
+</footer>
+
 <script>
 const FAKE_LOGS = [
-    { time: now(-1),  event: 'Démarrage du serveur Flask',          level: 'ok'     },
-    { time: now(-3),  event: 'Connexion base de données PostgreSQL', level: 'ok'     },
-    { time: now(-5),  event: 'Tentative de registration (toto)',     level: 'ok'     },
-    { time: now(-8),  event: 'Rate-limit déclenché sur /api/register', level: 'warn' },
-    { time: now(-12), event: 'Accès non autorisé /api/profile',      level: 'warn'   },
-    { time: now(-20), event: 'Endpoint /api/debug consulté',         level: 'danger' },
+    { time: now(-1),  event: 'Flask server started',                level: 'ok'     },
+    { time: now(-3),  event: 'PostgreSQL database connection',        level: 'ok'     },
+    { time: now(-5),  event: 'Registration attempt (toto)',           level: 'ok'     },
+    { time: now(-8),  event: 'Rate limit triggered on /api/register', level: 'warn' },
+    { time: now(-12), event: 'Unauthorized access to /api/profile',   level: 'warn'   },
+    { time: now(-20), event: '/api/debug endpoint accessed',          level: 'danger' },
 ];
 
 function now(minusMin) {
     const d = new Date(Date.now() + minusMin * 60000);
-    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 function levelBadge(level) {
@@ -277,7 +292,7 @@ async function loadDebug() {
     const out = document.getElementById('debug-output');
     const badge = document.getElementById('ep-debug-badge');
     section.style.display = 'block';
-    out.textContent = 'Chargement…';
+    out.textContent = 'Loading…';
     try {
         const r = await fetch('/api/debug');
         const data = await r.json();
@@ -285,7 +300,7 @@ async function loadDebug() {
         badge.className = 'badge badge-danger';
         badge.textContent = r.status;
     } catch (e) {
-        out.textContent = 'Erreur: ' + e.message;
+        out.textContent = 'Error: ' + e.message;
         badge.className = 'badge badge-danger';
         badge.textContent = 'ERR';
     }

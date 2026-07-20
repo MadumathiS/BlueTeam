@@ -1,11 +1,56 @@
 <!doctype html>
-<html>
-<head><meta charset="UTF-8"><title>DriftLock - Verify</title></head>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftLock - Verify</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+</head>
 <body>
-<h1>Enter your 6-digit code</h1>
-<form method="POST" action="/verify-mfa">
-    <input type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autofocus>
-    <button type="submit">Verify</button>
-</form>
+
+<header class="site-header">
+    <a href="{{ url_for('home') }}" class="site-logo-link" aria-label="Retour à l'accueil">
+        <img src="{{ url_for('static', filename='images/DriftLockALPHA.png') }}" alt="DriftLock Alpha" class="site-logo-top-left">
+    </a>
+
+    <nav class="top-auth-nav" aria-label="Authentication links">
+        {% if is_logged_in %}
+            <span class="top-auth-link" style="color: var(--market-text); cursor: default;">{{ current_username }}</span>
+            <span class="top-auth-separator">/</span>
+            <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="top-auth-link">LOGIN</a>
+        {% endif %}
+    </nav>
+</header>
+
+<section class="vault-home">
+    <div class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mb-8" style="max-width: 540px; margin-left: auto; margin-right: auto;">
+        <h1 class="text-xl text-white font-bold mb-3 border-b border-market-border pb-2">Enter your 6-digit code</h1>
+
+        <form method="POST" action="{{ url_for('verify_mfa') }}">
+            <label for="code" class="text-sm text-market-gold font-semibold block mb-1">Verification Code</label>
+            <input id="code" type="text" name="code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required autofocus class="mb-3" style="width: 100%; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid var(--market-border); background: #11141a; color: #fff;">
+
+            <button type="submit" class="top-auth-link" style="background: var(--market-gold); color: #1a1d24; border: 0; border-radius: 0.5rem; padding: 0.6rem 0.9rem; font-weight: 700; cursor: pointer;">Verify</button>
+        </form>
+    </div>
+</section>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Support & Safety</h3>
+            <a href="{{ url_for('support_page') }}" class="text-market-gold hover:text-white">Need Help?</a>
+        </div>
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Contact</h3>
+            <p class="text-gray-400">Email: contact@driftlock.io</p>
+            <p class="text-gray-400">Phone: +33 1 23 45 67 89</p>
+        </div>
+    </div>
+    <p class="footer-copy">&copy; 2026 DriftLock. All rights reserved.</p>
+</footer>
+
 </body>
 </html>
