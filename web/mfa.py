@@ -7,8 +7,8 @@ import pyotp
 
 totp_bp = Blueprint('totp', __name__)
 
-@totp_bp.route('/dashboard')
-def dashboard():
+@totp_bp.route('/authenticator')
+def authenticator():
     user_id = 1 #session.get('user_id')
     if not user_id:
         return redirect(url_for('login'))  # adjust to your actual login route name
