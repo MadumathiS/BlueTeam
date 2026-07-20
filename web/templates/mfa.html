@@ -153,10 +153,9 @@
     </a>
 
     <nav class="top-auth-nav" aria-label="Authentication links">
-        <span class="user-chip">
-            <span class="user-dot"></span>
-            <span id="username-display">{{ current_user.username }}</span>
-        </span>
+        <a href="{{ url_for('totp.authenticator') }}" class="top-auth-link">MFA</a>
+        <span class="top-auth-separator">/</span>
+        <span class="top-auth-link" style="color: var(--market-text); cursor: default;">{{ current_user.username }}</span>
         <span class="top-auth-separator">/</span>
         <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
     </nav>
