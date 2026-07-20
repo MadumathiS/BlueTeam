@@ -21,7 +21,7 @@
 </header>
 
 <section class="vault-home">
-    <div class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mb-8" style="max-width: 540px; margin-left: auto; margin-right: auto;">
+    <div id="register-step" class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mb-8" style="max-width: 540px; margin-left: auto; margin-right: auto;">
         <h1 class="text-xl text-white font-bold mb-3 border-b border-market-border pb-2">Create your account</h1>
 
         <form id="register-form">
@@ -41,6 +41,30 @@
         </form>
 
         <p id="form-message" class="text-sm mt-3"></p>
+    </div>
+     </div>
+
+    <!-- STEP 2: MFA setup (hidden until registration succeeds) -->
+    <div id="mfa-setup-step" class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mb-8" style="max-width: 540px; margin-left: auto; margin-right: auto; display: none;">
+        <h1 class="text-xl text-white font-bold mb-3 border-b border-market-border pb-2">Set up two-factor authentication</h1>
+
+        <p class="text-sm text-gray-300 mb-3">Scan this QR code with Google Authenticator, Authy, or a similar app.</p>
+
+        <div style="display:flex; justify-content:center; margin-bottom: 1rem;">
+            <div style="display:flex; justify-content:center; margin-bottom: 1rem;">
+                <img id="qr-image" alt="MFA QR Code" style="width: 220px; height: 220px;">
+            </div>
+        </div>
+
+        <p class="text-xs text-gray-400 mb-3">Save these backup codes somewhere safe. Each can be used once if you lose access to your authenticator app.</p>
+        <div id="backup-codes" class="text-xs text-market-gold mb-4" style="font-family: monospace; word-break: break-all;"></div>
+
+        <label for="mfa-code" class="text-sm text-market-gold font-semibold block mb-1">Enter the 6-digit code from your app</label>
+        <input id="mfa-code" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" required class="mb-3" style="width: 100%; padding: 0.6rem; border-radius: 0.5rem; border: 1px solid var(--market-border); background: #11141a; color: #fff;">
+
+        <button id="confirm-mfa-btn" class="top-auth-link" style="background: var(--market-gold); color: #1a1d24; border: 0; border-radius: 0.5rem; padding: 0.6rem 0.9rem; font-weight: 700; cursor: pointer;">Confirm & Activate</button>
+
+        <p id="mfa-message" class="text-sm mt-3"></p>
     </div>
 </section>
 
@@ -62,6 +86,10 @@
 <script>
 const registerForm = document.getElementById('register-form');
 const formMessage = document.getElementById('form-message');
+const registerStep = document.getElementById('register-step');
+const mfaSetupStep = document.getElementById('mfa-setup-step');
+const mfaMessage = document.getElementById('mfa-message');
+const confirmMfaBtn = document.getElementById('confirm-mfa-btn');
 
 registerForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -90,13 +118,53 @@ registerForm.addEventListener('submit', async (event) => {
             formMessage.textContent = data.error || 'Registration failed.';
             return;
         }
+        // Registration succeeded - move to MFA setup step
+        registerStep.style.display = 'none';
+        mfaSetupStep.style.display = 'block';
 
-        formMessage.className = 'text-market-gold text-sm mt-3';
-        formMessage.textContent = 'Compte cree avec succes.';
-        registerForm.reset();
+        // Render QR code from the provisioning URI returned by the server
+        document.getElementById('qr-image').src = 'data:image/png;base64,' + data.qr_code;
+        
+        // Show backup codes
+        const backupCodesDiv = document.getElementById('backup-codes');
+        backupCodesDiv.textContent = (data.backup_codes || []).join('  ·  ');
     } catch (error) {
         formMessage.className = 'text-red-400 text-sm mt-3';
         formMessage.textContent = 'Erreur reseau, veuillez reessayer.';
+    }
+});
+confirmMfaBtn.addEventListener('click', async () => {
+    const code = document.getElementById('mfa-code').value.trim();
+
+    if (!/^\d{6}$/.test(code)) {
+        mfaMessage.className = 'text-red-400 text-sm mt-3';
+        mfaMessage.textContent = 'Veuillez entrer un code a 6 chiffres.';
+        return;
+    }
+
+    try {
+        const response = await fetch('/register/confirm-mfa', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            mfaMessage.className = 'text-red-400 text-sm mt-3';
+            mfaMessage.textContent = data.error || 'Code invalide.';
+            return;
+        }
+
+        mfaMessage.className = 'text-market-gold text-sm mt-3';
+        mfaMessage.textContent = 'MFA active. Redirection vers la connexion...';
+        setTimeout(() => {
+            window.location.href = "{{ url_for('login') }}";
+        }, 1500);
+
+    } catch (error) {
+        mfaMessage.className = 'text-red-400 text-sm mt-3';
+        mfaMessage.textContent = 'Erreur reseau, veuillez reessayer.';
     }
 });
 </script>
