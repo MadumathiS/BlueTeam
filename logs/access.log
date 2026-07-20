@@ -601,3 +601,16 @@
 2026-07-20 09:09:19,554 | INFO | 172.18.0.1 | GET /static/images/DriftLockALPHA.png
 2026-07-20 09:09:19,555 | INFO
 2026-07-20 10:06:07,555 | INFO | 172.18.0.1 | GET /authenticator
+2026-07-20 10:42:12,300 | INFO | 172.18.0.1 | POST /api/login
+2026-07-20 10:42:12,860 | INFO | 172.18.0.1 | POST /api/login
+2026-07-20 10:42:36,730 | WARNING | 172.18.0.1 | POST /verify-mfa
+2026-07-20 10:42:36,983 | INFO | 172.18.0.1 | GET /favicon.ico
+2026-07-20 10:42:56,775 | WARNING | 172.18.0.1 | POST /verify-mfa
+2026-07-20 10:42:56,962 | INFO | 172.18.0.1 | GET /favicon.ico
+2026-07-20 13:03:56,486 | INFO | 172.18.0.1 | POST /api/login
+2026-07-20 13:03:56,703 | INFO | 172.18.0.1 | POST /api/login
+2026-07-20 13:04:24,439 | INFO | 172.18.0.1 | POST /verify-mfa
+2026-07-20 13:19:02,504 | INFO | 172.18.0.1 | POST /api/login
+2026-07-20 13:19:02,739 | INFO | 172.18.0.1 | POST /api/login
+2026-07-20 13:19:22,700 | INFO | 172.18.0.1 | POST /verify-mfa
+2026-07-20 13:25:48,425 | WARNING | 172.18.0.1 | GET /backup_secrets/db_backup_2024.sql.bak
