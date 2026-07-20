@@ -1,30 +1,34 @@
-# web/totp_routes.py
+# web/mfa.py
 from flask import Blueprint, render_template, jsonify, session, redirect, url_for
-from models import User, TOTPSeed
+from models import User
 from crypto_utils import decrypt_secret
+from decorators import login_required
 import time
 import pyotp
 
 totp_bp = Blueprint('totp', __name__)
 
+
 @totp_bp.route('/authenticator')
+@login_required
 def authenticator():
     user_id = session.get('user_id')
-    if not user_id:
-        return redirect(url_for('login'))  # adjust to your actual login route name
     user = User.query.get(user_id)
     if not user:
-        return redirect(url_for('login'))  # adjust to your actual login route name
-    return render_template('mfa.html',current_user=user)  # replace with actual user retrieval logic
+        session.clear()
+        return redirect(url_for('login'))
+    return render_template('mfa.html', current_user=user)
+
 
 @totp_bp.route('/api/current-code')
+@login_required
 def current_code():
     user_id = session.get('user_id')
-    if not user_id:
-        return jsonify({"error": "Not authenticated"}), 401
-
     user = User.query.get(user_id)
-    if not user or not user.totp_seed:
+    if not user:
+        session.clear()
+        return jsonify({"error": "Not authenticated"}), 401
+    if not user.totp_seed:
         return jsonify({"error": "No TOTP configured"}), 404
 
     secret = decrypt_secret(user.totp_seed.encrypted_seed)

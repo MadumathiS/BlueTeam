@@ -1,0 +1,11 @@
+{"timestamp": "2026-07-20T09:28:19.469317+00:00", "event": "request", "source_ip": "172.18.0.1", "method": "GET", "path": "/", "user_agent": "curl/8.18.0"}
+{"timestamp": "2026-07-20T09:28:19.599361+00:00", "event": "request", "source_ip": "172.18.0.1", "method": "GET", "path": "/api/v1/users/1/setup-status", "user_agent": "curl/8.18.0"}
+{"timestamp": "2026-07-20T09:28:19.978135+00:00", "event": "setup_status_access", "source_ip": "172.18.0.1", "requested_id": 1, "distinct_ids_seen": 1}
+{"timestamp": "2026-07-20T09:29:11.788896+00:00", "event": "request", "source_ip": "172.18.0.1", "method": "GET", "path": "/api/v1/users/1/setup-status", "user_agent": "curl/8.18.0"}
+{"timestamp": "2026-07-20T09:29:11.837572+00:00", "event": "setup_status_access", "source_ip": "172.18.0.1", "requested_id": 1, "distinct_ids_seen": 1}
+{"timestamp": "2026-07-20T09:29:11.855128+00:00", "event": "request", "source_ip": "172.18.0.1", "method": "GET", "path": "/api/v1/users/2/setup-status", "user_agent": "curl/8.18.0"}
+{"timestamp": "2026-07-20T09:29:11.855893+00:00", "event": "setup_status_access", "source_ip": "172.18.0.1", "requested_id": 2, "distinct_ids_seen": 2}
+{"timestamp": "2026-07-20T09:29:11.862895+00:00", "event": "request", "source_ip": "172.18.0.1", "method": "GET", "path": "/api/v1/users/3/setup-status", "user_agent": "curl/8.18.0"}
+{"timestamp": "2026-07-20T09:29:11.863634+00:00", "event": "idor_enumeration_suspected", "source_ip": "172.18.0.1", "requested_id": 3, "distinct_ids_seen": 3, "severity": "CRITICAL", "details": "Single source read multiple distinct user IDs \u2014 likely IDOR enumeration"}
+{"timestamp": "2026-07-20T09:35:14.257258+00:00", "event": "request", "source_ip": "172.18.0.1", "method": "GET", "path": "/api/v1/users/1/setup-status", "user_agent": "curl/8.18.0"}
+{"timestamp": "2026-07-20T09:35:14.323947+00:00", "event": "idor_enumeration_suspected", "source_ip": "172.18.0.1", "requested_id": 1, "distinct_ids_seen": 3, "severity": "CRITICAL", "details": "Single source read multiple distinct user IDs \u2014 likely IDOR enumeration"}

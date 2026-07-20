@@ -16,7 +16,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
   web:
     build: ./web
     ports:
@@ -40,14 +39,31 @@ services:
         condition: service_started
     volumes:
       - ./logs:/app/logs
-
+  internal-api:
+    build: ./internal-api
+    ports:
+      - "5000:5000"
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      POSTGRES_USER: driftlock_admin
+      POSTGRES_DB: driftlock
+      DB_HOST: db
+      DB_PORT: 5432
+      LOGS_DIR: /app/logs
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
   redis:
     image: redis:7
     container_name: driftlock-redis-1
     restart: always
     ports:
       - "6379:6379"
-
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
     environment:
@@ -71,7 +87,6 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-
   kibana:
     image: docker.elastic.co/kibana/kibana:8.15.0
     environment:
@@ -81,7 +96,6 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-
 volumes:
   pgdata:
   esdata:

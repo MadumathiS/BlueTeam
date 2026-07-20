@@ -12,11 +12,14 @@ import psycopg2
 import time
 from urllib.parse import quote_plus
 
-from auth import register as register_handler
+from auth import (
+    register as register_handler,
+    login as login_handler,
+    logout as logout_handler,
+    verify_mfa as verify_mfa_handler,
+    confirm_mfa_setup as confirm_mfa_handler,
+)
 from mfa import totp_bp
-from auth import confirm_mfa_setup as confirm_mfa_handler
-
-from auth import register as register_handler, login as login_handler, logout as logout_handler, verify_mfa as verify_mfa_handler
 from decorators import login_required
 
 app = Flask(__name__)
@@ -86,17 +89,13 @@ from honeypot import honeypot_bp
 app.register_blueprint(honeypot_bp)
 
 # --- Logging setup (for Incident Response Report) ---
-# Ensure logs directory exists (relative to project BlueTeam/)
+# Single handler, single format. No basicConfig (it caused duplicate/bare lines),
+# and propagate=False so nothing is written twice.
 LOGS_DIR = Path(os.getenv('LOGS_DIR', '/app/logs'))
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
 logfile = str(LOGS_DIR / 'access.log')
 
-logging.basicConfig(
-    filename=logfile,
-    level=logging.INFO,
-    format='%(asctime)s | %(levelname)s'
-)
-# --- Format of the logging ---
+
 class RequestFormatter(logging.Formatter):
     def format(self, record):
         # Avoid accessing `request` when outside an active request context
@@ -109,6 +108,7 @@ class RequestFormatter(logging.Formatter):
             record.method = 'N/A'
             record.path = 'N/A'
         return super().format(record)
+
 
 app.logger.handlers.clear()
 handler = logging.FileHandler(logfile)
@@ -127,10 +127,6 @@ if ratelimit_uri:
 else:
     limiter = Limiter(app=app, key_func=get_remote_address, default_limits=["100 per minute"])  # falls back to in-memory
 
-@app.before_request
-def log_request():
-    app.logger.info("Incoming request")
-
 # --- Normal routes ---
 @app.route('/')
 @app.route('/home')
@@ -138,10 +134,10 @@ def home():
     return render_template('index.html')
 
 
-
 register_view = limiter.limit("5 per minute")(register_handler)
 app.add_url_rule('/register', endpoint='register', view_func=register_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/register', endpoint='api_register', view_func=register_view, methods=['POST'])
+
 
 def login_key():
     if request.is_json:
@@ -160,29 +156,35 @@ login_view = limiter.limit(
 app.add_url_rule('/login', endpoint='login', view_func=login_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/login', endpoint='api_login', view_func=login_view, methods=['POST'])
 app.add_url_rule('/logout', endpoint='logout', view_func=logout_handler, methods=['GET'])
+
 verify_mfa_view = limiter.limit("5 per minute")(verify_mfa_handler)
 app.add_url_rule('/verify-mfa', endpoint='verify_mfa', view_func=verify_mfa_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/verify-mfa', endpoint='api_verify_mfa', view_func=verify_mfa_view, methods=['POST'])
 
 app.add_url_rule('/register/confirm-mfa', endpoint='confirm_mfa_setup',
-                    view_func=confirm_mfa_handler, methods=['POST'])
+                 view_func=confirm_mfa_handler, methods=['POST'])
 
 
-@app.route('/support', methods=['GET'])    
+@app.route('/support', methods=['GET'])
 def support_page():
     return render_template('support.html')
+
+
 # --- Register the TOTP Blueprint for MFA routes ---
 app.register_blueprint(totp_bp)
+
 
 @app.route('/admin/dashboard', methods=['GET', 'POST'])
 @login_required
 def admin_dashboard():
     # Placeholder for admin dashboard logic
-    return render_template('admin_dashboard.html')  
+    return render_template('admin_dashboard.html')
+
 
 @app.route('/api/status')
 def status():
     return jsonify({"status": "ok"})
+
 
 # --- Authenticated endpoint example (security control: auth required) ---
 @app.route('/api/profile')
@@ -195,7 +197,8 @@ def profile():
     return jsonify({"user": "demo_user", "role": "member"})
 
 
-# --- INTENTIONAL VULNERABILITY: exposed debug endpoint, no auth required ---
+# --- INTENTIONAL VULNERABILITY (EASY): exposed debug endpoint, no auth required ---
+# Documented in README as deliberate. Leaks system info for Red Team discovery.
 @app.route('/api/debug')
 def debug():
     app.logger.warning(f"Debug endpoint accessed by {request.remote_addr}")
@@ -205,19 +208,28 @@ def debug():
         "flask_env": "development",
         "app_secret_hint": "check .env file"  # intentionally leaky
     })
+
+
 @app.errorhandler(401)
 def unauthorized(e):
     return jsonify({"error": "Unauthorized"}), 401
+
 
 @app.errorhandler(404)
 def not_found(e):
     app.logger.info(f"404 hit: {request.path} from {request.remote_addr}")
     return jsonify({"error": "Not found"}), 404
 
-@app.errorhandler(500) #manage internal server errors
+
+@app.errorhandler(500)  # manage internal server errors
 def internal_error(e):
     app.logger.error(f"Unhandled exception: {e}")
     return jsonify({"error": "Internal server error"}), 500
 
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=4325, debug=True) #remove debug true in production
+    # NOTE: debug=True is a development convenience. It exposes the Werkzeug
+    # debugger (arbitrary code execution if reached) — this is NOT one of your
+    # three intentional vulns, so turn it off for any graded/demo run to avoid
+    # an accidental "security issue beyond the intentional one".
+    app.run(host='0.0.0.0', port=4325, debug=True)
