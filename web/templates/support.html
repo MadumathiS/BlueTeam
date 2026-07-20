@@ -1,209 +1,146 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DriftLock - Support</title>
-    <link rel="stylesheet" href="/static/css/home.css">
-    <style>
-        .input-field {
-            width: 100%;
-            padding: 0.6rem;
-            border-radius: 0.5rem;
-            border: 1px solid var(--market-border);
-            background: #11141a;
-            color: #fff;
-            font-family: "Liberation Mono", monospace;
-            font-size: 0.875rem;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-        .input-field:focus {
-            outline: none;
-            border-color: var(--market-gold);
-        }
-        textarea.input-field {
-            resize: vertical;
-            min-height: 130px;
-        }
-        .btn-submit {
-            background: var(--market-gold);
-            color: #1a1d24;
-            border: 0;
-            border-radius: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: "Liberation Mono", monospace;
-            font-size: 0.875rem;
-            transition: background 0.15s;
-        }
-        .btn-submit:hover { background: #c95000; }
-        .ticket-history {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .ticket-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.65rem 0.75rem;
-            border-bottom: 1px solid var(--market-border);
-            font-size: 0.85rem;
-        }
-        .ticket-item:last-child { border-bottom: none; }
-        .ticket-subject { color: var(--market-text); }
-        .ticket-meta { color: var(--market-muted); font-size: 0.78rem; }
-        .badge {
-            display: inline-block;
-            padding: 0.1rem 0.55rem;
-            border-radius: 999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-        .badge-open   { background: #1e3a5f; color: #60a5fa; }
-        .badge-closed { background: #14532d; color: #4ade80; }
-        .badge-pending{ background: #78350f; color: #fbbf24; }
-        .success-banner {
-            display: none;
-            padding: 0.75rem 1rem;
-            background: #14532d;
-            border: 1px solid #16a34a;
-            border-radius: 0.5rem;
-            color: #4ade80;
-            font-size: 0.875rem;
-            margin-top: 1rem;
-        }
-        .user-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: #11141a;
-            border: 1px solid var(--market-border);
-            border-radius: 999px;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.8rem;
-            color: var(--market-gold);
-        }
-        .user-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: #22c55e;
-            display: inline-block;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 </head>
 <body>
 
-<img src="/static/images/DriftLockALPHA.png" alt="DriftLock Alpha" class="site-logo-top-left">
+<header class="site-header">
+    <a href="{{ url_for('home') }}" class="site-logo-link" aria-label="Back to home">
+        <img src="{{ url_for('static', filename='images/DriftLockALPHA.png') }}" alt="DriftLock Alpha" class="site-logo-top-left">
+    </a>
 
-<nav class="top-auth-nav" aria-label="Navigation">
-    <a href="index.html" class="top-auth-link">HOME</a>
-    <span class="top-auth-separator">/</span>
-    <a href="login.html" class="top-auth-link">LOGOUT</a>
-</nav>
+    <nav class="top-auth-nav" aria-label="Authentication links">
+        {% if is_logged_in %}
+            <span class="top-auth-link" style="color: var(--market-text); cursor: default;">{{ current_username }}</span>
+            <span class="top-auth-separator">/</span>
+            <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
+        {% else %}
+            <a href="{{ url_for('register') }}" class="top-auth-link">REGISTER</a>
+            <span class="top-auth-separator">/</span>
+            <a href="{{ url_for('login') }}" class="top-auth-link">LOGIN</a>
+        {% endif %}
+    </nav>
+</header>
 
 <section class="vault-home">
 
-    <!-- En-tête avec utilisateur connecté -->
+    <!-- Header with logged-in user -->
     <div class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mb-8" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
         <div>
             <p class="text-xl text-white font-bold mb-1">Support</p>
-            <p class="text-gray-400 text-sm">Envoie un message à l'équipe DriftLock. Nous te répondrons sous 24h.</p>
+            <p class="text-gray-400 text-sm">Send a message to the DriftLock team. We will respond within 24 hours.</p>
         </div>
         <div class="user-chip">
             <span class="user-dot"></span>
-            <span id="username-display">utilisateur</span>
+            <span id="username-display">user</span>
         </div>
     </div>
 
     <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
 
-        <!-- Formulaire d'envoi -->
+        <!-- Ticket submission form -->
         <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl">
-            <p class="text-market-gold font-semibold text-sm mb-3" style="text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem;">Nouveau ticket</p>
+            <p class="text-market-gold font-semibold text-sm mb-3" style="text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem;">New ticket</p>
 
             <form id="support-form">
-                <label for="subject" class="text-sm text-market-gold font-semibold block mb-1">Sujet</label>
+                <label for="subject" class="text-sm text-market-gold font-semibold block mb-1">Subject</label>
                 <select id="subject" name="subject" class="input-field mb-3" required>
-                    <option value="" disabled selected>-- Sélectionner une catégorie --</option>
-                    <option value="account">Problème de compte</option>
-                    <option value="mfa">Authentification MFA</option>
-                    <option value="security">Signalement de sécurité</option>
-                    <option value="billing">Facturation</option>
-                    <option value="other">Autre</option>
+                    <option value="" disabled selected>-- Select a category --</option>
+                    <option value="account">Account Issue</option>
+                    <option value="mfa">MFA Authentication</option>
+                    <option value="security">Security Report</option>
+                    <option value="billing">Billing</option>
+                    <option value="other">Other</option>
                 </select>
 
-                <label for="priority" class="text-sm text-market-gold font-semibold block mb-1">Priorité</label>
+                <label for="priority" class="text-sm text-market-gold font-semibold block mb-1">Priority</label>
                 <select id="priority" name="priority" class="input-field mb-3">
-                    <option value="low">Faible</option>
-                    <option value="normal" selected>Normale</option>
-                    <option value="high">Haute</option>
-                    <option value="critical">Critique</option>
+                    <option value="low">Low</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
                 </select>
 
                 <label for="message" class="text-sm text-market-gold font-semibold block mb-1">Message</label>
-                <textarea id="message" name="message" class="input-field mb-3" placeholder="Décris ton problème en détail…" required minlength="20"></textarea>
+                <textarea id="message" name="message" class="input-field mb-3" placeholder="Describe your issue in detail…" required minlength="20"></textarea>
 
-                <button type="submit" class="btn-submit">Envoyer le ticket</button>
+                <button type="submit" class="btn-submit">Send Ticket</button>
             </form>
 
             <div class="success-banner" id="success-banner">
-                ✓ Ticket envoyé avec succès. L'équipe admin te répondra dans les meilleurs délais.
+                ✓ Ticket sent successfully. The admin team will respond as soon as possible.
             </div>
         </div>
 
-        <!-- Historique des tickets de l'utilisateur -->
+        <!-- User's ticket history -->
         <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl">
-            <p class="text-market-gold font-semibold text-sm mb-3" style="text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem;">Mes tickets</p>
+            <p class="text-market-gold font-semibold text-sm mb-3" style="text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem;">My tickets</p>
             <ul class="ticket-history" id="ticket-list">
                 <li class="ticket-item">
                     <div>
-                        <div class="ticket-subject">Problème de connexion MFA</div>
-                        <div class="ticket-meta">#1042 &mdash; il y a 2 jours</div>
+                        <div class="ticket-subject">MFA Login Issue</div>
+                        <div class="ticket-meta">#1042 &mdash; 2 days ago</div>
                     </div>
-                    <span class="badge badge-closed">Résolu</span>
+                    <span class="badge badge-closed">Closed</span>
                 </li>
                 <li class="ticket-item">
                     <div>
-                        <div class="ticket-subject">Code de secours invalide</div>
-                        <div class="ticket-meta">#1039 &mdash; il y a 5 jours</div>
+                        <div class="ticket-subject">Invalid backup code</div>
+                        <div class="ticket-meta">#1039 &mdash; 5 days ago</div>
                     </div>
-                    <span class="badge badge-closed">Résolu</span>
+                    <span class="badge badge-closed">Closed</span>
                 </li>
                 <li class="ticket-item">
                     <div>
-                        <div class="ticket-subject">Signalement d'activité suspecte</div>
-                        <div class="ticket-meta">#1051 &mdash; aujourd'hui</div>
+                        <div class="ticket-subject">Report of suspicious activity</div>
+                        <div class="ticket-meta">#1051 &mdash; today</div>
                     </div>
-                    <span class="badge badge-pending">En attente</span>
+                    <span class="badge badge-pending">Pending</span>
                 </li>
             </ul>
         </div>
 
     </div>
 
-    <!-- Informations de contact -->
+    <!-- Contact information -->
     <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8" style="margin-top:2rem;">
-        <p class="text-market-gold font-semibold text-sm mb-3" style="text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem;">Contact direct</p>
+        <p class="text-market-gold font-semibold text-sm mb-3" style="text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem;">Direct contact</p>
         <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
             <div>
                 <p class="text-gray-400 text-sm mb-1">Email support</p>
                 <a href="mailto:support@driftlock.local" class="text-market-gold text-sm">support@driftlock.local</a>
             </div>
             <div>
-                <p class="text-gray-400 text-sm mb-1">Urgences sécurité</p>
+                <p class="text-gray-400 text-sm mb-1">Security emergency</p>
                 <a href="mailto:security@driftlock.local" class="text-market-gold text-sm">security@driftlock.local</a>
             </div>
             <div>
-                <p class="text-gray-400 text-sm mb-1">Délai de réponse</p>
-                <p class="text-sm" style="color:#e5e7eb;">24h en semaine &mdash; 48h week-end</p>
+                <p class="text-gray-400 text-sm mb-1">Response delay</p>
+                <p class="text-sm" style="color:#e5e7eb;">24h on weekdays &mdash; 48h on weekends</p>
             </div>
         </div>
     </div>
 
 </section>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Support & Safety</h3>
+            <a href="{{ url_for('support_page') }}" class="text-market-gold hover:text-white">Need Help?</a>
+        </div>
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Contact</h3>
+            <p class="text-gray-400">Email: contact@driftlock.io</p>
+            <p class="text-gray-400">Phone: +33 1 23 45 67 89</p>
+        </div>
+    </div>
+    <p class="footer-copy">&copy; 2026 DriftLock. All rights reserved.</p>
+</footer>
 
 <script>
 document.getElementById('username-display').textContent = 'toto';
@@ -224,9 +161,9 @@ form.addEventListener('submit', (e) => {
     li.innerHTML = `
         <div>
             <div class="ticket-subject">${subjectText}</div>
-            <div class="ticket-meta">#${newId} &mdash; à l'instant</div>
+            <div class="ticket-meta">#${newId} &mdash; just now</div>
         </div>
-        <span class="badge badge-open">Ouvert</span>
+        <span class="badge badge-open">Open</span>
     `;
     ticketList.prepend(li);
 
