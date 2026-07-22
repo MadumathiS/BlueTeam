@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DriftLock - Admin Panel</title>
+    <title>DriftLock - Admin Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
     <style>
         .admin-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1.25rem;
             margin-bottom: 2rem;
         }
@@ -19,105 +19,33 @@
             padding: 1.25rem;
             text-align: center;
         }
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--market-gold);
-        }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--market-gold); }
         .stat-label {
-            font-size: 0.8rem;
-            color: var(--market-muted);
-            margin-top: 0.25rem;
-            letter-spacing: 0.05em;
+            font-size: 0.75rem; color: var(--market-muted);
+            margin-top: 0.25rem; letter-spacing: 0.05em; text-transform: uppercase;
         }
-        .status-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 0.4rem;
-            background: #6b7280;
-        }
-        .status-dot.online  { background: #22c55e; }
-        .status-dot.offline { background: #ef4444; }
-        .admin-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            color: var(--market-text);
-        }
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; color: var(--market-text); }
         .admin-table th {
-            text-align: left;
-            color: var(--market-gold);
-            padding: 0.5rem 0.75rem;
-            border-bottom: 1px solid var(--market-border);
-            font-weight: 600;
-            letter-spacing: 0.04em;
+            text-align: left; color: var(--market-gold); padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--market-border); font-weight: 600; letter-spacing: 0.04em;
         }
         .admin-table td {
-            padding: 0.55rem 0.75rem;
-            border-bottom: 1px solid var(--market-border);
-            color: var(--market-muted);
-            font-family: "Liberation Mono", monospace;
+            padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--market-border);
+            color: var(--market-muted); font-family: "Liberation Mono", monospace;
         }
         .admin-table tr:last-child td { border-bottom: none; }
         .admin-table tr:hover td { color: #fff; }
-        .badge {
-            display: inline-block;
-            padding: 0.1rem 0.55rem;
-            border-radius: 999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
+        .badge { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
         .badge-ok     { background: #14532d; color: #4ade80; }
         .badge-warn   { background: #78350f; color: #fbbf24; }
         .badge-danger { background: #7f1d1d; color: #fca5a5; }
+        .badge-crit   { background: #7f1d1d; color: #fca5a5; }
         .section-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            color: var(--market-gold);
-            text-transform: uppercase;
-            margin-bottom: 0.75rem;
-            padding-bottom: 0.4rem;
-            border-bottom: 1px solid var(--market-border);
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+            color: var(--market-gold); text-transform: uppercase;
+            margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--market-border);
         }
-        #debug-output {
-            background: #0d0f14;
-            border: 1px solid var(--market-border);
-            border-radius: 0.5rem;
-            padding: 0.75rem 1rem;
-            font-size: 0.8rem;
-            color: #9ca3af;
-            white-space: pre-wrap;
-            word-break: break-all;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .btn-admin {
-            background: transparent;
-            border: 1px solid var(--market-gold);
-            color: var(--market-gold);
-            border-radius: 0.4rem;
-            padding: 0.35rem 0.75rem;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: "Liberation Mono", monospace;
-            transition: background 0.15s, color 0.15s;
-        }
-        .btn-admin:hover {
-            background: var(--market-gold);
-            color: #1a1d24;
-        }
-        .btn-danger {
-            border-color: #ef4444;
-            color: #ef4444;
-        }
-        .btn-danger:hover {
-            background: #ef4444;
-            color: #fff;
-        }
+        .empty-row td { text-align: center; color: var(--market-muted); padding: 1rem; }
     </style>
 </head>
 <body>
@@ -126,119 +54,63 @@
     <a href="{{ url_for('home') }}" class="site-logo-link" aria-label="Back to home">
         <img src="{{ url_for('static', filename='images/Finallocklogo.png') }}" alt="DriftLock Alpha" class="site-logo-top-left">
     </a>
-
     <nav class="top-auth-nav" aria-label="Authentication links">
-        {% if is_logged_in %}
-            <a href="{{ url_for('totp.authenticator') }}" class="top-auth-link">MFA</a>
-            <span class="top-auth-separator">/</span>
-            <span class="top-auth-link" style="color: var(--market-text); cursor: default;">{{ current_username }}</span>
-            <span class="top-auth-separator">/</span>
-            <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
-        {% else %}
-            <a href="{{ url_for('register') }}" class="top-auth-link">REGISTER</a>
-            <span class="top-auth-separator">/</span>
-            <a href="{{ url_for('login') }}" class="top-auth-link">LOGIN</a>
-        {% endif %}
+        <a href="{{ url_for('totp.authenticator') }}" class="top-auth-link">MFA</a>
+        <span class="top-auth-separator">/</span>
+        <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
     </nav>
 </header>
 
 <section class="vault-home">
 
-    <!-- Header -->
     <div class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mb-8">
-        <p class="text-xl text-white font-bold mb-1">Admin Panel</p>
-        <p class="text-gray-400 text-sm">DriftLock &mdash; system overview</p>
+        <p class="text-xl text-white font-bold mb-1">Admin Dashboard</p>
+        <p class="text-gray-400 text-sm">DriftLock &mdash; system-wide monitoring (admins only)</p>
     </div>
 
-    <!-- Stat cards -->
+    <!-- Summary stat cards -->
     <div class="admin-grid" id="stat-cards">
-        <div class="stat-card">
-            <div class="stat-value" id="stat-status">—</div>
-            <div class="stat-label">SERVER STATUS</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-platform">—</div>
-            <div class="stat-label">PLATFORM</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-env">—</div>
-            <div class="stat-label">ENVIRONMENT</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-python">—</div>
-            <div class="stat-label">PYTHON VERSION</div>
-        </div>
+        <div class="stat-card"><div class="stat-value" id="s-users">—</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card"><div class="stat-value" id="s-mfa">—</div><div class="stat-label">MFA Enabled</div></div>
+        <div class="stat-card"><div class="stat-value" id="s-admins">—</div><div class="stat-label">Admins</div></div>
+        <div class="stat-card"><div class="stat-value" id="s-honeypot">—</div><div class="stat-label">Honeypot Hits</div></div>
+        <div class="stat-card"><div class="stat-value" id="s-replay">—</div><div class="stat-label">Replay Alerts</div></div>
+        <div class="stat-card"><div class="stat-value" id="s-idor">—</div><div class="stat-label">IDOR Alerts</div></div>
     </div>
 
-    <!-- API Endpoints -->
+    <!-- Honeypot alerts -->
     <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
-        <div class="section-title">API Endpoints</div>
+        <div class="section-title">Honeypot Alerts (CRITICAL)</div>
         <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Method</th>
-                    <th>Route</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><span class="badge badge-ok">GET</span></td>
-                    <td>/api/status</td>
-                    <td>Application health</td>
-                    <td><span id="ep-status-badge" class="badge badge-warn">—</span></td>
-                    <td><button class="btn-admin" onclick="pingEndpoint('/api/status', 'ep-status-badge')">Ping</button></td>
-                </tr>
-                <tr>
-                    <td><span class="badge badge-warn">POST</span></td>
-                    <td>/api/register</td>
-                    <td>Account creation</td>
-                    <td><span class="badge badge-ok">Active</span></td>
-                    <td>—</td>
-                </tr>
-                <tr>
-                    <td><span class="badge badge-ok">GET</span></td>
-                    <td>/api/profile</td>
-                    <td>User profile (token required)</td>
-                    <td><span id="ep-profile-badge" class="badge badge-warn">—</span></td>
-                    <td><button class="btn-admin" onclick="pingEndpoint('/api/profile', 'ep-profile-badge')">Ping</button></td>
-                </tr>
-                <tr>
-                    <td><span class="badge badge-danger">GET</span></td>
-                    <td>/api/debug</td>
-                    <td>System information (unprotected)</td>
-                    <td><span id="ep-debug-badge" class="badge badge-warn">—</span></td>
-                    <td><button class="btn-admin btn-danger" onclick="loadDebug()">Inspect</button></td>
-                </tr>
-            </tbody>
+            <thead><tr><th>Time</th><th>Source IP</th><th>Path</th><th>Severity</th></tr></thead>
+            <tbody id="honeypot-body"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
         </table>
     </div>
 
-    <!-- Debug output -->
-    <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8" id="debug-section" style="display:none;">
-        <div class="section-title" style="display:flex; justify-content:space-between; align-items:center;">
-            <span>/api/debug Response</span>
-            <button class="btn-admin btn-danger" onclick="document.getElementById('debug-section').style.display='none'">Close</button>
-        </div>
-        <pre id="debug-output">Loading...</pre>
+    <!-- Detection alerts (replay + IDOR) -->
+    <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
+        <div class="section-title">Detection Alerts</div>
+        <table class="admin-table">
+            <thead><tr><th>Time</th><th>Event</th><th>User / Source</th><th>Severity</th></tr></thead>
+            <tbody id="detect-body"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+        </table>
     </div>
 
-    <!-- Recent activity (simulated / indicator) -->
+    <!-- Recent activity across all users -->
     <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
-        <div class="section-title">Recent Activity</div>
+        <div class="section-title">Recent Activity (all users)</div>
         <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Time</th>
-                    <th>Event</th>
-                    <th>Level</th>
-                </tr>
-            </thead>
-            <tbody id="activity-log">
-                <tr><td colspan="3" style="color:var(--market-muted); text-align:center; padding:1rem;">Loading logs&hellip;</td></tr>
-            </tbody>
+            <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Status</th><th>IP</th><th>Path</th></tr></thead>
+            <tbody id="activity-body"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+        </table>
+    </div>
+
+    <!-- User roster -->
+    <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
+        <div class="section-title">User Accounts</div>
+        <table class="admin-table">
+            <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>MFA</th><th>Role</th><th>Created</th></tr></thead>
+            <tbody id="users-body"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
         </table>
     </div>
 
@@ -246,120 +118,97 @@
 
 <footer class="site-footer">
     <div class="footer-inner">
-        <div class="footer-col" style="padding-left:20rem;">
+        <div class="footer-col">
             <h3 class="text-market-gold font-bold text-lg mb-3">Support & Safety</h3>
             <a href="{{ url_for('support_page') }}" class="text-market-gold hover:text-white">Need Help?</a>
         </div>
         <div class="footer-col">
             <h3 class="text-market-gold font-bold text-lg mb-3">Contact</h3>
             <p class="text-gray-400">Email: contact@driftlock.io</p>
-            <p class="text-gray-400">Phone: +33 1 23 45 67 89</p>
         </div>
     </div>
     <p class="footer-copy">&copy; 2026 DriftLock. All rights reserved.</p>
 </footer>
 
 <script>
-const FAKE_LOGS = [
-    { time: now(-1),  event: 'Flask server started',                level: 'ok'     },
-    { time: now(-3),  event: 'PostgreSQL database connection',        level: 'ok'     },
-    { time: now(-5),  event: 'Registration attempt (toto)',           level: 'ok'     },
-    { time: now(-8),  event: 'Rate limit triggered on /api/register', level: 'warn' },
-    { time: now(-12), event: 'Unauthorized access to /api/profile',   level: 'warn'   },
-    { time: now(-20), event: '/api/debug endpoint accessed',          level: 'danger' },
-];
-
-function now(minusMin) {
-    const d = new Date(Date.now() + minusMin * 60000);
-    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmt(ts) { if (!ts) return '—'; try { return new Date(ts).toLocaleString(); } catch { return esc(ts); } }
+function emptyRow(tbody, cols, msg) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="${cols}">${esc(msg)}</td></tr>`;
 }
 
-function levelBadge(level) {
-    const map = { ok: 'badge-ok', warn: 'badge-warn', danger: 'badge-danger' };
-    const label = { ok: 'INFO', warn: 'WARN', danger: 'ALERT' };
-    return `<span class="badge ${map[level] || ''}">${label[level] || level}</span>`;
-}
-
-async function pingEndpoint(url, badgeId) {
-    const badge = document.getElementById(badgeId);
-    badge.className = 'badge badge-warn';
-    badge.textContent = '…';
+async function loadOverview() {
+    let data;
     try {
-        const r = await fetch(url);
-        if (r.ok) {
-            badge.className = 'badge badge-ok';
-            badge.textContent = r.status;
-        } else {
-            badge.className = 'badge badge-danger';
-            badge.textContent = r.status;
-        }
-    } catch {
-        badge.className = 'badge badge-danger';
-        badge.textContent = 'ERR';
-    }
-}
-
-async function loadDebug() {
-    const section = document.getElementById('debug-section');
-    const out = document.getElementById('debug-output');
-    const badge = document.getElementById('ep-debug-badge');
-    section.style.display = 'block';
-    out.textContent = 'Loading…';
-    try {
-        const r = await fetch('/api/debug');
-        const data = await r.json();
-        out.textContent = JSON.stringify(data, null, 2);
-        badge.className = 'badge badge-danger';
-        badge.textContent = r.status;
+        const r = await fetch('/admin/api/overview', { credentials: 'same-origin' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        data = await r.json();
     } catch (e) {
-        out.textContent = 'Error: ' + e.message;
-        badge.className = 'badge badge-danger';
-        badge.textContent = 'ERR';
+        emptyRow(document.getElementById('honeypot-body'), 4, 'Failed to load.');
+        emptyRow(document.getElementById('detect-body'), 4, 'Failed to load.');
+        emptyRow(document.getElementById('activity-body'), 6, 'Failed to load.');
+        return;
+    }
+
+    const s = data.summary || {};
+    document.getElementById('s-users').textContent    = s.total_users ?? '—';
+    document.getElementById('s-mfa').textContent      = s.mfa_enabled_users ?? '—';
+    document.getElementById('s-admins').textContent   = s.admin_users ?? '—';
+    document.getElementById('s-honeypot').textContent = s.honeypot_hits ?? '—';
+    document.getElementById('s-replay').textContent   = s.replay_alerts ?? '—';
+    document.getElementById('s-idor').textContent     = s.idor_alerts ?? '—';
+
+    const hp = document.getElementById('honeypot-body');
+    const hits = (data.honeypot_hits || []).slice().reverse();
+    if (!hits.length) emptyRow(hp, 4, 'No honeypot activity.');
+    else hp.innerHTML = hits.map(h => `<tr>
+        <td>${fmt(h.timestamp)}</td><td>${esc(h.source_ip)}</td>
+        <td>${esc(h.path)}</td><td><span class="badge badge-crit">${esc(h.severity || 'CRITICAL')}</span></td></tr>`).join('');
+
+    const db = document.getElementById('detect-body');
+    const dets = [].concat(data.replay_alerts || [], data.idor_alerts || []);
+    if (!dets.length) emptyRow(db, 4, 'No detection alerts.');
+    else db.innerHTML = dets.map(d => `<tr>
+        <td>${fmt(d.timestamp)}</td><td>${esc(d.event)}</td>
+        <td>${esc(d.user_id != null ? ('user ' + d.user_id) : (d.source_ip || '—'))}</td>
+        <td><span class="badge badge-danger">${esc(d.severity || 'HIGH')}</span></td></tr>`).join('');
+
+    const ab = document.getElementById('activity-body');
+    const acts = data.recent_activity || [];
+    if (!acts.length) emptyRow(ab, 6, 'No activity recorded.');
+    else ab.innerHTML = acts.map(a => {
+        const st = (a.status || '').toUpperCase();
+        const cls = st === 'SUCCESS' ? 'badge-ok' : (st === 'ALERT' ? 'badge-danger' : 'badge-warn');
+        return `<tr>
+            <td>${fmt(a.timestamp)}</td><td>${a.user_id != null ? esc(a.user_id) : '—'}</td>
+            <td>${esc(a.action)}</td><td><span class="badge ${cls}">${esc(a.status)}</span></td>
+            <td>${esc(a.ip_address)}</td><td>${esc(a.request_path)}</td></tr>`;
+    }).join('');
+}
+
+async function loadUsers() {
+    const tb = document.getElementById('users-body');
+    try {
+        const r = await fetch('/admin/api/users', { credentials: 'same-origin' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const data = await r.json();
+        const users = data.users || [];
+        if (!users.length) { emptyRow(tb, 6, 'No users.'); return; }
+        tb.innerHTML = users.map(u => `<tr>
+            <td>${esc(u.id)}</td><td>${esc(u.username)}</td><td>${esc(u.email)}</td>
+            <td>${u.mfa_enabled ? '<span class="badge badge-ok">ON</span>' : '<span class="badge badge-warn">OFF</span>'}</td>
+            <td>${u.is_admin ? '<span class="badge badge-danger">ADMIN</span>' : 'user'}</td>
+            <td>${fmt(u.created_at)}</td></tr>`).join('');
+    } catch (e) {
+        emptyRow(tb, 6, 'Failed to load users.');
     }
 }
 
-async function loadStatus() {
-    try {
-        const r = await fetch('/api/status');
-        const data = await r.json();
-        document.getElementById('stat-status').innerHTML =
-            `<span class="status-dot online"></span>${data.status || 'ok'}`;
-        document.getElementById('ep-status-badge').className = 'badge badge-ok';
-        document.getElementById('ep-status-badge').textContent = '200';
-    } catch {
-        document.getElementById('stat-status').innerHTML =
-            `<span class="status-dot offline"></span>offline`;
-    }
-}
-
-async function loadDebugStats() {
-    try {
-        const r = await fetch('/api/debug');
-        const data = await r.json();
-        const pyVer = (data.python_version || '').split(' ')[0] || '—';
-        document.getElementById('stat-python').textContent = pyVer;
-        document.getElementById('stat-env').textContent = data.flask_env || '—';
-        const platform = (data.platform || '—').split('-')[0];
-        document.getElementById('stat-platform').textContent = platform;
-        document.getElementById('ep-debug-badge').className = 'badge badge-ok';
-        document.getElementById('ep-debug-badge').textContent = '200';
-    } catch { /* silent */ }
-}
-
-function renderLogs() {
-    const tbody = document.getElementById('activity-log');
-    tbody.innerHTML = FAKE_LOGS.map(l =>
-        `<tr>
-            <td>${l.time}</td>
-            <td>${l.event}</td>
-            <td>${levelBadge(l.level)}</td>
-        </tr>`
-    ).join('');
-}
-
-loadStatus();
-loadDebugStats();
-renderLogs();
+loadOverview();
+loadUsers();
 </script>
 
 </body>

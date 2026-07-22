@@ -22,7 +22,7 @@ from auth import (
 )
 from mfa import totp_bp
 from reset import request_reset, reset_password as reset_password_handler
-from decorators import admin_required
+from admindashboard import admin_bp, alerts_bp
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
@@ -191,12 +191,11 @@ def support_page():
 # --- Register the TOTP Blueprint for MFA routes ---
 app.register_blueprint(totp_bp)
 
-
-@app.route('/admin/dashboard', methods=['GET', 'POST'])
-@admin_required
-def admin_dashboard():
-    # Placeholder for admin dashboard logic
-    return render_template('admin_dashboard.html')
+# --- Register the admin dashboard + user activity blueprints ---
+# admin_bp  : /admin/dashboard + /admin/api/*   (admin-only, @admin_required)
+# alerts_bp : /activity + /activity/api/mine    (per-user, @login_required)
+app.register_blueprint(admin_bp)
+app.register_blueprint(alerts_bp)
 
 
 @app.route('/api/status')

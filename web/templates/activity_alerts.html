@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriftLock - Activity Alerts</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <style>
+        .act-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; color: var(--market-text); }
+        .act-table th {
+            text-align: left; color: var(--market-gold); padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid var(--market-border); font-weight: 600; letter-spacing: 0.04em;
+        }
+        .act-table td {
+            padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--market-border);
+            color: var(--market-muted); font-family: "Liberation Mono", monospace;
+        }
+        .act-table tr:last-child td { border-bottom: none; }
+        .act-table tr:hover td { color: #fff; }
+        .badge { display: inline-block; padding: 0.1rem 0.55rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+        .badge-ok     { background: #14532d; color: #4ade80; }
+        .badge-warn   { background: #78350f; color: #fbbf24; }
+        .badge-danger { background: #7f1d1d; color: #fca5a5; }
+        .section-title {
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+            color: var(--market-gold); text-transform: uppercase;
+            margin-bottom: 0.75rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--market-border);
+        }
+        .empty-row td { text-align: center; color: var(--market-muted); padding: 1rem; }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <a href="{{ url_for('home') }}" class="site-logo-link" aria-label="Back to home">
+        <img src="{{ url_for('static', filename='images/Finallocklogo.png') }}" alt="DriftLock Alpha" class="site-logo-top-left">
+    </a>
+    <nav class="top-auth-nav" aria-label="Authentication links">
+        <a href="{{ url_for('totp.authenticator') }}" class="top-auth-link">MFA</a>
+        <span class="top-auth-separator">/</span>
+        <span class="top-auth-link" style="color: var(--market-text); cursor: default;">{{ current_username }}</span>
+        <span class="top-auth-separator">/</span>
+        <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
+    </nav>
+</header>
+
+<section class="vault-home">
+
+    <div class="p-6 bg-market-gray border border-market-gold rounded-lg shadow-xl mb-8">
+        <p class="text-xl text-white font-bold mb-1">Activity Alerts</p>
+        <p class="text-gray-400 text-sm">Recent security events on your account</p>
+    </div>
+
+    <!-- Security events (this user's detections) -->
+    <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
+        <div class="section-title">Security Events</div>
+        <table class="act-table">
+            <thead><tr><th>Time</th><th>Event</th><th>Source IP</th><th>Severity</th></tr></thead>
+            <tbody id="sec-body"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+        </table>
+    </div>
+
+    <!-- Account activity -->
+    <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
+        <div class="section-title">Account Activity</div>
+        <table class="act-table">
+            <thead><tr><th>Time</th><th>Action</th><th>Status</th><th>IP</th></tr></thead>
+            <tbody id="act-body"><tr class="empty-row"><td colspan="4">Loading…</td></tr></tbody>
+        </table>
+    </div>
+
+</section>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Support & Safety</h3>
+            <a href="{{ url_for('support_page') }}" class="text-market-gold hover:text-white">Need Help?</a>
+        </div>
+        <div class="footer-col">
+            <h3 class="text-market-gold font-bold text-lg mb-3">Contact</h3>
+            <p class="text-gray-400">Email: contact@driftlock.io</p>
+        </div>
+    </div>
+    <p class="footer-copy">&copy; 2026 DriftLock. All rights reserved.</p>
+</footer>
+
+<script>
+function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmt(ts) { if (!ts) return '—'; try { return new Date(ts).toLocaleString(); } catch { return esc(ts); } }
+function emptyRow(tbody, cols, msg) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="${cols}">${esc(msg)}</td></tr>`;
+}
+
+async function loadMine() {
+    const sec = document.getElementById('sec-body');
+    const act = document.getElementById('act-body');
+    let data;
+    try {
+        const r = await fetch('/activity/api/mine', { credentials: 'same-origin' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        data = await r.json();
+    } catch (e) {
+        emptyRow(sec, 4, 'Failed to load.');
+        emptyRow(act, 4, 'Failed to load.');
+        return;
+    }
+
+    const events = (data.security_events || []).slice().reverse();
+    if (!events.length) emptyRow(sec, 4, 'No security events on your account. Good news.');
+    else sec.innerHTML = events.map(d => `<tr>
+        <td>${fmt(d.timestamp)}</td><td>${esc(d.event)}</td>
+        <td>${esc(d.source_ip || '—')}</td>
+        <td><span class="badge badge-danger">${esc(d.severity || 'HIGH')}</span></td></tr>`).join('');
+
+    const acts = data.activity || [];
+    if (!acts.length) emptyRow(act, 4, 'No account activity recorded.');
+    else act.innerHTML = acts.map(a => {
+        const st = (a.status || '').toUpperCase();
+        const cls = st === 'SUCCESS' ? 'badge-ok' : (st === 'ALERT' ? 'badge-danger' : 'badge-warn');
+        return `<tr>
+            <td>${fmt(a.timestamp)}</td><td>${esc(a.action)}</td>
+            <td><span class="badge ${cls}">${esc(a.status)}</span></td>
+            <td>${esc(a.ip_address)}</td></tr>`;
+    }).join('');
+}
+
+loadMine();
+</script>
+
+</body>
+</html>
