@@ -9,13 +9,17 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     mfa_enabled = db.Column(db.Boolean, default=False)
+    role = db.Column(db.String(1), nullable=False, default='U')  # 'A' = Admin, 'U' = User
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
     totp_seed = db.relationship('TOTPSeed', backref='user', uselist=False, cascade="all, delete-orphan")
     reset_tokens = db.relationship('PasswordResetToken', backref='user', cascade="all, delete-orphan")
     logs = db.relationship('ActivityLog', backref='user')
-
+    @property
+    def is_admin(self):
+        return self.role == 'A'
+    
 # 2. TOTP Seeds Table (1:1 Relationship)
 class TOTPSeed(db.Model):
     __tablename__ = 'totp_seeds'
