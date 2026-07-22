@@ -313,6 +313,22 @@ def generate_qr_base64(data: str) -> str:
     img.save(buf, format='PNG')
     return base64.b64encode(buf.getvalue()).decode()
 
+def resend_mfa():
+    user_id = session.get('pending_mfa_user_id')
+    if not user_id:
+        return jsonify({"error": "No pending MFA session"}), 400
+
+    user = User.query.get(user_id)
+    if not user or not user.totp_seed:
+        return jsonify({"error": "Invalid session"}), 400
+
+    secret = decrypt_secret(user.totp_seed.encrypted_seed)
+    totp = pyotp.TOTP(secret)
+    code = totp.now()
+    _send_mfa_code(user.email, user.username, code)
+    current_app.logger.info(f"MFA code resent to {user.email}")
+    return jsonify({"message": "A new code has been sent to your email."}), 200
+
 
 def verify_mfa():
     user_id = session.get('pending_mfa_user_id')
@@ -338,7 +354,7 @@ def verify_mfa():
         secret = decrypt_secret(user.totp_seed.encrypted_seed)
         totp = pyotp.TOTP(secret)
 
-        if not totp.verify(code, valid_window=1):
+        if not totp.verify(code, valid_window=10):
             current_app.logger.warning(
                 f"MFA verify failed for {user.username} from {request.remote_addr}")
             return jsonify({"error": "Invalid code"}), 401

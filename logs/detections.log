@@ -3,3 +3,5 @@
 {"timestamp": "2026-07-20T19:20:17.950277+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59485840, "source_ip": "172.18.0.1", "context": "login"}
 {"timestamp": "2026-07-22T07:46:58.125102+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59490213, "source_ip": "172.18.0.1", "context": "login"}
 {"timestamp": "2026-07-22T09:22:58.144983+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59490405, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T12:12:13.074072+00:00", "event": "mfa_verify", "user_id": 1, "counter": 59490744, "source_ip": "172.18.0.1", "context": "mfa_setup"}
+{"timestamp": "2026-07-22T12:38:31.563899+00:00", "event": "mfa_verify", "user_id": 1, "counter": 59490797, "source_ip": "172.18.0.1", "context": "login"}
