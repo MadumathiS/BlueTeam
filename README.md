@@ -29,6 +29,62 @@ A single attack traces through every component:
 
 Red Team packet -> app logs the request -> if it touches the honeypot or trips a detection, an alert fires -> Logstash ships the log into Elasticsearch -> Kibana surfaces it -> an analyst correlates the attacker's actions into one confirmed incident and separates it from benign noise -> that becomes the incident-response report.
 
+## Architecture
+
+DriftLock runs as a set of Docker Compose services on one isolated lab network. Two Flask services — the web portal (`:4325`) and a separate, scannable `internal-api` (`:5000`) — share a single PostgreSQL database. The web service leans on Redis for rate limiting and lockout, and captures login OTP email through MailHog. Every request is written to JSON/plain log files, which Logstash mounts read-only and parses into Elasticsearch, where an analyst runs triage in Kibana.
+
+```mermaid
+flowchart LR
+    Browser["Browser"]
+    Auth["Authenticator app"]
+    Honeypot["Honeypot visitor"]
+    Scanner["Red Team scanner"]
+
+    Web["Flask web :4325"]
+    API["internal-api :5000"]
+
+    PG[("PostgreSQL")]
+    Redis[("Redis")]
+    Mail["MailHog / mailpit"]
+
+    Logs["JSON log files"]
+    Logstash["Logstash"]
+    ES[("Elasticsearch")]
+    Kibana["Kibana"]
+
+    Browser --> Web
+    Auth --> Web
+    Honeypot --> Web
+    Scanner --> Web
+    Scanner --> API
+
+    Web --> PG
+    API --> PG
+    Web --> Redis
+    Web --> Mail
+
+    Web --> Logs
+    API --> Logs
+    Logs --> Logstash
+    Logstash --> ES
+    ES --> Kibana
+```
+
+### Components
+
+| Component | Port (host to container) | Role |
+|-----------|----------------------|------|
+| web (Flask) | 4325 | Main portal: registration, login, MFA, support, honeypot, `/api/debug` |
+| internal-api (Flask) | 5000 | Separate scannable service; hosts the IDOR vulnerability |
+| db (PostgreSQL 16) | 5433 to 5432 | Shared database for both app services |
+| redis | 6379 | Rate-limit counters + login-lockout tracking |
+| mailpit (MailHog) | 1025 (SMTP), 8025 (UI) | Captures login OTP and reset emails in dev |
+| elasticsearch | 9200 | Log storage and search |
+| logstash | — | Parses log files, ships structured events to Elasticsearch |
+| kibana | 5601 | Analyst dashboards for triage and incident response |
+
+Both app services share the same PostgreSQL database. All four log files are written under `logs/` and mounted read-only into Logstash, which fans them out to four Elasticsearch indices (see the ELK indices section).
+
 ## Tech stack
 
 Backend: Python / Flask
