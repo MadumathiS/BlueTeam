@@ -8,7 +8,6 @@ import pyotp
 
 totp_bp = Blueprint('totp', __name__)
 
-
 @totp_bp.route('/authenticator')
 @login_required
 def authenticator():

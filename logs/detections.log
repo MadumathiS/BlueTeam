@@ -1,1 +1,3 @@
 {"timestamp": "2026-07-20T13:19:22.700776+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59485118, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-20T19:07:14.985674+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59485814, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-20T19:20:17.950277+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59485840, "source_ip": "172.18.0.1", "context": "login"}

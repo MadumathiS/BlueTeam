@@ -1,6 +1,7 @@
 from flask import current_app, redirect, render_template, url_for, session, request, jsonify
 from crypto_utils import hash_password, encrypt_secret, verify_password, decrypt_secret
-from models import db, User, TOTPSeed
+from models import db, User, TOTPSeed, PasswordResetToken
+from sqlalchemy import or_
 from detections import record_totp_use
 import json
 import pyotp
@@ -8,7 +9,41 @@ import re
 import qrcode
 import io
 import base64
+import os
+import redis
 
+_redis = redis.Redis(
+    host=os.getenv('REDIS_HOST', 'redis'),
+    port=int(os.getenv('REDIS_PORT', 6379)),
+    decode_responses=True
+)
+MAX_LOGIN_ATTEMPTS = 3
+LOCKOUT_SECONDS = 60
+
+import smtplib
+from email.mime.text import MIMEText
+
+SMTP_HOST = os.getenv('SMTP_HOST', 'mailhog')
+SMTP_PORT = int(os.getenv('SMTP_PORT', 1025))
+
+def _send_mfa_code(to_email, username, code):
+    body = (
+        f"Hi {username},\n\n"
+        f"Your DriftLock verification code is: {code}\n\n"
+        f"This code expires in 30 seconds.\n\n"
+        f"If you did not attempt to log in, secure your account immediately.\n\n"
+        f"— DriftLock Security"
+    )
+    msg = MIMEText(body)
+    msg['Subject'] = 'DriftLock - Your Login Verification Code'
+    msg['From'] = 'security@driftlock.local'
+    msg['To'] = to_email
+    try:
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.send_message(msg)
+        current_app.logger.info(f"MFA code sent to {to_email}")
+    except Exception as e:
+        current_app.logger.error(f"Failed to send MFA code: {e}")
 
 def is_valid_username(username):
     return bool(re.match(r'^[a-zA-Z0-9_]{3,20}$', username))
@@ -96,7 +131,7 @@ def register():
             username=username,
             email=email,
             password_hash=hash_password(password),
-            mfa_enabled=False
+            mfa_enabled=True
         )
         db.session.add(new_user)
         db.session.flush()
@@ -137,8 +172,7 @@ DUMMY_HASH = hash_password('dummy_password_for_timing')
 
 def login():
     if session.get('logged_in'):
-        return redirect(url_for('totp.authenticator'))  # Redirect to MFA setup if already logged in
-    
+        return redirect(url_for('totp.authenticator'))
     if session.get('pending_mfa_user_id'):
         return redirect(url_for('verify_mfa'))
 
@@ -160,23 +194,66 @@ def login():
     if not isinstance(password, str):
         password = ''
 
+    attempts_key = f"failed_login:{username.lower()}"
+
     try:
-        user = User.query.filter_by(username=username).first()
+        current_attempts = int(_redis.get(attempts_key) or 0)
+        if current_attempts >= MAX_LOGIN_ATTEMPTS:
+            current_app.logger.warning(
+                f"Locked-out login attempt for {username} from {request.remote_addr}"
+            )
+            return jsonify({
+                "error": "Account temporarily locked",
+                "locked": True
+            }), 401
+
+        user = User.query.filter(
+            or_(User.username == username, User.email == username.lower())
+        ).first()
 
         if user is None:
             verify_password(password, DUMMY_HASH)
-            current_app.logger.warning(f"Login failed (no such user) from {request.remote_addr}")
-            return jsonify({"error": "Invalid username or password"}), 401
+            current_app.logger.warning(
+                f"Login failed (no such user) from {request.remote_addr}"
+            )
+            attempts = _redis.incr(attempts_key)
+            if attempts == 1:
+                _redis.expire(attempts_key, LOCKOUT_SECONDS)
+            remaining = MAX_LOGIN_ATTEMPTS - attempts
+            if attempts >= MAX_LOGIN_ATTEMPTS:
+                return jsonify({"error": "Account temporarily locked", "locked": True}), 401
+            return jsonify({
+                "error": "Invalid username or password",
+                "attempts_remaining": remaining
+            }), 401
 
         if not verify_password(password, user.password_hash):
-            current_app.logger.warning(f"Login failed for {username} from {request.remote_addr}")
-            return jsonify({"error": "Invalid username or password"}), 401
+            current_app.logger.warning(
+                f"Login failed for {username} from {request.remote_addr}"
+            )
+            attempts = _redis.incr(attempts_key)
+            if attempts == 1:
+                _redis.expire(attempts_key, LOCKOUT_SECONDS)
+            remaining = MAX_LOGIN_ATTEMPTS - attempts
+            if attempts >= MAX_LOGIN_ATTEMPTS:
+                return jsonify({"error": "Account temporarily locked", "locked": True}), 401
+            return jsonify({
+                "error": "Invalid username or password",
+                "attempts_remaining": remaining
+            }), 401
+
+        _redis.delete(attempts_key)
 
         session.clear()
 
         if user.mfa_enabled:
             session['pending_mfa_user_id'] = user.id
-            current_app.logger.info(f"Password OK, MFA pending: {username}")
+            # Compute the current TOTP code and email it
+            secret = decrypt_secret(user.totp_seed.encrypted_seed)
+            totp = pyotp.TOTP(secret)
+            code = totp.now()
+            _send_mfa_code(user.email, user.username, code)
+            current_app.logger.info(f"Password OK, MFA code emailed: {username}")
             if request.is_json:
                 return jsonify({"message": "MFA required", "mfa_required": True}), 200
             return redirect(url_for('verify_mfa'))
