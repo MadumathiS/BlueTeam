@@ -11,7 +11,7 @@
 
 body {
     font-family: "Liberation Mono", monospace;
-    background: var(--market-bg);
+    background: linear-gradient(180deg, #000000 0%, #1a1d24 100%);
     color: var(--market-text);
     min-height: 10vh;
     margin: 0;
@@ -174,6 +174,65 @@ textarea.input-field {
     text-decoration: none;
 }
 
+.intro-showcase {
+    width: 100%;
+    padding: 2.2rem 1rem 1.4rem;
+    margin-bottom: 2rem;
+}
+
+.intro-shell {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.intro-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+    gap: 2rem;
+    align-items: center;
+}
+
+.intro-kicker {
+    color: var(--market-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0 0 0.8rem;
+}
+
+.intro-title {
+    margin: 0 0 1rem;
+    color: #ffffff;
+    font-size: 2.4rem;
+    line-height: 1.2;
+}
+
+.intro-content p {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 1.08rem;
+    line-height: 1.55;
+}
+
+.intro-image-placeholder {
+    position: relative;
+    overflow: hidden;
+    min-height: 300px;
+    border-radius: 0.9rem;
+    background: transparent;
+    -webkit-mask-image: radial-gradient(ellipse 88% 78% at 50% 50%, #000 20%, rgba(0, 0, 0, 0) 70%);
+    mask-image: radial-gradient(ellipse 88% 78% at 50% 50%, #000 20%, rgba(0, 0, 0, 0) 70%);
+}
+
+.intro-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+    object-fit: cover;
+}
+
 .p-6 { padding: 1.5rem; }
 .p-5 { padding: 1.25rem; }
 .mb-8 { margin-bottom: 2rem; }
@@ -246,6 +305,26 @@ textarea.input-field {
 }
 
 @media (max-width: 480px) {
+    .intro-showcase {
+        padding: 1.3rem 1rem 0.8rem;
+    }
+
+    .intro-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .intro-title {
+        font-size: 1.8rem;
+    }
+
+    .intro-image-placeholder {
+        min-height: 220px;
+    }
+
+    .intro-image {
+        min-height: 220px;
+    }
+
     .top-auth-nav {
         top: 10px;
         right: 10px;
