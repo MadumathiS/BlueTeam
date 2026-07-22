@@ -18,6 +18,7 @@ from auth import (
     logout as logout_handler,
     verify_mfa as verify_mfa_handler,
     confirm_mfa_setup as confirm_mfa_handler,
+    resend_mfa as resend_mfa_handler
 )
 from mfa import totp_bp
 from reset import request_reset, reset_password as reset_password_handler
@@ -176,6 +177,7 @@ app.add_url_rule('/logout', endpoint='logout', view_func=logout_handler, methods
 verify_mfa_view = limiter.limit("5 per minute")(verify_mfa_handler)
 app.add_url_rule('/verify-mfa', endpoint='verify_mfa', view_func=verify_mfa_view, methods=['GET', 'POST'])
 app.add_url_rule('/api/verify-mfa', endpoint='api_verify_mfa', view_func=verify_mfa_view, methods=['POST'])
+app.add_url_rule('/api/resend-mfa', endpoint='resend_mfa', view_func=resend_mfa_handler, methods=['POST'])
 
 app.add_url_rule('/register/confirm-mfa', endpoint='confirm_mfa_setup',
                  view_func=confirm_mfa_handler, methods=['POST'])

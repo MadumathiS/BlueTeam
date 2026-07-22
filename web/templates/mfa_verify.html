@@ -25,7 +25,35 @@
             <button type="submit" class="top-auth-link" style="background: var(--market-gold); color: #1a1d24; border: 0; border-radius: 0.5rem; padding: 0.6rem 0.9rem; font-weight: 700; cursor: pointer;">Verify</button>
         </form>
 
+<p id="resend-message" class="text-sm mt-3"></p>
         <p id="verify-message" class="text-sm mt-3"></p>
+        <button id="resend-btn" onclick="resendCode()" class="top-auth-link" style="background: transparent; color: var(--market-gold); border: 1px solid var(--market-gold); border-radius: 0.5rem; padding: 0.5rem 0.9rem; font-weight: 600; cursor: pointer; margin-top: 0.75rem;">
+            Resend Code
+        </button>
+
+        <script>
+        async function resendCode() {
+            const btn = document.getElementById('resend-btn');
+            const msg = document.getElementById('resend-message');
+            btn.disabled = true;
+            btn.style.opacity = '0.4';
+
+            try {
+                const res = await fetch('/api/resend-mfa', { method: 'POST' });
+                const data = await res.json();
+                msg.className = 'text-market-gold text-sm mt-3';
+                msg.textContent = data.message || 'A new code has been sent.';
+            } catch (err) {
+                msg.className = 'text-red-400 text-sm mt-3';
+                msg.textContent = 'Failed to resend. Try again.';
+            }
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }, 30000);
+        }
+        </script>
     </div>
 </section>
 
