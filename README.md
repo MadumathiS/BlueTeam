@@ -4,7 +4,12 @@ DriftLock is a TOTP-based multi-factor authentication portal built as the Blue T
 
 ## What it does
 
-Users register an account (username, email, password). The system hashes the password with bcrypt and generates a unique TOTP secret, which the user adds to their authenticator app (Google Authenticator, Authy, etc.) by scanning a QR code. Logging in then requires two factors: the password (something you know) and the current six-digit code from the authenticator app (something you have).
+Users register an account by providing a username, email address, and password. The system securely hashes the password using **bcrypt**. During registration, the user scans a QR code to complete the initial account setup.
+
+When logging in, the user first enters their username (or email) and password. If the credentials are valid, the system generates a one-time password (OTP) and sends it to the user's registered email address.
+
+For development and testing, **MailHog** is available at **http://localhost:8025/** and acts as a dummy mail server. The user retrieves the OTP from MailHog and enters it to complete the login process. Authentication is successful only after both the password (something the user knows) and the emailed OTP (something the user receives) are verified.
+
 
 TOTP here protects DriftLock's own login — one issuer, one secret per user (a 1:1 relationship). It is a login second factor, not a multi-service authenticator vault.
 
@@ -66,11 +71,16 @@ docker compose up -d kibana logstash
 
 Key endpoints once running:
 
-App: http://localhost:4325/
-Internal API: http://localhost:5000/
-Kibana: http://localhost:5601/
-Elasticsearch: http://localhost:9200/
+- App: `http://localhost:4325/`
 
+- Internal API: `http://localhost:5000/`
+
+- Kibana: `http://localhost:5601/`
+
+- Elasticsearch: `http://localhost:9200/`
+
+- Mailhog `http://localhost:8025/`
+- 
 On Linux, Elasticsearch may require: sudo sysctl -w vm.max_map_count=262144
 
 ### Required environment variables (.env, gitignored)
@@ -136,12 +146,6 @@ blue-team-mfa-portal/
     ├── 02-hardening-report.md
     └── 03-incident-response.md
 ```
-
-### Planned / target architecture
-
-- web/decorators.py already provides @login_required.
-  A @rate_limited helper is planned to consolidate the rate-limit
-  logic currently applied inline in app.py.
 
 ## Intentional vulnerabilities (disclosure)
 
