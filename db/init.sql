@@ -5,6 +5,8 @@ CREATE TABLE users (
     password_hash VARCHAR(255) NOT NULL,
     mfa_enabled BOOLEAN DEFAULT FALSE,
     role CHAR(1) NOT NULL DEFAULT 'U' CHECK (role IN ('A', 'U')),
+    verification_code VARCHAR(255);
+    code_expires_at TIMESTAMP;
     created_at TIMESTAMP DEFAULT NOW()
 );
 

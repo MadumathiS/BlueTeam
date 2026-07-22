@@ -1195,3 +1195,222 @@ WHERE users.username = %(username_1)s OR users.email = %(email_1)s
 2026-07-22 12:39:05,600 | INFO | 172.18.0.1 | POST /api/login
 2026-07-22 12:39:05,600 | INFO | 172.18.0.1 | POST /api/login
 2026-07-22 12:39:17,827 | INFO | 172.18.0.1 | POST /api/resend-mfa
+2026-07-22 14:21:27,917 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:21:30,637 | ERROR | 172.18.0.1 | POST /api/login
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column users.verification_code does not exist
+LINE 1: ...d AS users_mfa_enabled, users.role AS users_role, users.veri...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/auth.py", line 238, in login
+    ).first()
+      ^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2766, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column users.verification_code does not exist
+LINE 1: ...d AS users_mfa_enabled, users.role AS users_role, users.veri...
+                                                             ^
+
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.password_hash AS users_password_hash, users.mfa_enabled AS users_mfa_enabled, users.role AS users_role, users.verification_code AS users_verification_code, users.code_expires_at AS users_code_expires_at, users.created_at AS users_created_at 
+FROM users 
+WHERE users.username = %(username_1)s OR users.email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'username_1': 'Steve', 'email_1': 'steve', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-07-22 14:21:53,723 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:21:53,725 | ERROR | 172.18.0.1 | POST /api/login
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column users.verification_code does not exist
+LINE 1: ...d AS users_mfa_enabled, users.role AS users_role, users.veri...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/auth.py", line 238, in login
+    ).first()
+      ^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2766, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column users.verification_code does not exist
+LINE 1: ...d AS users_mfa_enabled, users.role AS users_role, users.veri...
+                                                             ^
+
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.password_hash AS users_password_hash, users.mfa_enabled AS users_mfa_enabled, users.role AS users_role, users.verification_code AS users_verification_code, users.code_expires_at AS users_code_expires_at, users.created_at AS users_created_at 
+FROM users 
+WHERE users.username = %(username_1)s OR users.email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'username_1': 'Steve', 'email_1': 'steve', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-07-22 14:22:16,012 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:22:16,030 | ERROR | 172.18.0.1 | POST /api/login
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UndefinedColumn: column users.verification_code does not exist
+LINE 1: ...d AS users_mfa_enabled, users.role AS users_role, users.veri...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/auth.py", line 238, in login
+    ).first()
+      ^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2766, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/query.py", line 2864, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2373, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 2271, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column users.verification_code does not exist
+LINE 1: ...d AS users_mfa_enabled, users.role AS users_role, users.veri...
+                                                             ^
+
+[SQL: SELECT users.id AS users_id, users.username AS users_username, users.email AS users_email, users.password_hash AS users_password_hash, users.mfa_enabled AS users_mfa_enabled, users.role AS users_role, users.verification_code AS users_verification_code, users.code_expires_at AS users_code_expires_at, users.created_at AS users_created_at 
+FROM users 
+WHERE users.username = %(username_1)s OR users.email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'username_1': 'Steve', 'email_1': 'steve', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-07-22 14:26:59,084 | INFO | 172.18.0.1 | POST /register
+2026-07-22 14:27:00,895 | INFO | 172.18.0.1 | POST /register
+2026-07-22 14:27:37,572 | INFO | 172.18.0.1 | POST /register/confirm-mfa
+2026-07-22 14:27:53,815 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:27:55,679 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:27:55,679 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:29:00,600 | INFO | 172.18.0.1 | POST /api/resend-mfa
+2026-07-22 14:48:08,480 | INFO | 172.18.0.1 | GET /logut
+2026-07-22 14:48:10,563 | INFO | 172.18.0.1 | GET /favicon.ico
+2026-07-22 14:48:34,893 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:48:37,758 | WARNING | 172.18.0.1 | POST /api/login
+2026-07-22 14:48:47,380 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:48:49,413 | WARNING | 172.18.0.1 | POST /api/login
+2026-07-22 14:48:58,979 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:49:01,978 | WARNING | 172.18.0.1 | POST /api/login
+2026-07-22 14:49:33,882 | INFO | 172.18.0.1 | POST /register
+2026-07-22 14:49:36,622 | INFO | 172.18.0.1 | POST /register
+2026-07-22 14:50:15,643 | INFO | 172.18.0.1 | POST /register/confirm-mfa
+2026-07-22 14:50:32,851 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:50:38,069 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:50:38,069 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:50:51,608 | INFO | 172.18.0.1 | POST /api/resend-mfa
+2026-07-22 14:50:51,608 | INFO | 172.18.0.1 | POST /api/resend-mfa
+2026-07-22 14:52:11,937 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:52:17,588 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:52:17,589 | INFO | 172.18.0.1 | POST /api/login
+2026-07-22 14:52:27,841 | INFO | 172.18.0.1 | POST /api/resend-mfa
+2026-07-22 14:52:27,841 | INFO | 172.18.0.1 | POST /api/resend-mfa
+2026-07-22 14:52:41,692 | WARNING | 172.18.0.1 | POST /verify-mfa
+2026-07-22 14:52:57,276 | INFO | 172.18.0.1 | POST /verify-mfa
