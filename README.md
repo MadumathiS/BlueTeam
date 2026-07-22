@@ -80,7 +80,7 @@ Key endpoints once running:
 - Elasticsearch: `http://localhost:9200/`
 
 - Mailhog `http://localhost:8025/`
-- 
+  
 On Linux, Elasticsearch may require: sudo sysctl -w vm.max_map_count=262144
 
 ### Required environment variables (.env, gitignored)
