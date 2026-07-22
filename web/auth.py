@@ -62,7 +62,7 @@ def register():
 
         if user.mfa_enabled:
             # Fully set up already - nothing to do here
-            return redirect(url_for('home'))
+            return redirect(url_for('totp.authenticator'))
 
         # Logged in, but MFA setup was never completed - show the QR step
         # directly instead of the registration form
