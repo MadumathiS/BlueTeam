@@ -10,6 +10,8 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     mfa_enabled = db.Column(db.Boolean, default=False)
     role = db.Column(db.String(1), nullable=False, default='U')  # 'A' = Admin, 'U' = User
+    verification_code = db.Column(db.String(255))   # hashed, never plaintext
+    code_expires_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships

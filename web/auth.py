@@ -3,6 +3,8 @@ from crypto_utils import hash_password, encrypt_secret, verify_password, decrypt
 from models import db, User, TOTPSeed, PasswordResetToken
 from sqlalchemy import or_
 from detections import record_totp_use
+from datetime import datetime, timedelta
+import secrets
 import json
 import pyotp
 import re
@@ -19,6 +21,7 @@ _redis = redis.Redis(
 )
 MAX_LOGIN_ATTEMPTS = 3
 LOCKOUT_SECONDS = 60
+CODE_TTL_MINUTES = 5
 
 import smtplib
 from email.mime.text import MIMEText
@@ -30,7 +33,7 @@ def _send_mfa_code(to_email, username, code):
     body = (
         f"Hi {username},\n\n"
         f"Your DriftLock verification code is: {code}\n\n"
-        f"This code expires in 30 seconds.\n\n"
+        f"This code expires in 5 minutes.\n\n"
         f"If you did not attempt to log in, secure your account immediately.\n\n"
         f"— DriftLock Security"
     )
@@ -52,6 +55,29 @@ def is_valid_username(username):
 def is_valid_email(email):
     return bool(re.match(r'^[^\s@]+@[^\s@]+\.[^\s@]+$', email))
 
+def generate_numeric_code(length=6):
+    return ''.join(secrets.choice('0123456789') for _ in range(length))
+
+def _issue_login_code(user):
+    code = generate_numeric_code()
+    user.verification_code = hash_password(code)
+    user.code_expires_at = datetime.utcnow() + timedelta(minutes=CODE_TTL_MINUTES)
+    db.session.commit()
+    _send_mfa_code(user.email, user.username, code)
+    return code
+
+def _verify_login_code(user, submitted_code):
+    if not user.verification_code or not user.code_expires_at:
+        return False
+    if datetime.utcnow() > user.code_expires_at:
+        return False
+    if not verify_password(submitted_code, user.verification_code):
+        return False
+    # single-use - clear immediately
+    user.verification_code = None
+    user.code_expires_at = None
+    db.session.commit()
+    return True
 
 def register():
     if session.get('logged_in'):
@@ -248,14 +274,10 @@ def login():
 
         if user.mfa_enabled:
             session['pending_mfa_user_id'] = user.id
-            # Compute the current TOTP code and email it
-            secret = decrypt_secret(user.totp_seed.encrypted_seed)
-            totp = pyotp.TOTP(secret)
-            code = totp.now()
-            _send_mfa_code(user.email, user.username, code)
-            current_app.logger.info(f"Password OK, MFA code emailed: {username}")
+            _issue_login_code(user)
+            current_app.logger.info(f"Password OK, login code emailed: {username}")
             if request.is_json:
-                return jsonify({"message": "MFA required", "mfa_required": True}), 200
+                return jsonify({"message": "Verification code sent", "mfa_required": True}), 200
             return redirect(url_for('verify_mfa'))
 
         session['logged_in'] = True
@@ -335,13 +357,9 @@ def verify_mfa():
             session.clear()
             return jsonify({"error": "Invalid session"}), 400
 
-        secret = decrypt_secret(user.totp_seed.encrypted_seed)
-        totp = pyotp.TOTP(secret)
-
-        if not totp.verify(code, valid_window=1):
-            current_app.logger.warning(
-                f"MFA verify failed for {user.username} from {request.remote_addr}")
-            return jsonify({"error": "Invalid code"}), 401
+        if not _verify_login_code(user, code):
+            current_app.logger.warning(f"MFA verify failed for {user.username} from {request.remote_addr}")
+            return jsonify({"error": "Invalid or expired code"}), 401
 
         # Blue-side detection: record TOTP usage and check for replay attack
         client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
