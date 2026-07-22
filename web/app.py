@@ -21,7 +21,7 @@ from auth import (
 )
 from mfa import totp_bp
 from reset import request_reset, reset_password as reset_password_handler
-from decorators import login_required
+from decorators import admin_required
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
@@ -191,7 +191,7 @@ app.register_blueprint(totp_bp)
 
 
 @app.route('/admin/dashboard', methods=['GET', 'POST'])
-@login_required
+@admin_required
 def admin_dashboard():
     # Placeholder for admin dashboard logic
     return render_template('admin_dashboard.html')
