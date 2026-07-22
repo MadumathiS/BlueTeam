@@ -28,64 +28,81 @@
     </nav>
 </header>
 
+<section class="intro-showcase">
+    <div class="intro-shell">
+        <div class="intro-grid">
+            <div class="intro-content">
+                <h2 class="intro-title">Secure <span class="text-market-gold">Access</span> <br> Trusted <span class="text-market-gold">Protection</span></h2>
+                <p class="text-gray-400 text-md">
+                    DriftLock centralizes authentication monitoring,<br> 
+                    instant alerts and account protection in one clean dashboard
+                </p>
+            </div>
+            <div class="intro-image-placeholder" aria-label="AI Shield image">
+                <img src="{{ url_for('static', filename='images/IAshield.png') }}" alt="AI Shield visual" class="intro-image">
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="vault-home">
 
 <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
-    <p class="text-market-gold font-semibold text-sm mb-3" style="font-size:1.75rem; text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem;">Features</p>
+    <p class="text-market-gold font-semibold text-sm mb-3" style="font-size:1.75rem; text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem; text-align:center; margin-top:-0.2rem;">Features</p>
     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem;">
-        <div>
+        <div style="text-align:center;">
             <p class="text-white font-bold mb-1">TOTP Authentication</p>
             <p class="text-gray-400 text-sm">One-time codes generated every 30 seconds.</p>
-            <img src="{{ url_for('static', filename='images/shieldlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem 0 0.55rem;">
+            <img src="{{ url_for('static', filename='images/shieldlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem auto 0.55rem;">
         </div>
-        <div>
+        <div style="text-align:center;">
             <p class="text-white font-bold mb-1">Emergency Codes</p>
             <p class="text-gray-400 text-sm">Regain access to your account even without your device.</p>
-            <img src="{{ url_for('static', filename='images/fingerprintlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem 0 0.55rem;">
+            <img src="{{ url_for('static', filename='images/fingerprintlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem auto 0.55rem;">
         </div>
-        <div>
+        <div style="text-align:center;">
             <p class="text-white font-bold mb-1">Activity Alerts</p>
             <p class="text-gray-400 text-sm">Get notified of suspicious login attempts.</p>
-            <img src="{{ url_for('static', filename='images/belllogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem 0 0.55rem;">
+            <img src="{{ url_for('static', filename='images/belllogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem auto 0.55rem;">
         </div>
-        <div>
+        <div style="text-align:center;">
             <p class="text-white font-bold mb-1">Multi-Device</p>
             <p class="text-gray-400 text-sm">Securely manage your 2FA across multiple devices.</p>
-            <img src="{{ url_for('static', filename='images/earthlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem 0 0.55rem;">
+            <img src="{{ url_for('static', filename='images/earthlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem auto 0.55rem;">
         </div>
     </div>
 </div>
 
 <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
-    <p class="text-market-gold font-semibold text-sm mb-3" style="font-size:1.75rem; text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem;">Why Choose DriftLock</p>
+    <p class="text-market-gold font-semibold text-sm mb-3" style="font-size:1.75rem; text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem; text-align:center; margin-top:-0.2rem;">Why Choose DriftLock</p>
     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1.25rem;">
-        <div>
+        <div style="text-align:center;">
             <p class="text-white font-bold mb-1">Enhanced Security</p>
             <p class="text-gray-400 text-sm">End-to-end encryption <br> and secure secret storage.</p>
-            <img src="{{ url_for('static', filename='images/locklogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem 0 0.55rem;">
+            <img src="{{ url_for('static', filename='images/locklogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem auto 0.55rem;">
         </div>
-        <div>
+        <div style="text-align:center;">
             <p class="text-white font-bold mb-1">Easy Integration</p>
             <p class="text-gray-400 text-sm">Quick setup, without <br>complexity for your teams.</p>
-            <img src="{{ url_for('static', filename='images/interlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem 0 0.55rem;">
+            <img src="{{ url_for('static', filename='images/interlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem auto 0.55rem;">
         </div>
-        <div>
+        <div style="text-align:center;">
             <p class="text-white font-bold mb-1">Responsive Support</p>
             <p class="text-gray-400 text-sm">A team available to <br>meet your needs.</p>
-            <img src="{{ url_for('static', filename='images/headsetlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem 0 0.55rem;">
+            <img src="{{ url_for('static', filename='images/headsetlogo.png') }}" alt="Shield logo" style="display:block; width:56px; height:auto; margin:0.35rem auto 0.55rem;">
         </div>
     </div>
 </div>
 
 <div class="p-6 bg-market-gray border border-market-border rounded-lg shadow-xl mb-8">
-    <p class="text-market-gold font-semibold text-sm mb-3" style="font-size:1.75rem; text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem;">Trusted By</p>
+    <p class="text-market-gold font-semibold text-sm mb-3" style="font-size:1.75rem; text-transform:uppercase; letter-spacing:0.08em; border-bottom:1px solid var(--market-border); padding-bottom:0.5rem; text-align:center; margin-top:-0.2rem;">Trusted By</p>
     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:1.25rem; text-align:center;">
         <div>
-            <p class="text-xl text-market-gold font-bold">10K+</p>
+            <p class="text-xl text-market-gold font-bold">10M+</p>
             <p class="text-gray-400 text-sm">Protected accounts</p>
         </div>
         <div>
-            <p class="text-xl text-market-gold font-bold">99.9%</p>
+            <p class="text-xl text-market-gold font-bold">99.99%</p>
             <p class="text-gray-400 text-sm">Service uptime</p>
         </div>
         <div>
@@ -93,7 +110,7 @@
             <p class="text-gray-400 text-sm">Active monitoring</p>
         </div>
         <div>
-            <p class="text-xl text-market-gold font-bold">0</p>
+            <p class="text-xl text-market-gold font-bold">1/2</p>
             <p class="text-gray-400 text-sm">Major security incidents</p>
         </div>
     </div>
@@ -103,13 +120,13 @@
 
 <footer class="site-footer">
     <div class="footer-inner">
-        <div class="footer-col">
+        <div class="footer-col" style="padding-left:20rem;">
             <h3 class="text-market-gold font-bold text-lg mb-3">Support & Safety</h3>
             <a href="{{ url_for('support_page') }}" class="text-market-gold hover:text-white">Need Help?</a>
         </div>
         <div class="footer-col">
             <h3 class="text-market-gold font-bold text-lg mb-3">Contact</h3>
-            <p class="text-gray-400">Email: dontcontactusatanycost@driftlock.io</p>
+            <p class="text-gray-400">Email: support?@driftlock.io</p>
             <p class="text-gray-400">Phone: +33 1 23 45 67 89</p>
         </div>
     </div>
