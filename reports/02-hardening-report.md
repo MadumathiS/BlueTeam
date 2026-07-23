@@ -201,8 +201,46 @@ container with no route to the internal datastores.
 ## 4. Verification tests
 
 The infrastructure controls in 2.12–2.14 were verified on the deployed stack.
-Each test below was executed against the running environment; evidence
-screenshots are held in the project's security-check document.
+Each test below was executed against the running environment. Evidence comprises
+the socket enumeration in Test 0 plus the command output screenshots held in the
+project's security-check document.
+
+### Test 0 — Listening sockets (full exposure surface)
+
+`sudo ss -tulnp` enumerates every socket the host is listening on, giving the
+complete external attack surface in a single command rather than probing ports
+individually.
+
+| Port | Bound to | Service | Assessment |
+|------|----------|---------|------------|
+| 22 | `0.0.0.0` | SSH | Public — intended |
+| 4325 | `0.0.0.0` | DriftLock portal (docker-proxy) | Public — intended |
+| 8025 | `0.0.0.0` | MailHog UI (docker-proxy) | Public — intended |
+| 5601 | `0.0.0.0` | Kibana (docker-proxy) | Public — intended |
+| 5000 | — | internal-api | Intended public (deliberate HARD vuln) — see note |
+| 1025 | `127.0.0.1` | SMTP (MailHog) | Loopback only — correct |
+| 5433 | not published | PostgreSQL | Not exposed to host — correct |
+| 6379 | not published | Redis | Not exposed to host — correct |
+| 9200 | not published | Elasticsearch | Not exposed to host — correct |
+| 631 | `127.0.0.1` | CUPS (OS service) | Loopback only — not app-related |
+| 53 | `127.0.0.x` | systemd-resolved | Loopback only — not app-related |
+
+**Result:** PostgreSQL, Redis, and Elasticsearch have no `docker-proxy` listener
+at all, meaning they are not published to the host and are reachable only
+container-to-container on the Docker network — a stronger guarantee than
+loopback binding. SMTP is correctly restricted to loopback. Only the four
+intended services are externally reachable.
+
+> **Note — internal-api (5000):** this service is *deliberately* exposed as
+> intentional Vulnerability 3 (IDOR), and must be reachable for the Red Team to
+> discover it by port scan. It did not appear as a listener in this capture;
+> confirm the container is running and the port is published before the exercise,
+> or the planted vulnerability will be undiscoverable.
+
+> **Note — development tooling:** two loopback-bound listeners belonging to a
+> VS Code remote session were present during this capture. They are not remotely
+> reachable, but editor and tooling processes should be stopped before a graded
+> capture so the measured surface reflects the deployed stack only.
 
 ### Test 1 — Port binding
 
@@ -218,9 +256,11 @@ unreachable, while the intended public services responded normally.
 | DriftLock portal | 4325 | REACHABLE | REACHABLE — correct |
 | MailHog UI | 8025 | REACHABLE | REACHABLE — correct |
 | Kibana | 5601 | REACHABLE | REACHABLE — correct |
+| internal-api | 5000 | REACHABLE | Intentionally exposed (Vulnerability 3) |
 
-Internal services are bound to `127.0.0.1` only and are therefore invisible to a
-scan from the lab network.
+Internal services are bound to `127.0.0.1` or not published at all, and are
+therefore invisible to a scan from the lab network. The internal-api is the one
+service deliberately left discoverable.
 
 ### Test 2 — Host firewall active
 
