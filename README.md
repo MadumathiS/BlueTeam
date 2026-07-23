@@ -285,9 +285,9 @@ ctf-challenges/
 
 ## Reports
 
-reports/01-design-report.md — architecture, security controls, vulnerability rationale, Wireshark findings
-reports/02-hardening-report.md — security implementations, defense-in-depth
-reports/03-incident-response.md — attack evidence, detection method, log analysis, recommended fixes
+- reports/01-design-report.md — architecture, security controls, vulnerability rationale, Wireshark findings
+- reports/02-hardening-report.md — security implementations, defense-in-depth
+- reports/03-incident-response.md — attack evidence, detection method, log analysis, recommended fixes
 
 ## Project status
 
