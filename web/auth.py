@@ -80,11 +80,8 @@ def _verify_login_code(user, submitted_code):
     return True
 
 def register():
-    resume_user_id = session.get('pending_setup_user_id') if not session.get('logged_in') else None
-    if session.get('logged_in') or resume_user_id:
-        user_id = session.get('user_id') or resume_user_id
-        user = User.query.get(user_id)
-
+    if session.get('logged_in'):
+        user = User.query.get(session.get('user_id'))
         if not user:
             session.clear()
             return redirect(url_for('login'))
@@ -160,7 +157,7 @@ def register():
             username=username,
             email=email,
             password_hash=hash_password(password),
-            mfa_enabled=False
+            mfa_enabled=True
         )
         db.session.add(new_user)
         db.session.flush()
@@ -201,17 +198,7 @@ DUMMY_HASH = hash_password('dummy_password_for_timing')
 
 def login():
     if session.get('logged_in'):
-        user = User.query.get(session.get('user_id'))
-        if not user:
-            session.clear()
-            return redirect(url_for('login'))
-
-        if not user.mfa_enabled:
-            # Logged in, but never completed MFA setup - send them to finish it
-            return redirect(url_for('register'))
-
         return redirect(url_for('totp.authenticator'))
-
     if session.get('pending_mfa_user_id'):
         return redirect(url_for('verify_mfa'))
 
@@ -283,28 +270,6 @@ def login():
 
         _redis.delete(attempts_key)
 
-        if not user.mfa_enabled:
-            session.clear()
-            if user.totp_seed:
-                secret = decrypt_secret(user.totp_seed.encrypted_seed)
-                provisioning_uri = pyotp.totp.TOTP(secret).provisioning_uri(
-                    name=user.username, issuer_name="DriftlockPortal"
-                )
-                qr_base64 = generate_qr_base64(provisioning_uri)
-                backup_codes = json.loads(user.totp_seed.backup_codes)
-                session['pending_setup_user_id'] = user.id
-                current_app.logger.info(f"Login blocked - resuming MFA setup: {username}")
-                if request.is_json:
-                    return jsonify({
-                        "error": "MFA setup incomplete",
-                        "resume_setup": True,
-                        "qr_code": qr_base64,
-                        "backup_codes": backup_codes,
-                        "redirect": url_for('register'),
-                        "mfa_required": True
-                    }), 403
-            return redirect(url_for('register'))
-
         session.clear()
 
         if user.mfa_enabled:
@@ -312,7 +277,7 @@ def login():
             _issue_login_code(user)
             current_app.logger.info(f"Password OK, login code emailed: {username}")
             if request.is_json:
-                return jsonify({"message": "Verification code sent", "mfa_required": True, "redirect": url_for('verify_mfa')}), 200
+                return jsonify({"message": "Verification code sent", "mfa_required": True}), 200
             return redirect(url_for('verify_mfa'))
 
         session['logged_in'] = True

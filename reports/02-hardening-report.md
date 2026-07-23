@@ -93,15 +93,15 @@ from riding it into an authenticated session.
 
 ### 2.9 Authorization on sensitive endpoints
 
-The `@login_required` and `@admin_required` decorators protect authenticated
-views by enforcing session-based authentication and authorization checks. They
-return a 401 response (JSON) for unauthenticated API requests or redirect
-unauthenticated browser users to the login page (HTML). The TOTP dashboard and
-current-code endpoints are protected, and the current-code endpoint is scoped
-to the authenticated session user.
+The `@login_required` and `@admin_required` decorators gate authenticated views
+and return 401 (JSON) or redirect to login (HTML). The TOTP dashboard and
+current-code endpoints are protected, and the current-code endpoint is scoped to
+the session user. `@admin_required` further restricts the admin dashboard to
+accounts flagged as administrators; regular users are confined to their own
+activity view.
 
-**Why:** Sensitive functionality must validate server-side authentication and
-authorization rather than trusting client-side state or user-controlled data.
+**Why:** sensitive functionality must verify an authenticated session rather than
+trusting client state.
 
 ### 2.10 Secure password reset
 
@@ -125,14 +125,48 @@ dedicated indices for Kibana triage.
 searchable logs. Separating high-signal alerts into their own indices keeps
 triage fast.
 
-### 2.12 Deployment hardening
+### 2.12 Network segmentation and port exposure
 
-The web container builds its dependencies then drops to a non-root `appuser`.
-Secrets are injected via environment variables, never baked into images. Services
-are isolated via Docker Compose networking.
+Only the services that must be publicly reachable are bound to all interfaces.
+Internal services — PostgreSQL, Redis, Elasticsearch, and the SMTP listener —
+are bound to `127.0.0.1` only, so they are unreachable from the external network
+even though the containers are running. Docker Compose defines separate
+`frontend` and `backend` networks, with the backend marked `internal: true` so
+containers attached to it have no route off the host.
 
-**Why:** running as non-root limits blast radius if the app process is
-compromised; env-injected secrets keep credentials out of the image layers.
+**Why:** a port scan from the lab network should surface only the intended attack
+surface. Binding datastores to loopback means a scanner never sees Postgres,
+Redis, or Elasticsearch, and even a compromised container on the backend network
+cannot reach outward. This is what makes the deliberately-exposed `internal-api`
+a *chosen* attack surface rather than one of many.
+
+### 2.13 Host firewall (UFW)
+
+The host firewall is active with a default-deny inbound policy, permitting only
+SSH (22) and the three intentionally-public services: the DriftLock portal
+(4325), MailHog (8025), and Kibana (5601).
+
+**Why:** defence in depth behind the Docker port bindings — even if a container
+were misconfigured to publish a port, the host firewall still refuses the
+connection. Default-deny means new services are closed until explicitly opened.
+
+### 2.14 Container hardening
+
+Each application container is constrained at runtime:
+
+- **Non-root execution** — the web image creates and switches to an unprivileged
+  `appuser`; the process does not run as root.
+- **`no-new-privileges:true`** — prevents a process inside the container from
+  gaining additional privileges via setuid binaries.
+- **`cap_drop: ALL`** — all Linux capabilities are dropped, so the container
+  cannot perform privileged kernel operations.
+- **Secrets via environment variables** — credentials and keys are injected at
+  runtime, never baked into image layers.
+
+**Why:** these limit the blast radius of a successful application compromise. An
+attacker who achieves code execution lands as an unprivileged user, in a
+capability-stripped container, unable to escalate — turning what could be host
+compromise into a contained incident.
 
 ## 3. Defense-in-depth summary
 
@@ -152,12 +186,73 @@ Data-at-rest exposure is mitigated by:
 
 Everything is observed by:
    full request logging   +  honeypot  +  structured detections  +  ELK
+
+The infrastructure beneath it is constrained by:
+   loopback-bound datastores  +  internal backend network
+   +  UFW default-deny         +  non-root containers
+   +  no-new-privileges        +  cap_drop ALL
 ```
 
 No single failure collapses the system: bypassing one layer still leaves the
-others standing, and any probing generates observable log signal.
+others standing, and any probing generates observable log signal. Even a
+successful application compromise lands in an unprivileged, capability-stripped
+container with no route to the internal datastores.
 
-## 4. Known / accepted items
+## 4. Verification tests
+
+The infrastructure controls in 2.12–2.14 were verified on the deployed stack.
+Each test below was executed against the running environment; evidence
+screenshots are held in the project's security-check document.
+
+### Test 1 — Port binding
+
+Internal services were probed on the host's external IP and confirmed
+unreachable, while the intended public services responded normally.
+
+| Service | Port | Expected | Result |
+|---------|------|----------|--------|
+| PostgreSQL | 5433 | BLOCKED | BLOCKED — correct |
+| Redis | 6379 | BLOCKED | BLOCKED — correct |
+| Elasticsearch | 9200 | BLOCKED | BLOCKED — correct |
+| SMTP (MailHog) | 1025 | BLOCKED | BLOCKED — correct |
+| DriftLock portal | 4325 | REACHABLE | REACHABLE — correct |
+| MailHog UI | 8025 | REACHABLE | REACHABLE — correct |
+| Kibana | 5601 | REACHABLE | REACHABLE — correct |
+
+Internal services are bound to `127.0.0.1` only and are therefore invisible to a
+scan from the lab network.
+
+### Test 2 — Host firewall active
+
+`ufw status` reports **Status: active** with a default-deny inbound policy and
+allow rules for only 22, 4325, 8025, and 5601 (IPv4 and IPv6).
+
+### Test 3 — Docker networks exist
+
+Both `frontend` and `backend` bridge networks are present in `docker network ls`.
+
+### Test 4 — Backend network is internal
+
+Inspecting the backend network confirms `"Internal": true`, so containers on it
+have no external route.
+
+### Test 5 — Containers run as non-root
+
+`whoami` inside the web container returns **appuser**, not root.
+
+### Test 6 — no-new-privileges is set
+
+Container inspection confirms the `no-new-privileges:true` security option is
+applied.
+
+### Test 7 — cap_drop is applied
+
+Container inspection confirms `CapDrop: [ALL]` — all Linux capabilities dropped.
+
+**Result:** all seven checks passed, confirming the network, firewall, and
+container-runtime controls are in force on the deployed stack.
+
+## 5. Known / accepted items
 
 - **`debug=True` in `app.py`** exposes the Werkzeug debugger (potential RCE) and
   is **not** one of the three intentional vulnerabilities. It must be set to
@@ -169,8 +264,9 @@ others standing, and any probing generates observable log signal.
 - The three intentional vulnerabilities are documented weaknesses and are
   deliberately **not** hardened.
 
-## 5. References
+## 6. References
 
 - Project brief — Blue Team hardening requirements
 - OWASP Top 10 — A02 Cryptographic Failures, A07 Identification & Authentication Failures
-- `crypto_utils.py`, `auth.py`, `reset.py`, `app.py`, `docker-compose.yml`
+- `crypto_utils.py`, `auth.py`, `reset.py`, `app.py`, `decorators.py`, `docker-compose.yml`, `web/Dockerfile`
+- Security check evidence — `Security_check_DriftLock.docx` (7 verification tests)
