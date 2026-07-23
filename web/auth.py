@@ -26,7 +26,7 @@ CODE_TTL_MINUTES = 5
 import smtplib
 from email.mime.text import MIMEText
 
-SMTP_HOST = os.getenv('SMTP_HOST', 'mailhog')
+SMTP_HOST = os.getenv('SMTP_HOST', 'mailpit')
 SMTP_PORT = int(os.getenv('SMTP_PORT', 1025))
 
 def _send_mfa_code(to_email, username, code):
