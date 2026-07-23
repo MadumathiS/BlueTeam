@@ -1,0 +1,21 @@
+{"timestamp": "2026-07-20T13:19:22.700776+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59485118, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-20T19:07:14.985674+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59485814, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-20T19:20:17.950277+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59485840, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T07:46:58.125102+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59490213, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T09:22:58.144983+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59490405, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T12:12:13.074072+00:00", "event": "mfa_verify", "user_id": 1, "counter": 59490744, "source_ip": "172.18.0.1", "context": "mfa_setup"}
+{"timestamp": "2026-07-22T12:38:31.563899+00:00", "event": "mfa_verify", "user_id": 1, "counter": 59490797, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T14:27:37.554254+00:00", "event": "mfa_verify", "user_id": 1, "counter": 59491015, "source_ip": "172.18.0.1", "context": "mfa_setup"}
+{"timestamp": "2026-07-22T14:50:15.607097+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59491060, "source_ip": "172.18.0.1", "context": "mfa_setup"}
+{"timestamp": "2026-07-22T14:52:57.267723+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59491065, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T15:36:17.175803+00:00", "event": "mfa_verify", "user_id": 1, "counter": 59491152, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T15:56:36.417092+00:00", "event": "mfa_verify", "user_id": 1, "counter": 59491193, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T16:03:50.663662+00:00", "event": "mfa_verify", "user_id": 1, "counter": 59491207, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T16:13:19.372162+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59491226, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T16:19:48.003107+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59491239, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T16:38:16.343130+00:00", "event": "mfa_verify", "user_id": 4, "counter": 59491276, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-23T11:37:23.265259+00:00", "event": "mfa_verify", "user_id": 5, "counter": 59493554, "source_ip": "172.19.0.1", "context": "login"}
+{"timestamp": "2026-07-23T11:40:21.118935+00:00", "event": "mfa_verify", "user_id": 6, "counter": 59493560, "source_ip": "172.19.0.1", "context": "mfa_setup"}
+{"timestamp": "2026-07-23T11:40:46.126302+00:00", "event": "mfa_verify", "user_id": 6, "counter": 59493561, "source_ip": "172.19.0.1", "context": "login"}{"timestamp": "2026-07-23T13:14:19.698353+00:00", "event": "mfa_verify", "user_id": 6, "counter": 59493748, "source_ip": "172.20.0.1", "context": "login"}
+{"timestamp": "2026-07-23T13:16:06.583297+00:00", "event": "mfa_verify", "user_id": 7, "counter": 59493752, "source_ip": "172.20.0.1", "context": "mfa_setup"}
+{"timestamp": "2026-07-23T13:16:25.306792+00:00", "event": "mfa_replay_suspected", "user_id": 7, "counter": 59493752, "source_ip": "172.20.0.1", "context": "login", "severity": "HIGH", "details": "A one-time TOTP code was accepted more than once within the same time window \u2014 possible captured-code replay."}
