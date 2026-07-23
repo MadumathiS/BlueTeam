@@ -1414,3 +1414,12 @@ WHERE users.username = %(username_1)s OR users.email = %(email_1)s
 2026-07-22 14:52:27,841 | INFO | 172.18.0.1 | POST /api/resend-mfa
 2026-07-22 14:52:41,692 | WARNING | 172.18.0.1 | POST /verify-mfa
 2026-07-22 14:52:57,276 | INFO | 172.18.0.1 | POST /verify-mfa
+2026-07-22 20:54:27,056 | INFO | 172.19.0.1 | POST /register
+2026-07-22 20:54:27,405 | WARNING | 172.19.0.1 | POST /register
+2026-07-22 20:54:45,109 | INFO | 172.19.0.1 | POST /register
+2026-07-22 20:54:46,404 | INFO | 172.19.0.1 | POST /register
+2026-07-22 20:55:16,846 | INFO | 172.19.0.1 | POST /register/confirm-mfa
+2026-07-22 20:55:31,981 | INFO | 172.19.0.1 | POST /api/login
+2026-07-22 20:55:35,939 | INFO | 172.19.0.1 | POST /api/login
+2026-07-22 20:55:35,939 | INFO | 172.19.0.1 | POST /api/login
+2026-07-22 20:55:50,795 | INFO | 172.19.0.1 | POST /verify-mfa

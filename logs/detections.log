@@ -8,3 +8,5 @@
 {"timestamp": "2026-07-22T14:27:37.554254+00:00", "event": "mfa_verify", "user_id": 1, "counter": 59491015, "source_ip": "172.18.0.1", "context": "mfa_setup"}
 {"timestamp": "2026-07-22T14:50:15.607097+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59491060, "source_ip": "172.18.0.1", "context": "mfa_setup"}
 {"timestamp": "2026-07-22T14:52:57.267723+00:00", "event": "mfa_verify", "user_id": 2, "counter": 59491065, "source_ip": "172.18.0.1", "context": "login"}
+{"timestamp": "2026-07-22T20:55:16.838069+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59491790, "source_ip": "172.19.0.1", "context": "mfa_setup"}
+{"timestamp": "2026-07-22T20:55:50.794413+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59491791, "source_ip": "172.19.0.1", "context": "login"}

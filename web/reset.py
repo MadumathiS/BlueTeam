@@ -10,7 +10,7 @@ import os
 
 TOKEN_EXPIRY_MINUTES = 15
 
-SMTP_HOST = os.getenv('SMTP_HOST', 'mailhog')
+SMTP_HOST = os.getenv('SMTP_HOST', 'mailpit')
 SMTP_PORT = int(os.getenv('SMTP_PORT', 1025))
 APP_URL = os.getenv('APP_URL', 'http://localhost:4325')
 

@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: driftlock
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -16,10 +16,16 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - backend
+    security_opt:
+      - no-new-privileges:true
+
+
   web:
     build: ./web
     ports:
-      - "4325:4325"
+      - "0.0.0.0:4325:4325"
     environment:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -31,6 +37,8 @@ services:
       RATELIMIT_STORAGE_URI: redis://redis:6379/0
       MASTER_KEY: ${MASTER_KEY}
       SECRET_KEY: ${SECRET_KEY}
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
     restart: always
     depends_on:
       db:
@@ -39,10 +47,18 @@ services:
         condition: service_started
     volumes:
       - ./logs:/app/logs
+    networks:
+      - frontend
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
   internal-api:
     build: ./internal-api
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     environment:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -58,21 +74,39 @@ services:
         condition: service_healthy
     volumes:
       - ./logs:/app/logs
+    networks:
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
   redis:
     image: redis:7
     container_name: driftlock-redis-1
     restart: always
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    networks:
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    
 
-      
-  mailhog:
+  mailpit:
     image: axllent/mailpit:latest
     container_name: blueteam-mailpit
     restart: unless-stopped
     ports:
-      - "1025:1025"
-      - "8025:8025"
+      - "127.0.0.1:1025:1025"
+      - "0.0.0.0:8025:8025"
+    networks:
+      - backend
+      - frontend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
@@ -81,7 +115,7 @@ services:
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ports:
-      - "9200:9200"
+      - "127.0.0.1:9200:9200"
     volumes:
       - esdata:/usr/share/elasticsearch/data
     healthcheck:
@@ -89,6 +123,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    networks:
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
   logstash:
     image: docker.elastic.co/logstash/logstash:8.15.0
     volumes:
@@ -97,17 +138,35 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
+    networks:
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
   kibana:
     image: docker.elastic.co/kibana/kibana:8.15.0
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
-      - "5601:5601"
+      - "0.0.0.0:5601:5601"
     depends_on:
       elasticsearch:
         condition: service_healthy
+    networks:
+      - frontend
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+networks:
+  frontend:
+  backend:
+    internal: true
+
 volumes:
   pgdata:
   esdata:
-  
- 
