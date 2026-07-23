@@ -244,13 +244,16 @@ Detection: the service logs ID access; one source reading 3+ distinct IDs escala
 Fix (production): authenticate the caller and enforce requested_id == caller_id, or use unguessable identifiers; do not expose internal APIs to untrusted networks
 
 Disclosure note: These three vulnerabilities are intentional CTF targets. Every other part of the application is meant to be secure — any weakness beyond these three is an accidental defect, not a planted target.
+
 ---
 ## ELK indices
 
 driftlock-access-* — all HTTP access logs (web)
 driftlock-honeypot-* — high-priority honeypot alerts
 driftlock-internal-api-* — internal-api requests + IDOR enumeration alerts
+
 ---
+
 ## CTF Challenges (for the other team)
 
 Separate from DriftLock's own intentional vulnerabilities, we author a set of **standalone CTF challenges** for another Blue/Red group working on a different application. These challenges are self-contained and are **not** derived from DriftLock's three planted vulnerabilities — they exercise general skills (log triage, forensics, decoding) that complement this project's recon-and-detect theme.
@@ -290,25 +293,29 @@ ctf-challenges/
 - Keep `ctf-challenges/` **outside** the app's live `logs/` directory. DriftLock's `app.py`, `honeypot.py`, `internal-api/api.py`, and `detections.py` actively write to `logs/`, and Logstash mounts `./logs:ro` and ingests everything it finds — dropping challenge logs there would pollute the Elasticsearch indices and the project's own incident-response evidence.
 - Player prompts point at the technique without naming the exact command; escalating hints live in collapsible blocks and are released only when a team is stuck (or as point-cost unlocks on a scoreboard such as CTFd).
 - All challenge material stays on the isolated lab network.
+
 ---
+
 ## Reports
 
 - reports/01-design-report.md — architecture, security controls, vulnerability rationale, Wireshark findings
 - reports/02-hardening-report.md — security implementations, defense-in-depth
 - reports/03-incident-response.md — attack evidence, detection method, log analysis, recommended fixes
+  
 ---
+
 ## Project status
 
 Complete: the defensive infrastructure (honeypot, request logging, the ELK monitoring pipeline with three indices, the internal-api service, and the Docker deployment); the two-step login flow (password -> TOTP) with enumeration and session-fixation protections; and session-based authorization on sensitive endpoints. The three intentional vulnerabilities are in place and documented.
 
 ---
+
 ## Notes
 
 All testing and scanning must occur only within the isolated lab environment.
 The venv/ directory and .env file must never be committed.
+
 ---
 ## License
 
 This project is licensed for research and educational purposes only.
-
-
