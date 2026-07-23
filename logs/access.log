@@ -1462,4 +1462,19 @@ WHERE users.username = %(username_1)s OR users.email = %(email_1)s
 2026-07-23 11:40:29,837 | INFO | 172.19.0.1 | POST /api/login
 2026-07-23 11:40:30,230 | INFO | 172.19.0.1 | POST /api/login
 2026-07-23 11:40:30,230 | INFO | 172.19.0.1 | POST /api/login
-2026-07-23 11:40:46,126 | INFO | 172.19.0.1 | POST /verify-mfa
+2026-07-23 11:40:46,126 | INFO | 172.19.0.1 | POST /verify-mfa2026-07-23 13:14:08,012 | INFO | 172.20.0.1 | POST /api/login
+2026-07-23 13:14:08,401 | INFO | 172.20.0.1 | POST /api/login
+2026-07-23 13:14:08,401 | INFO | 172.20.0.1 | POST /api/login
+2026-07-23 13:14:19,698 | INFO | 172.20.0.1 | POST /verify-mfa
+2026-07-23 13:14:56,406 | INFO | 172.20.0.1 | POST /register
+2026-07-23 13:14:56,410 | WARNING | 172.20.0.1 | POST /register
+2026-07-23 13:15:31,074 | INFO | 172.20.0.1 | POST /register
+2026-07-23 13:15:31,253 | INFO | 172.20.0.1 | POST /register
+2026-07-23 13:15:41,077 | INFO | 172.20.0.1 | POST /api/login
+2026-07-23 13:15:41,265 | INFO | 172.20.0.1 | POST /api/login
+2026-07-23 13:16:06,586 | INFO | 172.20.0.1 | POST /register/confirm-mfa
+2026-07-23 13:16:09,609 | INFO | 172.20.0.1 | POST /api/login
+2026-07-23 13:16:09,972 | INFO | 172.20.0.1 | POST /api/login
+2026-07-23 13:16:09,973 | INFO | 172.20.0.1 | POST /api/login
+2026-07-23 13:16:25,306 | WARNING | 172.20.0.1 | POST /verify-mfa
+2026-07-23 13:16:25,307 | INFO | 172.20.0.1 | POST /verify-mfa
