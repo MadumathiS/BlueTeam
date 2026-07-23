@@ -91,6 +91,7 @@ flowchart LR
 | kibana | 5601 | Analyst dashboards for triage and incident response |
 
 Both app services share the same PostgreSQL database. All four log files are written under `logs/` and mounted read-only into Logstash, which fans them out to four Elasticsearch indices (see the ELK indices section).
+
 ---
 ## Tech stack
 
