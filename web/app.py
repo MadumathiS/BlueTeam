@@ -131,9 +131,17 @@ else:
 
 @app.context_processor
 def inject_user_status():
+    pending_setup_id = session.get('pending_setup_user_id')
+    if 'user_id' in session:
+        current_username = User.query.get(session['user_id']).username
+    elif pending_setup_id:
+        current_username = User.query.get(pending_setup_id).username
+    else:
+        current_username = None
     return {
         'is_logged_in': session.get('logged_in', False),
-        'current_username': User.query.get(session['user_id']).username if session.get('user_id') else None
+        'is_pending_setup': bool(pending_setup_id),
+        'current_username': current_username
     }
 
 # --- Normal routes ---

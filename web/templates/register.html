@@ -20,6 +20,10 @@
             <span class="top-auth-link" style="color: var(--market-text); cursor: default;">{{ current_username }}</span>
             <span class="top-auth-separator">/</span>
             <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
+        {% elif is_pending_setup %}
+                <span class="top-auth-link" style="color: var(--market-text);">{{ current_username }} (setup pending)</span>
+                <span class="top-auth-separator">/</span>
+                <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
         {% else %}
             <a href="{{ url_for('login') }}" class="top-auth-link">LOGIN</a>
         {% endif %}
