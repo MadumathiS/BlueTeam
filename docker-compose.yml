@@ -58,7 +58,7 @@ services:
   internal-api:
     build: ./internal-api
     ports:
-      - "127.0.0.1:5000:5000"
+      - "0.0.0.0:5000:5000"   # INTENTIONAL — Vulnerability 3 (IDOR)
     environment:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -75,6 +75,7 @@ services:
     volumes:
       - ./logs:/app/logs
     networks:
+      - frontend
       - backend
     security_opt:
       - no-new-privileges:true
