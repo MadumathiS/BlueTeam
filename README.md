@@ -87,15 +87,15 @@ Both app services share the same PostgreSQL database. All four log files are wri
 
 ## Tech stack
 
-Backend: Python / Flask
-Database: PostgreSQL
-Cache / rate-limit store: Redis
-TOTP: pyotp
-Crypto: bcrypt (passwords), Fernet (TOTP seeds)
-Monitoring: Elasticsearch, Logstash, Kibana (ELK)
-Deployment: Docker Compose
-App port: 4325 (web portal, non-standard per the brief)
-Internal API port: 5000 (internal-api — separate service, discoverable by scan)
+- Backend: `Python / Flask`
+- Database: `PostgreSQL`
+- Cache / rate-limit store: `Redis`
+- TOTP: `pyotp`
+- Crypto: `bcrypt (passwords)`, `Fernet (TOTP seeds)`
+- Monitoring: `Elasticsearch`, `Logstash`, `Kibana (ELK)`
+- Deployment: `Docker Compose`
+- App port: `4325 (web portal, non-standard per the brief)`
+- Internal API port: `5000 (internal-api — separate service, discoverable by scan)`
 
 ## Running the project
 
@@ -141,9 +141,9 @@ On Linux, Elasticsearch may require: sudo sysctl -w vm.max_map_count=262144
 
 ### Required environment variables (.env, gitignored)
 
-DB_USER, DB_PASSWORD, DB_NAME — database credentials
-MASTER_KEY — Fernet key encrypting TOTP seeds at rest
-SECRET_KEY — Flask session signing key
+- DB_USER, DB_PASSWORD, DB_NAME — `database credentials`
+- MASTER_KEY — `Fernet key encrypting TOTP seeds at rest`
+- SECRET_KEY — `Flask session signing key`
 
 ## Repository Structure
 
