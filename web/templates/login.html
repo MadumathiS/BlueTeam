@@ -105,6 +105,9 @@ loginForm.addEventListener('submit', async (event) => {
                 formMessage.textContent = data.error || 'Connexion impossible.';
                 resetLinkBox.style.display = 'none';
             }
+            if (data.mfa_required && data.redirect) {
+                window.location.href = data.redirect;
+            }
             return;
         }
 
@@ -112,8 +115,8 @@ loginForm.addEventListener('submit', async (event) => {
         loginForm.querySelector('button').disabled = false;
         loginForm.querySelector('button').style.opacity = '1';
 
-        if (data.mfa_required) {
-            window.location.href = '/verify-mfa';
+        if (data.mfa_required && data.redirect) {
+            window.location.href = data.redirect;
             return;
         }
         formMessage.className = 'text-market-gold text-sm mt-3';
