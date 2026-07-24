@@ -1478,3 +1478,14 @@ WHERE users.username = %(username_1)s OR users.email = %(email_1)s
 2026-07-23 13:16:09,973 | INFO | 172.20.0.1 | POST /api/login
 2026-07-23 13:16:25,306 | WARNING | 172.20.0.1 | POST /verify-mfa
 2026-07-23 13:16:25,307 | INFO | 172.20.0.1 | POST /verify-mfa
+2026-07-24 08:52:16,756 | INFO | 172.20.0.1 | POST /register
+2026-07-24 08:52:17,000 | INFO | 172.20.0.1 | POST /register
+2026-07-24 08:54:52,602 | INFO | 172.20.0.1 | POST /api/login
+2026-07-24 08:54:52,832 | INFO | 172.20.0.1 | POST /api/login
+2026-07-24 08:58:25,809 | INFO | 172.20.0.1 | POST /api/login
+2026-07-24 08:58:26,026 | INFO | 172.20.0.1 | POST /api/login
+2026-07-24 08:58:49,335 | INFO | 172.20.0.1 | GET /.well-known/appspecific/com.chrome.devtools.json
+2026-07-24 09:17:57,760 | INFO | 172.20.0.1 | POST /register
+2026-07-24 09:17:58,007 | INFO | 172.20.0.1 | POST /register
+2026-07-24 09:31:50,170 | INFO | 172.20.0.1 | POST /register
+2026-07-24 09:31:50,374 | INFO | 172.20.0.1 | POST /register
