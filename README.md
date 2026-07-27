@@ -2,6 +2,8 @@
 
 DriftLock is a TOTP-based multi-factor authentication portal built as the Blue Team deliverable for a Red-vs-Blue Capture-the-Flag exercise. It is a realistic web application, secured with genuine controls, that contains three deliberate, documented vulnerabilities at increasing difficulty for the Red Team to discover — and is wrapped in logging, a honeypot, and an ELK monitoring stack so the Blue Team can detect and analyze the attack.
 
+> **Branch note:** this is the `main` branch — the intentionally-vulnerable CTF target. The remediated version, with all findings fixed and verified, is on the `patched` branch.
+
 ---
 ## What it does
 
@@ -11,7 +13,6 @@ When logging in, the user first enters their username (or email) and password. I
 
 For development and testing, **MailHog** is available at **http://localhost:8025/** and acts as a dummy mail server. The user retrieves the OTP from MailHog and enters it to complete the login process. Authentication is successful only after both the password (something the user knows) and the emailed OTP (something the user receives) are verified.
 
-
 TOTP here protects DriftLock's own login — one issuer, one secret per user (a 1:1 relationship). It is a login second factor, not a multi-service authenticator vault.
 
 ---
@@ -20,7 +21,7 @@ TOTP here protects DriftLock's own login — one issuer, one secret per user (a 
 
 DriftLock is a deliberately-defended target. Three layers make that work:
 
-1. **Realistic security controls.** Password hashing (bcrypt), encrypted TOTP secrets (Fernet), input validation on registration, rate limiting (Flask-Limiter, backed by Redis), session-based authentication, and a two-step login (password then TOTP) with protections against username enumeration and session fixation.
+1. **Realistic security controls.** Password hashing (bcrypt), encrypted TOTP secrets (Fernet), input validation on registration, rate limiting (Flask-Limiter, backed by Redis), session-based authentication, and a two-step login (password then OTP) with protections against username enumeration and session fixation.
 
 2. **Three intentional vulnerabilities.** The app contains three deliberate, documented weaknesses at increasing difficulty: an unauthenticated /api/debug endpoint (information disclosure), TOTP code replay (no single-use enforcement), and an IDOR in a separate internal API (broken access control). Each is documented below so graders understand they were deliberate; everything else is meant to be secure.
 
@@ -39,6 +40,10 @@ Red Team packet -> app logs the request -> if it touches the honeypot or trips a
 ## Architecture
 
 DriftLock runs as a set of Docker Compose services on one isolated lab network. Two Flask services — the web portal (`:4325`) and a separate, scannable `internal-api` (`:5000`) — share a single PostgreSQL database. The web service leans on Redis for rate limiting and lockout, and captures login OTP email through MailHog. Every request is written to JSON/plain log files, which Logstash mounts read-only and parses into Elasticsearch, where an analyst runs triage in Kibana.
+
+### Network exposure (host firewall)
+
+The host firewall (ufw) allows only **22 (SSH), 4325 (web portal), and 5000 (internal-api)** from the network. Kibana (5601) and MailHog (8025) are bound but **not exposed externally** — they are Blue Team tooling, reachable only on the host or via an SSH tunnel, so the attacking team cannot view the detection dashboards or captured mail. This is a deliberate defense-in-depth choice.
 
 ```mermaid
 flowchart LR
@@ -83,14 +88,14 @@ flowchart LR
 |-----------|----------------------|------|
 | web (Flask) | 4325 | Main portal: registration, login, MFA, support, honeypot, `/api/debug` |
 | internal-api (Flask) | 5000 | Separate scannable service; hosts the IDOR vulnerability |
-| db (PostgreSQL 16) | 5433 to 5432 | Shared database for both app services |
-| redis | 6379 | Rate-limit counters + login-lockout tracking |
-| mailpit (MailHog) | 1025 (SMTP), 8025 (UI) | Captures login OTP and reset emails in dev |
+| db (PostgreSQL 16) | 5433 to 5432 (localhost only) | Shared database for both app services |
+| redis | 6379 (localhost only) | Rate-limit counters + login-lockout tracking |
+| mailpit (MailHog) | 1025 (SMTP), 8025 (UI, host-only) | Captures login OTP and reset emails in dev |
 | elasticsearch | 9200 | Log storage and search |
 | logstash | — | Parses log files, ships structured events to Elasticsearch |
-| kibana | 5601 | Analyst dashboards for triage and incident response |
+| kibana | 5601 (host-only) | Analyst dashboards for triage and incident response |
 
-Both app services share the same PostgreSQL database. All four log files are written under `logs/` and mounted read-only into Logstash, which fans them out to four Elasticsearch indices (see the ELK indices section).
+Both app services share the same PostgreSQL database. All four log files are written under `logs/` and mounted read-only into Logstash, which fans them out to Elasticsearch indices (see the ELK indices section).
 
 ---
 ## Tech stack
@@ -136,15 +141,11 @@ docker compose up -d kibana logstash
 Key endpoints once running:
 
 - App: `http://localhost:4325/`
-
 - Internal API: `http://localhost:5000/`
+- Kibana: `http://localhost:5601/` (host-only)
+- Elasticsearch: `http://localhost:9200/` (host-only)
+- MailHog `http://localhost:8025/` (host-only)
 
-- Kibana: `http://localhost:5601/`
-
-- Elasticsearch: `http://localhost:9200/`
-
-- Mailhog `http://localhost:8025/`
-  
 On Linux, Elasticsearch may require: sudo sysctl -w vm.max_map_count=262144
 
 ### Required environment variables (.env, gitignored)
@@ -154,8 +155,6 @@ On Linux, Elasticsearch may require: sudo sysctl -w vm.max_map_count=262144
 - SECRET_KEY — `Flask session signing key`
 ---
 ## Repository Structure
-
-### Current (as built)
 
 ```
 blue-team-mfa-portal/
@@ -169,11 +168,12 @@ blue-team-mfa-portal/
 │   │                             #   /api/debug = intentional vuln (EASY)
 │   ├── auth.py                   # registration, login, verify-mfa, logout
 │   ├── crypto_utils.py           # password hashing + TOTP seed encryption
-│   ├── mfa.py                    # TOTP blueprint (totp_bp): dashboard, current-code
+│   ├── mfa.py                    # TOTP blueprint (totp_bp): authenticator, current-code
 │   ├── decorators.py             # @login_required
 │   ├── models.py                 # DB models (User, TOTPSeed, etc.)
 │   ├── honeypot.py               # honeypot blueprint: robots.txt bait +
 │   │                             #   /backup_secrets/ trap, embedded decoy
+│   ├── detections.py             # replay + enumeration detection helpers
 │   ├── robots.txt                # discloses /backup_secrets/ — bait
 │   ├── requirements.txt
 │   ├── Dockerfile
@@ -193,14 +193,14 @@ blue-team-mfa-portal/
 │   └── logstash/
 │       └── pipeline/
 │           └── logstash.conf     # grok-parses access.log; JSON-parses
-│                                 #   honeypot.log + internal-api.log;
-│                                 #   tags /backup_secrets/ as honeypot_hit
+│                                 #   honeypot.log + internal-api.log + detections.log
 │
 ├── logs/
 │   ├── access.log
 │   ├── honeypot.log
 │   ├── internal-api.log
-│   └── captures/                 # Wireshark .pcap files
+│   ├── detections.log
+│   └── captures/                 # Wireshark .pcap files (scan_lo.pcap, legit.pcap)
 │
 ├── ctf-challenges/               # standalone CTF challenges for the other team
 │   └── log-forensics/            #   (kept OUTSIDE logs/ — see CTF section)
@@ -217,50 +217,51 @@ DriftLock contains three deliberate, documented vulnerabilities at increasing di
 
 ### Vulnerability 1 — EASY — Information disclosure
 
-Endpoint: GET /api/debug (web, port 4325)
-Type: Unauthenticated information disclosure
-Exposes: Python version, platform, environment mode, and a hint pointing at the .env file
-Discovery: reachable via port scan + path enumeration; no auth required
-Detection: access is logged at WARNING and shipped to ELK
-Fix (production): remove the endpoint or gate it behind authentication
+- Endpoint: GET /api/debug (web, port 4325)
+- Type: Unauthenticated information disclosure
+- Exposes: Python version, platform, environment mode, and a hint pointing at the .env file
+- Discovery: reachable via port scan + path enumeration; no auth required
+- Detection: access is logged at WARNING and shipped to ELK
+- Fix (production): remove the endpoint or gate it behind authentication
 
 ### Vulnerability 2 — MEDIUM — TOTP replay
 
-Location: MFA verification flow (web, port 4325)
-Type: Missing one-time-use enforcement on TOTP codes
-Exposes: a captured code remains valid for its ~90-second window and can be replayed, weakening the second factor
-Discovery: capture a valid code and reuse it within the window
-Detection: verification events are logged; reuse of the same time-window counter for a user flags mfa_replay_suspected
-Fix (production): record consumed codes/counters and reject reuse
+- Location: MFA verification flow (web, port 4325)
+- Type: Missing one-time-use enforcement on TOTP codes
+- Exposes: a captured code remains valid for its ~90-second window and can be replayed, weakening the second factor
+- Discovery: capture a valid code and reuse it within the window
+- Detection: verification events are logged; reuse of the same time-window counter for a user flags mfa_replay_suspected
+- Fix (production): record consumed codes/counters and reject reuse
 
 ### Vulnerability 3 — HARD — IDOR / broken access control
 
-Service: internal-api (port 5000 — a separate, scannable service)
-Endpoint: GET /api/v1/users/<id>/setup-status
-Type: Insecure Direct Object Reference — returns any user's account metadata when the <id> is changed, with no authorization check
-Exposes: another user's username, mfa_enabled status, and account creation time
-Discovery: found via port scan as a second service, then path probing reveals the enumerable ID
-Detection: the service logs ID access; one source reading 3+ distinct IDs escalates to a CRITICAL idor_enumeration_suspected alert in ELK
-Fix (production): authenticate the caller and enforce requested_id == caller_id, or use unguessable identifiers; do not expose internal APIs to untrusted networks
+- Service: internal-api (port 5000 — a separate, scannable service)
+- Endpoint: GET /api/v1/users/<id>/setup-status
+- Type: Insecure Direct Object Reference — returns any user's account metadata when the <id> is changed, with no authorization check
+- Exposes: another user's username, mfa_enabled status, and account creation time
+- Discovery: found via port scan as a second service, then path probing reveals the enumerable ID
+- Detection: the service logs ID access; one source reading 3+ distinct IDs escalates to a CRITICAL idor_enumeration_suspected alert in ELK
+- Fix (production): authenticate the caller and enforce requested_id == caller_id, or use unguessable identifiers; do not expose internal APIs to untrusted networks
 
-Disclosure note: These three vulnerabilities are intentional CTF targets. Every other part of the application is meant to be secure — any weakness beyond these three is an accidental defect, not a planted target.
+Disclosure note: These three vulnerabilities are intentional CTF targets. Every other part of the application is meant to be secure — any weakness beyond these three is an accidental defect, not a planted target. (One additional finding — a hardcoded bearer token in /api/profile — was surfaced by the Red Team via source review and is documented as an additional finding; it is remediated on the `patched` branch.)
 
 ---
 ## ELK indices
 
-driftlock-access-* — all HTTP access logs (web)
-driftlock-honeypot-* — high-priority honeypot alerts
-driftlock-internal-api-* — internal-api requests + IDOR enumeration alerts
+- driftlock-access-* — all HTTP access logs (web)
+- driftlock-honeypot-* — high-priority honeypot alerts
+- driftlock-internal-api-* — internal-api requests + IDOR enumeration alerts
+- driftlock-detections-* — replay / enumeration detection events
 
 ---
 
 ## CTF Challenges (for the other team)
 
-Separate from DriftLock's own intentional vulnerabilities, we author a set of **standalone CTF challenges** for another Blue/Red group working on a different application. These challenges are self-contained and are **not** derived from DriftLock's three planted vulnerabilities — they exercise general skills (log triage, forensics, decoding) that complement this project's recon-and-detect theme.
+Separate from DriftLock's own intentional vulnerabilities, we author a set of **standalone CTF challenges** for another group working on a different application. These challenges are self-contained and are **not** derived from DriftLock's three planted vulnerabilities — they exercise general skills (log triage, forensics, decoding) that complement this project's recon-and-detect theme.
 
 ### Log-forensics challenge set
 
-Three log-analysis challenges at increasing difficulty. Players search realistic, noisy server logs to recover a hidden flag — reinforcing the same Blue Team log-triage skills used in incident response. The *technique* scales across tiers, not just the obscurity.
+Three log-analysis challenges at increasing difficulty. Players search realistic, noisy server logs to recover a hidden flag — reinforcing the same Blue Team log-triage skills used in incident response.
 
 | Tier   | File                | Skill tested            | Flag                       |
 |--------|---------------------|-------------------------|----------------------------|
@@ -291,7 +292,7 @@ ctf-challenges/
 - Hand each team **only** the tier folder(s) being released (the `.log` file + its player `README.md`).
 - **Never distribute `_graders/`** — it contains every flag and full solution.
 - Keep `ctf-challenges/` **outside** the app's live `logs/` directory. DriftLock's `app.py`, `honeypot.py`, `internal-api/api.py`, and `detections.py` actively write to `logs/`, and Logstash mounts `./logs:ro` and ingests everything it finds — dropping challenge logs there would pollute the Elasticsearch indices and the project's own incident-response evidence.
-- Player prompts point at the technique without naming the exact command; escalating hints live in collapsible blocks and are released only when a team is stuck (or as point-cost unlocks on a scoreboard such as CTFd).
+- Player prompts point at the technique without naming the exact command; escalating hints are released only when a team is stuck (or as point-cost unlocks on a scoreboard such as CTFd).
 - All challenge material stays on the isolated lab network.
 
 ---
@@ -301,12 +302,12 @@ ctf-challenges/
 - reports/01-design-report.md — architecture, security controls, vulnerability rationale, Wireshark findings
 - reports/02-hardening-report.md — security implementations, defense-in-depth
 - reports/03-incident-response.md — attack evidence, detection method, log analysis, recommended fixes
-  
+
 ---
 
 ## Project status
 
-Complete: the defensive infrastructure (honeypot, request logging, the ELK monitoring pipeline with three indices, the internal-api service, and the Docker deployment); the two-step login flow (password -> TOTP) with enumeration and session-fixation protections; and session-based authorization on sensitive endpoints. The three intentional vulnerabilities are in place and documented.
+Complete: the defensive infrastructure (honeypot, request logging, the ELK monitoring pipeline, the internal-api service, and the Docker deployment); the two-step login flow (password -> emailed OTP) with enumeration and session-fixation protections; and session-based authorization on sensitive endpoints. The three intentional vulnerabilities are in place and documented. Remediation is demonstrated on the `patched` branch.
 
 ---
 

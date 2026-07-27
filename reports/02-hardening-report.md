@@ -1,312 +1,96 @@
 # 02 — Hardening Report
 
 **Project:** DriftLock — Blue Team MFA Portal
-**Focus:** Security controls, why each was chosen, and the defense-in-depth strategy
+**Branch:** `main` (intentionally-vulnerable CTF target)
+
+This report describes the security implementations and defense-in-depth measures
+applied to DriftLock.
 
 ---
 
-## 1. Purpose
-
-This report documents the genuine security controls implemented in DriftLock —
-everything that is meant to be secure, as opposed to the three deliberately
-planted vulnerabilities. The intent is a target that resists casual attack, so
-the planted weaknesses must be found by real reconnaissance.
-
-## 2. Security controls
-
-### 2.1 Password storage — bcrypt
-
-Passwords are hashed with bcrypt using a per-password salt (`bcrypt.gensalt()`)
-in `crypto_utils.py`. Plaintext passwords are never stored or logged.
-
-**Why:** bcrypt is an adaptive, salted hash designed to resist brute force and
-rainbow-table attacks. A per-password salt defeats precomputation and means
-identical passwords produce different hashes.
-
-### 2.2 TOTP seed encryption — Fernet
-
-Each user's TOTP secret is encrypted at rest with Fernet (`encrypt_secret` /
-`decrypt_secret`), keyed by `MASTER_KEY`. Seeds are decrypted only transiently
-when a code is generated or verified.
-
-**Why:** the TOTP seed is the long-lived root of the second factor. If the
-database were exfiltrated, encrypted seeds are useless without the separately-held
-`MASTER_KEY`, so a DB leak alone does not compromise MFA.
-
-### 2.3 Input validation
-
-Registration validates username format (`^[a-zA-Z0-9_]{3,20}$`), email format,
-minimum password length (8), and password/confirmation match, server-side in
-`auth.py`. Client-side attributes (`minlength`, `pattern`) exist for UX but are
-never relied on for security.
-
-**Why:** server-side validation is the authoritative boundary; client controls
-can be bypassed. Strict character sets reduce injection and abuse surface.
-
-### 2.4 Rate limiting — Flask-Limiter + Redis
-
-Global default limit of 100/minute, with tighter per-route limits: registration
-5/min, login 3/min, MFA verify 5/min, profile 10/min. Counters are stored in
-Redis so limits are consistent and survive restarts.
-
-**Why:** rate limiting throttles brute-force and credential-stuffing attempts and
-blunts rapid endpoint enumeration. Redis-backed storage keeps counters correct
-rather than per-process in-memory.
-
-### 2.5 Account lockout
-
-After `MAX_LOGIN_ATTEMPTS` (3) failures for a given username, further attempts
-are refused for `LOCKOUT_SECONDS` (60), tracked with a Redis counter and TTL in
-`auth.py`. The login UI surfaces remaining-attempt counts and a lockout state.
-
-**Why:** complements rate limiting by binding failures to the targeted account,
-not just the source IP, making online password guessing impractical.
-
-### 2.6 Two-step authentication
-
-Login verifies the password, and only then — for MFA-enabled accounts — requires
-the current TOTP code before establishing an authenticated session. The password
-step sets a `pending_mfa_user_id`; the session is not privileged until TOTP
-succeeds.
-
-**Why:** defense in depth for authentication. A stolen or guessed password does
-not by itself grant access.
-
-### 2.7 Username-enumeration resistance
-
-When a username does not exist, login still performs a bcrypt verification
-against a constant `DUMMY_HASH`, and error messages are generic ("Invalid
-username or password").
-
-**Why:** without the dummy verification, a missing user would return
-noticeably faster, letting an attacker enumerate valid usernames by timing.
-Constant work + generic errors removes that oracle.
-
-### 2.8 Session-fixation resistance
-
-On any privilege transition — successful password step, MFA success, login —
-the session is cleared (`session.clear()`) before new authenticated values are
-set.
-
-**Why:** prevents an attacker who fixed a victim's pre-auth session identifier
-from riding it into an authenticated session.
-
-### 2.9 Authorization on sensitive endpoints
-
-The `@login_required` and `@admin_required` decorators gate authenticated views
-and return 401 (JSON) or redirect to login (HTML). The TOTP dashboard and
-current-code endpoints are protected, and the current-code endpoint is scoped to
-the session user. `@admin_required` further restricts the admin dashboard to
-accounts flagged as administrators; regular users are confined to their own
-activity view.
-
-**Why:** sensitive functionality must verify an authenticated session rather than
-trusting client state.
-
-### 2.10 Secure password reset
-
-Reset tokens are random (`secrets.token_urlsafe(32)`), stored only as SHA-256
-hashes, single-use, and expire after 15 minutes. Requests return an
-enumeration-safe response regardless of whether the email exists. Prior unused
-tokens for a user are invalidated when a new one is issued.
-
-**Why:** hashed-at-rest tokens mean a DB read cannot reset passwords; expiry and
-single-use bound the window; the uniform response prevents account enumeration
-via the reset flow.
-
-### 2.11 Logging and monitoring
-
-Every request is logged to `access.log` with timestamp, level, source IP, method,
-and path. Honeypot hits, TOTP-replay detections, and internal-api events are
-written as structured JSON. Logstash parses all of these into Elasticsearch under
-dedicated indices for Kibana triage.
-
-**Why:** detection and incident response depend on complete, structured,
-searchable logs. Separating high-signal alerts into their own indices keeps
-triage fast.
-
-### 2.12 Network segmentation and port exposure
-
-Only the services that must be publicly reachable are bound to all interfaces.
-Internal services — PostgreSQL, Redis, Elasticsearch, and the SMTP listener —
-are bound to `127.0.0.1` only, so they are unreachable from the external network
-even though the containers are running. Docker Compose defines separate
-`frontend` and `backend` networks, with the backend marked `internal: true` so
-containers attached to it have no route off the host.
-
-**Why:** a port scan from the lab network should surface only the intended attack
-surface. Binding datastores to loopback means a scanner never sees Postgres,
-Redis, or Elasticsearch, and even a compromised container on the backend network
-cannot reach outward. This is what makes the deliberately-exposed `internal-api`
-a *chosen* attack surface rather than one of many.
-
-### 2.13 Host firewall (UFW)
-
-The host firewall is active with a default-deny inbound policy, permitting only
-SSH (22) and the three intentionally-public services: the DriftLock portal
-(4325), MailHog (8025), and Kibana (5601).
-
-**Why:** defence in depth behind the Docker port bindings — even if a container
-were misconfigured to publish a port, the host firewall still refuses the
-connection. Default-deny means new services are closed until explicitly opened.
-
-### 2.14 Container hardening
-
-Each application container is constrained at runtime:
-
-- **Non-root execution** — the web image creates and switches to an unprivileged
-  `appuser`; the process does not run as root.
-- **`no-new-privileges:true`** — prevents a process inside the container from
-  gaining additional privileges via setuid binaries.
-- **`cap_drop: ALL`** — all Linux capabilities are dropped, so the container
-  cannot perform privileged kernel operations.
-- **Secrets via environment variables** — credentials and keys are injected at
-  runtime, never baked into image layers.
-
-**Why:** these limit the blast radius of a successful application compromise. An
-attacker who achieves code execution lands as an unprivileged user, in a
-capability-stripped container, unable to escalate — turning what could be host
-compromise into a contained incident.
-
-## 3. Defense-in-depth summary
-
-Authentication is protected by overlapping layers rather than any single control:
-
-```
-Password guessing must survive:
-   rate limiting (3/min)  +  per-account lockout (3 fails / 60s)
-   +  bcrypt cost         +  enumeration-resistant errors
-
-Account takeover must additionally survive:
-   TOTP second factor     +  session-fixation resets
-
-Data-at-rest exposure is mitigated by:
-   bcrypt password hashes +  Fernet-encrypted TOTP seeds
-   +  hashed, expiring, single-use reset tokens
-
-Everything is observed by:
-   full request logging   +  honeypot  +  structured detections  +  ELK
-
-The infrastructure beneath it is constrained by:
-   loopback-bound datastores  +  internal backend network
-   +  UFW default-deny         +  non-root containers
-   +  no-new-privileges        +  cap_drop ALL
-```
-
-No single failure collapses the system: bypassing one layer still leaves the
-others standing, and any probing generates observable log signal. Even a
-successful application compromise lands in an unprivileged, capability-stripped
-container with no route to the internal datastores.
-
-## 4. Verification tests
-
-The infrastructure controls in 2.12–2.14 were verified on the deployed stack.
-Each test below was executed against the running environment. Evidence comprises
-the socket enumeration in Test 0 plus the command output screenshots held in the
-project's security-check document.
-
-### Test 0 — Listening sockets (full exposure surface)
-
-`sudo ss -tulnp` enumerates every socket the host is listening on, giving the
-complete external attack surface in a single command rather than probing ports
-individually.
-
-| Port | Bound to | Service | Assessment |
-|------|----------|---------|------------|
-| 22 | `0.0.0.0` | SSH | Public — intended |
-| 4325 | `0.0.0.0` | DriftLock portal (docker-proxy) | Public — intended |
-| 8025 | `0.0.0.0` | MailHog UI (docker-proxy) | Public — intended |
-| 5601 | `0.0.0.0` | Kibana (docker-proxy) | Public — intended |
-| 5000 | — | internal-api | Intended public (deliberate HARD vuln) — see note |
-| 1025 | `127.0.0.1` | SMTP (MailHog) | Loopback only — correct |
-| 5433 | not published | PostgreSQL | Not exposed to host — correct |
-| 6379 | not published | Redis | Not exposed to host — correct |
-| 9200 | not published | Elasticsearch | Not exposed to host — correct |
-| 631 | `127.0.0.1` | CUPS (OS service) | Loopback only — not app-related |
-| 53 | `127.0.0.x` | systemd-resolved | Loopback only — not app-related |
-
-**Result:** PostgreSQL, Redis, and Elasticsearch have no `docker-proxy` listener
-at all, meaning they are not published to the host and are reachable only
-container-to-container on the Docker network — a stronger guarantee than
-loopback binding. SMTP is correctly restricted to loopback. Only the four
-intended services are externally reachable.
-
-> **Note — internal-api (5000):** this service is *deliberately* exposed as
-> intentional Vulnerability 3 (IDOR), and must be reachable for the Red Team to
-> discover it by port scan. It did not appear as a listener in this capture;
-> confirm the container is running and the port is published before the exercise,
-> or the planted vulnerability will be undiscoverable.
-
-> **Note — development tooling:** two loopback-bound listeners belonging to a
-> VS Code remote session were present during this capture. They are not remotely
-> reachable, but editor and tooling processes should be stopped before a graded
-> capture so the measured surface reflects the deployed stack only.
-
-### Test 1 — Port binding
-
-Internal services were probed on the host's external IP and confirmed
-unreachable, while the intended public services responded normally.
-
-| Service | Port | Expected | Result |
-|---------|------|----------|--------|
-| PostgreSQL | 5433 | BLOCKED | BLOCKED — correct |
-| Redis | 6379 | BLOCKED | BLOCKED — correct |
-| Elasticsearch | 9200 | BLOCKED | BLOCKED — correct |
-| SMTP (MailHog) | 1025 | BLOCKED | BLOCKED — correct |
-| DriftLock portal | 4325 | REACHABLE | REACHABLE — correct |
-| MailHog UI | 8025 | REACHABLE | REACHABLE — correct |
-| Kibana | 5601 | REACHABLE | REACHABLE — correct |
-| internal-api | 5000 | REACHABLE | Intentionally exposed (Vulnerability 3) |
-
-Internal services are bound to `127.0.0.1` or not published at all, and are
-therefore invisible to a scan from the lab network. The internal-api is the one
-service deliberately left discoverable.
-
-### Test 2 — Host firewall active
-
-`ufw status` reports **Status: active** with a default-deny inbound policy and
-allow rules for only 22, 4325, 8025, and 5601 (IPv4 and IPv6).
-
-### Test 3 — Docker networks exist
-
-Both `frontend` and `backend` bridge networks are present in `docker network ls`.
-
-### Test 4 — Backend network is internal
-
-Inspecting the backend network confirms `"Internal": true`, so containers on it
-have no external route.
-
-### Test 5 — Containers run as non-root
-
-`whoami` inside the web container returns **appuser**, not root.
-
-### Test 6 — no-new-privileges is set
-
-Container inspection confirms the `no-new-privileges:true` security option is
-applied.
-
-### Test 7 — cap_drop is applied
-
-Container inspection confirms `CapDrop: [ALL]` — all Linux capabilities dropped.
-
-**Result:** all seven checks passed, confirming the network, firewall, and
-container-runtime controls are in force on the deployed stack.
-
-## 5. Known / accepted items
-
-- **`debug=True` in `app.py`** exposes the Werkzeug debugger (potential RCE) and
-  is **not** one of the three intentional vulnerabilities. It must be set to
-  `debug=False` for any graded or demo run to avoid an accidental weakness
-  beyond the planted ones. *(Tracked in README "Remaining".)*
-- **`MASTER_KEY` fallback** should fail closed rather than auto-generating a
-  throwaway key, since a regenerated key makes previously-encrypted TOTP seeds
-  permanently undecryptable. *(Tracked in README "Remaining".)*
-- The three intentional vulnerabilities are documented weaknesses and are
-  deliberately **not** hardened.
-
-## 6. References
-
-- Project brief — Blue Team hardening requirements
-- OWASP Top 10 — A02 Cryptographic Failures, A07 Identification & Authentication Failures
-- `crypto_utils.py`, `auth.py`, `reset.py`, `app.py`, `decorators.py`, `docker-compose.yml`, `web/Dockerfile`
-- Security check evidence — `Security_check_DriftLock.docx` (7 verification tests)
+## 1. Defense-in-depth overview
+
+Security is applied in layers so no single control is the only barrier:
+
+1. **Network layer** — host firewall, network segmentation, localhost-only
+   binding of internal services.
+2. **Container layer** — non-root user, dropped capabilities, no-new-privileges.
+3. **Application layer** — authentication, authorization, input validation, rate
+   limiting, secure session handling.
+4. **Cryptographic layer** — password hashing, encrypted secrets at rest.
+5. **Detective layer** — honeypot, structured logging, ELK monitoring.
+
+---
+
+## 2. Network hardening
+
+- **Host firewall (ufw)** — default deny inbound; only SSH (22), the web app
+  (4325), and the internal API (5000) are allowed from the network.
+- **Monitoring tooling not exposed** — Kibana (5601) and MailHog (8025) are bound
+  but firewalled from external access. They are reachable only on the host or via
+  an SSH tunnel, so the attacking team cannot view the detection dashboards or the
+  captured mail. This is deliberate: monitoring is a Blue Team asset and is not
+  part of the intended attack surface.
+- **Network segmentation** — a `frontend` network for host-exposed services and an
+  `internal` `backend` network (no internet access) for service-to-service
+  traffic. Databases and Redis communicate only over the backend network.
+- **Localhost-only datastores** — PostgreSQL and Redis host ports are bound to
+  `127.0.0.1`, unreachable from other machines even if the firewall were
+  misconfigured.
+
+---
+
+## 3. Container hardening
+
+- **Non-root user** — the web container runs as an unprivileged `appuser`.
+- **Dropped capabilities** — `cap_drop: ALL` removes all Linux capabilities from
+  application containers; the app binds a high port and needs none.
+- **no-new-privileges** — prevents privilege escalation via setuid binaries.
+- **Minimal images** — build dependencies are installed, used, then purged.
+
+---
+
+## 4. Application, cryptographic, and detective controls
+
+**Application:** two-factor login (password + emailed OTP) enforced in sequence via
+a pending-session model; session-fixation protection; username-enumeration
+resistance (constant-time dummy hash, identical error messages); Redis-backed rate
+limiting; account lockout; anti-enumeration password reset; `login_required`
+authorization on sensitive routes.
+
+**Cryptographic:** bcrypt password hashing with per-password salt; Fernet
+encryption of TOTP seeds at rest; secrets supplied via environment/`.env`
+(gitignored), never committed.
+
+**Detective:** honeypot (`/backup_secrets/` via `robots.txt`) firing CRITICAL
+alerts; structured access/honeypot/internal-api logging; ELK pipeline for triage
+and single-source correlation; purpose-built TOTP-replay and IDOR-enumeration
+detections.
+
+---
+
+## 5. Known / accepted items (this branch)
+
+This `main` branch is the intentionally-vulnerable CTF target. In addition to the
+three documented intentional vulnerabilities, the following are present as
+accepted items on this branch and are addressed on the `patched` branch:
+
+- **Flask debug mode** — `debug=True` is set for development convenience; it
+  exposes the Werkzeug debugger and should be disabled for any graded/production
+  run. (Fixed on `patched`.)
+- **`MASTER_KEY` fallback** — if unset, the app would generate a throwaway key,
+  which would render stored TOTP seeds undecryptable on restart. (Fixed on
+  `patched` to fail closed.)
+
+---
+
+## 6. Residual risk and recommendations
+
+- Run behind a production WSGI server (e.g. gunicorn) rather than the Flask
+  development server.
+- Enable HTTPS/TLS for all external traffic.
+- Move secrets from environment variables to a secret manager or file-based Docker
+  secrets.
+- Enable authentication on the ELK stack (disabled for the lab).
+- For the internal API, add per-user identity binding and prefer unguessable
+  identifiers over sequential integer IDs.
