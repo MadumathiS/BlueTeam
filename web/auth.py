@@ -406,12 +406,14 @@ def verify_mfa():
             current_app.logger.warning(f"MFA verify failed for {user.username} from {request.remote_addr}")
             return jsonify({"error": "Invalid or expired code"}), 401
 
-        # Blue-side detection: record TOTP usage and check for replay attack
+        # FIX (Vuln 2 / TOTP replay): detect AND reject a reused code.
         client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
         is_replay = record_totp_use(user.id, client_ip, context="login")
         if is_replay:
-            current_app.logger.warning(f"SUSPECTED TOTP REPLAY for user_id={user.id} from {client_ip}")
+            current_app.logger.warning(f"BLOCKED TOTP replay for user_id={user.id} from {client_ip}")
+            return jsonify({"error": "Code already used"}), 401
 
+        # Only reached if NOT a replay:
         session.clear()
         session['logged_in'] = True
         session['user_id'] = user.id

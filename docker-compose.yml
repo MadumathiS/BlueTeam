@@ -18,7 +18,7 @@ services:
       retries: 5
     networks:
       - backend
-      - frontend      # <-- required for the host port mapping to work
+      - frontend
     security_opt:
       - no-new-privileges:true
 
@@ -69,19 +69,13 @@ services:
       DB_HOST: db
       DB_PORT: 5432
       LOGS_DIR: /app/logs
-    restart: always
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}    # <-- add this (secure build)
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - ./logs:/app/logs
     networks:
-      - frontend
       - backend
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
+      - frontend
 
   redis:
     image: redis:7
@@ -91,6 +85,7 @@ services:
       - "127.0.0.1:6379:6379"
     networks:
       - backend
+      - frontend
     security_opt:
       - no-new-privileges:true
     
@@ -127,6 +122,7 @@ services:
       retries: 10
     networks:
       - backend
+      - frontend
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -142,6 +138,7 @@ services:
         condition: service_healthy
     networks:
       - backend
+      - frontend
     security_opt:
       - no-new-privileges:true
     cap_drop:

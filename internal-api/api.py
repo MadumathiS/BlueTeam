@@ -25,6 +25,7 @@ db_pass = os.getenv("DB_PASSWORD", "devpass")
 db_host = os.getenv("DB_HOST", "db")
 db_port = os.getenv("DB_PORT", "5432")
 db_name = os.getenv("DB_NAME", os.getenv("POSTGRES_DB", "driftlock"))
+INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     f"postgresql://{db_user}:{quote_plus(db_pass)}@{db_host}:{db_port}/{db_name}"
@@ -87,6 +88,20 @@ def status():
 
 @app.route("/api/v1/users/<int:user_id>/setup-status")
 def user_setup_status(user_id):
+    # FIX (Vuln 3 / IDOR): require a valid shared secret. Blocks anonymous
+    # enumeration — a caller without the key cannot read any user's data.
+    provided = request.headers.get("X-Internal-Api-Key")
+    if not INTERNAL_API_KEY or provided != INTERNAL_API_KEY:
+        _write_log({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "event": "unauthorized_setup_status",
+            "severity": "HIGH",
+            "source_ip": _source_ip(),
+            "requested_id": user_id,
+            "details": "Missing or invalid X-Internal-Api-Key",
+        })
+        return jsonify({"error": "Forbidden"}), 403
+
     user = User.query.get(user_id)
     if not user:
         _write_log({

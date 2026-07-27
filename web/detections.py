@@ -7,8 +7,7 @@ and internal-api.log.
 
 Currently detects:
   - TOTP replay: the same 30-second time window (counter) accepted more than
-    once for a user. This is the Blue-side signal for intentional
-    Vulnerability 2 (TOTP codes are not invalidated after use).
+    once for a user. Blue-side signal for intentional Vulnerability 2.
 """
 
 import json
@@ -21,7 +20,7 @@ LOGS_DIR = Path(os.getenv("LOGS_DIR", "/app/logs"))
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
 DETECT_LOG = LOGS_DIR / "detections.log"
 
-# Touch the file on module load so Filebeat/Logstash find it immediately
+# Touch the file on module load so Logstash finds it immediately
 DETECT_LOG.touch(exist_ok=True)
 
 # Recently-seen TOTP counters per user.
@@ -68,7 +67,7 @@ def record_totp_use(user_id, source_ip, context="login"):
 
     seen.append(counter)
     if len(seen) > _MAX_REMEMBERED:
-        del seen[-_MAX_REMEMBERED:]
+        del seen[:-_MAX_REMEMBERED]   # keep the most recent, drop the oldest
 
     _write(entry)
     return is_replay

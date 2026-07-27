@@ -1,4 +1,5 @@
 from flask import Flask, redirect, render_template, url_for, session, request, jsonify, abort, has_request_context
+from decorators import login_required
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import logging
@@ -214,25 +215,17 @@ def status():
 # --- Authenticated endpoint example (security control: auth required) ---
 @app.route('/api/profile')
 @limiter.limit("10 per minute")
+@login_required
 def profile():
-    token = request.headers.get('Authorization')
-    if token != "Bearer valid-session-token-123":
-        app.logger.warning(f"Unauthorized access attempt to /api/profile from {request.remote_addr}")
-        abort(401)
-    return jsonify({"user": "demo_user", "role": "member"})
+    user = User.query.get(session.get('user_id'))
+    if not user:
+        session.clear()
+        app.logger.warning(f"Unauthorized /api/profile access from {request.remote_addr}")
+        return jsonify({"error": "Unauthorized"}), 401
+    return jsonify({"user": user.username, "role": "member"})
 
 
-# --- INTENTIONAL VULNERABILITY (EASY): exposed debug endpoint, no auth required ---
-# Documented in README as deliberate. Leaks system info for Red Team discovery.
-@app.route('/api/debug')
-def debug():
-    app.logger.warning(f"Debug endpoint accessed by {request.remote_addr}")
-    return jsonify({
-        "python_version": sys.version,
-        "platform": platform.platform(),
-        "flask_env": "development",
-        "app_secret_hint": "check .env file"  # intentionally leaky
-    })
+# --- /api/debug REMOVED (was intentional Vuln 1). Now returns 404. ---
 
 
 @app.errorhandler(401)
@@ -257,4 +250,4 @@ if __name__ == '__main__':
     # debugger (arbitrary code execution if reached) — this is NOT one of your
     # three intentional vulns, so turn it off for any graded/demo run to avoid
     # an accidental "security issue beyond the intentional one".
-    app.run(host='0.0.0.0', port=4325, debug=True)
+    app.run(host='0.0.0.0', port=4325, debug=False)
