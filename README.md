@@ -160,7 +160,7 @@ blue-team-mfa-portal/   (patched branch)
 - `reports/02-hardening-report.md` — defense-in-depth; Section 5 lists resolved
   items
 - `reports/03-incident-response.md` — attack evidence, detection, and the applied
-  fixes with verification (Section 7)
+  fixes with verification 
 
 ---
 
