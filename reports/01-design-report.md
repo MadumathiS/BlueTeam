@@ -1,149 +1,142 @@
 # 01 — Design Report
 
 **Project:** DriftLock — Blue Team MFA Portal
-**Team:** Blue Team
+**Branch:** `patched` (remediated build)
 **Exercise:** Red vs Blue Capture-the-Flag
 
 ---
 
 ## 1. Overview
 
-DriftLock is a TOTP-based multi-factor authentication portal built as a
-deliberately-defended target for a Red-vs-Blue exercise. It is a realistic web
-application secured with genuine controls, containing intentional, documented
-vulnerabilities for the Red Team to discover, wrapped in a full detection stack
-(honeypot, structured logging, and an ELK monitoring pipeline) so the Blue Team
-can detect and analyze the attack.
+DriftLock is a multi-factor authentication portal built as a deliberately-defended
+target for a Red-vs-Blue exercise. It is a realistic web application secured with
+genuine controls, containing three intentional, documented vulnerabilities at
+increasing difficulty for the Red Team to discover, wrapped in a full detection
+stack (honeypot, structured logging, and an ELK monitoring pipeline) so the Blue
+Team can detect and analyze the attack.
 
 The application runs on a non-standard port (4325), with a separate internal API
-on port 5000, deployed via Docker Compose.
+on port 5000, deployed via Docker Compose on an isolated lab network.
 
 ---
 
 ## 2. Architecture
 
-The system is composed of the following services, orchestrated by Docker Compose:
+Services orchestrated by Docker Compose:
 
-- **web** (port 4325) — the main Flask application: registration, two-step login
-  (password + TOTP), session handling, rate limiting, request logging, and the
-  honeypot blueprint.
-- **internal-api** (port 5000) — a separate, deliberately-exposed service sharing
-  the same PostgreSQL database. Hosts the IDOR endpoint.
+- **web** (port 4325) — the main Flask portal: registration, two-step login
+  (password + emailed OTP), session handling, rate limiting, request logging, and
+  the honeypot blueprint.
+- **internal-api** (port 5000) — a separate, deliberately-scannable service
+  sharing the same PostgreSQL database. Hosts the IDOR endpoint.
 - **db** — PostgreSQL, holding users, TOTP seeds, reset tokens, activity logs,
   and honeypot logs.
-- **redis** — backing store for rate limiting.
-- **mailpit** — captures outbound email (password-reset flow) for inspection.
-- **elasticsearch / logstash / kibana** — the ELK monitoring pipeline that
-  ingests application, honeypot, internal-api, and detection logs for triage.
+- **redis** — rate-limit counters and login-lockout tracking.
+- **mailpit (MailHog)** — captures login OTP and reset email in development.
+- **elasticsearch / logstash / kibana** — the ELK pipeline that ingests access,
+  honeypot, and internal-api logs for triage.
 
-### Network design
-Two Docker networks segment the system: a `frontend` network for services that
-expose host ports, and an `internal` `backend` network (no internet access) for
-service-to-service traffic. Database and Redis host ports are bound to localhost
-only, limiting their exposure.
+### Network and exposure design
+The host firewall (ufw) allows only SSH (22), the web app (4325), and the internal
+API (5000) from the network. Kibana and MailHog are bound but **not exposed
+externally** — they are Blue Team tooling and are reachable only on the host or via
+an SSH tunnel, so the attacking team cannot see the detection dashboards or the
+mail capture. This is a deliberate defense-in-depth choice.
 
-### Authentication flow (two-factor)
-1. User registers; the server hashes the password (bcrypt) and generates a TOTP
-   secret, encrypted at rest (Fernet).
-2. At login, the password is verified. If MFA is enabled, the user is held in a
-   pending state (`pending_mfa_user_id`) and prompted for a TOTP code.
-3. The submitted code is verified against the decrypted seed. On success, a full
-   session is granted.
+### Authentication flow (two factors)
+1. User registers; the password is hashed (bcrypt) and a TOTP secret is generated
+   and encrypted at rest (Fernet).
+2. At login, username/email and password are verified. On success, a one-time
+   code is generated and emailed (captured by MailHog in development).
+3. The user retrieves the code and submits it; on verification a full session is
+   granted.
 
-This design authenticates with two factors from distinct categories — a password
-(*something you know*) and a TOTP code from an authenticator app (*something you
-have*) — satisfying the definition of MFA. TOTP here is a single login second
-factor (one secret per user, a 1:1 relationship), not a multi-service vault.
+This authenticates with two factors from distinct categories — a password
+(*something you know*) and an emailed one-time code (*something you receive*).
 
 ---
 
 ## 3. Security controls
 
 - **Password hashing** — bcrypt with per-password salt.
-- **TOTP seed encryption** — Fernet symmetric encryption; the key is supplied via
-  environment and never regenerated at runtime.
-- **Session security** — sessions are cleared before issuance (session-fixation
-  protection); a pending-vs-full session split ensures a password-only user is
-  not logged in until the second factor is verified.
-- **Username enumeration resistance** — login runs a dummy bcrypt hash for
-  unknown users (constant-time behavior) and returns an identical error message
-  whether the username exists or not.
-- **Rate limiting** — Flask-Limiter (Redis-backed): login limited per-username on
-  failed attempts, registration and MFA verification limited per minute.
-- **Account lockout** — repeated failed logins lock an account temporarily.
-- **Password reset** — token-based reset with a deliberately vague response
-  ("if an account exists…") to avoid email enumeration.
-- **Authorization** — sensitive routes require an authenticated session via a
-  `login_required` decorator.
-- **Container hardening** — non-root application user, dropped Linux
-  capabilities, `no-new-privileges`, network segmentation, and localhost-only
-  binding of internal datastores.
+- **TOTP seed encryption at rest** — Fernet symmetric encryption.
+- **Two-step login** — password then one-time code, with a pending-session model
+  so a password alone does not grant access.
+- **Session-fixation protection** — the session is cleared before issuance.
+- **Username-enumeration resistance** — a dummy bcrypt hash runs for unknown
+  users; login returns an identical message regardless of whether the user exists.
+- **Rate limiting** — Flask-Limiter (Redis-backed) on login, registration, and
+  code verification.
+- **Account lockout** — repeated failed logins temporarily lock the account.
+- **Password reset** — token-based, with a vague response to avoid email
+  enumeration.
+- **Authorization** — `login_required` on sensitive routes.
+- **Container hardening** — non-root application user, dropped Linux capabilities,
+  `no-new-privileges`, network segmentation, and localhost-only binding of the
+  database and Redis.
 
 ---
 
 ## 4. Intentional vulnerabilities (rationale)
 
 Three vulnerabilities were planted deliberately, at increasing difficulty, each
-chosen to be realistic and to leave a detectable trail. All are documented so
-graders understand they are intentional; everything else in the application is
-meant to be secure.
+realistic and each leaving a detectable trail. All are documented so graders
+understand they are intentional; everything else is meant to be secure.
 
-**Vulnerability 1 — EASY — Information disclosure (`/api/debug`).**
-An unauthenticated endpoint leaks the Python version, platform, environment mode,
-and a hint pointing at the `.env` file. Chosen as an easy, scanner-discoverable
-foothold that also seeds the attack chain (the `.env` hint).
+**Vulnerability 1 — EASY — Information disclosure (`/api/debug`).** An
+unauthenticated endpoint leaks the Python version, platform, environment mode, and
+a hint pointing at the `.env` file. Chosen as an easy, scanner-discoverable
+foothold that also seeds the attack chain.
 
-**Vulnerability 2 — MEDIUM — TOTP replay.**
-The MFA verification does not invalidate a code after use, so a captured code can
-be replayed within its validity window. Chosen because it is on-theme for an MFA
-portal and tests understanding of one-time-password semantics.
+**Vulnerability 2 — MEDIUM — TOTP replay.** MFA verification does not invalidate a
+code after use, so a captured code can be replayed within its window. On-theme for
+an MFA portal and tests understanding of one-time-password semantics.
 
-**Vulnerability 3 — HARD — IDOR (`/api/v1/users/<id>/setup-status`).**
-The internal API returns any user's account metadata when the `id` is
-manipulated, with no authorization check. Hosted on a separate service so the Red
-Team discovers it by port scan, then enumerates IDs. Chosen as a realistic
-broken-access-control challenge with a clean enumeration signature to detect.
+**Vulnerability 3 — HARD — IDOR (`/api/v1/users/<id>/setup-status`).** The internal
+API returns any user's account metadata when the `id` is manipulated, with no
+authorization check. Hosted on a separate scannable service so the Red Team
+discovers it by port scan, then enumerates IDs. A realistic broken-access-control
+challenge with a clean enumeration signature to detect.
 
 An additional finding — a hardcoded bearer token in `/api/profile` — was
-identified by the Red Team through source review. It was not one of the three
-primary planted vulnerabilities and is treated as an additional finding
-(remediated in the patched build).
+identified by the Red Team via source review. It was not one of the three primary
+planted vulnerabilities and is treated as an additional finding.
+
+On this `patched` branch, all three vulnerabilities and the additional hardcoded-token finding are **remediated**; see the Incident Response Report (Section 7) for the applied fixes and their verification. The `main` branch retains them as the live CTF target.
 
 ---
 
 ## 5. Detection design
 
-Detection is layered so that signal can be separated from noise:
-
 - **Honeypot** — `robots.txt` advertises a fake `/backup_secrets/` path; any
-  request to it fires a CRITICAL alert. As no legitimate user visits it, honeypot
-  hits are the highest-confidence indicator of compromise.
+  request fires a CRITICAL alert. As no legitimate user visits it, honeypot hits
+  are the highest-confidence indicator of compromise.
 - **Access logging** — every request is logged in a structured format; scan
   bursts are recognizable by pattern.
 - **Detection helpers** — TOTP replay is flagged (`mfa_replay_suspected`); IDOR
-  enumeration is flagged (`idor_enumeration_suspected`, escalating to CRITICAL
-  when one source reads multiple distinct IDs).
-- **ELK pipeline** — Logstash ships all logs into Elasticsearch; Kibana provides
+  enumeration is flagged (`idor_enumeration_suspected`, escalating to CRITICAL when
+  one source reads three or more distinct IDs).
+- **ELK pipeline** — Logstash ships logs into Elasticsearch; Kibana provides
   search and dashboards, allowing correlation of a single source across the
-  honeypot, access, internal-api, and detection indices.
+  honeypot, access, and internal-api indices.
 
 ---
 
 ## 6. Wireshark findings
 
-Traffic was captured on the lab host (single-host setup; loopback interface).
-Two contrasting patterns were documented:
+Scan and legitimate traffic were captured on the lab host (single-host setup;
+loopback interface). Two captures are retained in `logs/captures/`:
 
-- **Scan traffic** — a single source issuing bare SYN packets to hundreds of
-  different ports within milliseconds, and on open ports completing the handshake
-  then immediately sending RST with no application data. This is the recognizable
-  reconnaissance signature.
-- **Legitimate traffic** — a complete TCP handshake followed by a real HTTP GET
-  request, the server's response carrying data, and a graceful FIN close.
+- **`scan_lo.pcap`** — a port scan: a single source issuing SYN packets to
+  hundreds of ports within milliseconds, and on open ports completing the handshake
+  then immediately sending RST with no application data.
+- **`legit.pcap`** — a normal session: a full TCP handshake, a real HTTP GET, the
+  server's response carrying data, and a graceful FIN close.
 
-The difference — many ports vs. one, no data vs. real data, RST vs. graceful
-close — is how reconnaissance is distinguished from normal use at the network
-level.
+Annotated screenshots (`wireshark-scan-portsweep.png`,
+`wireshark-openport-detection.png`, `wireshark-legitimate-traffic.png`) show the
+contrast — many ports vs. one, no data vs. real data, RST vs. graceful close —
+which distinguishes reconnaissance from legitimate use at the network level.
 
 ---
 
@@ -151,6 +144,6 @@ level.
 
 DriftLock combines a realistic, appropriately-hardened MFA application with three
 intentional, documented vulnerabilities and a layered detection stack. The design
-priorities were realism (a believable target), clear intentionality (documented
-vulnerabilities so accidental issues are distinguishable), and detectability
-(every planted weakness leaves a trail the Blue Team can find and correlate).
+priorities were realism, clear intentionality (so accidental issues are
+distinguishable), and detectability (every planted weakness leaves a correlatable
+trail).

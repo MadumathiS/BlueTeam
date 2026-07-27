@@ -5,3 +5,4 @@ logs/*.log
 *.tar
 *.tar.gz
 .env
+.env

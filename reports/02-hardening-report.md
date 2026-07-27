@@ -1,19 +1,18 @@
 # 02 — Hardening Report
 
 **Project:** DriftLock — Blue Team MFA Portal
-**Team:** Blue Team
+**Branch:** `patched` (remediated build)
 
 This report describes the security implementations and defense-in-depth measures
-applied to DriftLock, and the remediation applied in the patched build.
+applied to DriftLock.
 
 ---
 
 ## 1. Defense-in-depth overview
 
-Security is applied in layers, so that no single control is the only thing
-standing between an attacker and a compromise:
+Security is applied in layers so no single control is the only barrier:
 
-1. **Network layer** — firewall rules, network segmentation, localhost-only
+1. **Network layer** — host firewall, network segmentation, localhost-only
    binding of internal services.
 2. **Container layer** — non-root user, dropped capabilities, no-new-privileges.
 3. **Application layer** — authentication, authorization, input validation, rate
@@ -26,108 +25,81 @@ standing between an attacker and a compromise:
 ## 2. Network hardening
 
 - **Host firewall (ufw)** — default deny inbound; only SSH (22), the web app
-  (4325), and the internal API (5000) are allowed. Monitoring and datastore
-  ports are not exposed externally.
-- **Network segmentation** — a `frontend` network for host-exposed services and
-  an `internal` `backend` network (no internet access) for service-to-service
+  (4325), and the internal API (5000) are allowed from the network.
+- **Monitoring tooling not exposed** — Kibana (5601) and MailHog (8025) are bound
+  but firewalled from external access. They are reachable only on the host or via
+  an SSH tunnel, so the attacking team cannot view the detection dashboards or the
+  captured mail. This is deliberate: monitoring is a Blue Team asset and is not
+  part of the intended attack surface.
+- **Network segmentation** — a `frontend` network for host-exposed services and an
+  `internal` `backend` network (no internet access) for service-to-service
   traffic. Databases and Redis communicate only over the backend network.
 - **Localhost-only datastores** — PostgreSQL and Redis host ports are bound to
-  `127.0.0.1`, so they are unreachable from other machines even if the firewall
-  were misconfigured.
+  `127.0.0.1`, unreachable from other machines even if the firewall were
+  misconfigured.
 
 ---
 
 ## 3. Container hardening
 
-- **Non-root user** — the web container runs as an unprivileged `appuser`, not
-  root, limiting the impact of any code-execution flaw.
+- **Non-root user** — the web container runs as an unprivileged `appuser`.
 - **Dropped capabilities** — `cap_drop: ALL` removes all Linux capabilities from
-  application containers; the app binds a high port (4325) and needs none.
-- **no-new-privileges** — prevents privilege escalation via setuid binaries
-  inside containers.
-- **Minimal images / build hygiene** — build dependencies are installed, used,
-  then purged; images are slim.
+  application containers; the app binds a high port and needs none.
+- **no-new-privileges** — prevents privilege escalation via setuid binaries.
+- **Minimal images** — build dependencies are installed, used, then purged.
 
 ---
 
-## 4. Application hardening
+## 4. Application, cryptographic, and detective controls
 
-- **Two-factor authentication** — password plus TOTP, enforced in sequence via a
-  pending-session model so a password alone does not grant access.
-- **Session-fixation protection** — the session is cleared before a new session
-  is issued on both login and MFA verification.
-- **Username enumeration resistance** — a dummy bcrypt hash runs for non-existent
-  users (constant-time), and login returns an identical message regardless of
-  whether the username exists.
-- **Rate limiting** — Redis-backed Flask-Limiter: failed logins limited
-  per-username, registration and MFA verification limited per minute.
-- **Account lockout** — repeated failed logins temporarily lock the account.
-- **Password reset** — token-based, with a vague response that does not reveal
-  whether an email is registered (anti-enumeration).
-- **Authorization** — `login_required` on sensitive routes; the TOTP code
-  endpoint returns only the logged-in user's own code.
+**Application:** two-factor login (password + emailed OTP) enforced in sequence via
+a pending-session model; session-fixation protection; username-enumeration
+resistance (constant-time dummy hash, identical error messages); Redis-backed rate
+limiting; account lockout; anti-enumeration password reset; `login_required`
+authorization on sensitive routes.
 
----
+**Cryptographic:** bcrypt password hashing with per-password salt; Fernet
+encryption of TOTP seeds at rest; secrets supplied via environment/`.env`
+(gitignored), never committed.
 
-## 5. Cryptographic hardening
-
-- **Password hashing** — bcrypt with per-password salt; passwords are never
-  stored or logged in plaintext.
-- **TOTP seed encryption at rest** — seeds are encrypted with Fernet. In the
-  patched build, the encryption key must be supplied via the environment and the
-  application fails closed if it is missing — preventing the earlier failure mode
-  where a missing key silently generated a throwaway key and rendered stored
-  seeds undecryptable on restart.
-- **Secrets management** — keys (`MASTER_KEY`, `SECRET_KEY`, `INTERNAL_API_KEY`)
-  are supplied via environment/`.env` (gitignored), never committed to source.
-  A stronger production posture would use file-based Docker secrets mounted at
-  `/run/secrets/` rather than environment variables, since env vars can leak via
-  process inspection.
+**Detective:** honeypot (`/backup_secrets/` via `robots.txt`) firing CRITICAL
+alerts; structured access/honeypot/internal-api logging; ELK pipeline for triage
+and single-source correlation; purpose-built TOTP-replay and IDOR-enumeration
+detections.
 
 ---
 
-## 6. Detective controls
+## 5. Remediation applied (this branch)
 
-- **Honeypot** — a fake `/backup_secrets/` path advertised via `robots.txt`;
-  any access fires a CRITICAL alert. High-confidence, low-false-positive signal.
-- **Structured logging** — access, honeypot, internal-api, and detection events
-  are logged in parseable formats.
-- **ELK monitoring** — Logstash parses and ships logs to Elasticsearch; Kibana
-  provides dashboards and search for triage and source correlation.
-- **Purpose-built detections** — TOTP replay and IDOR enumeration each emit
-  dedicated alert events, so exploitation of the intentional vulnerabilities is
-  visible even when the underlying weakness is (by design) not blocked.
+This `patched` branch has the vulnerabilities and previously-accepted items
+**resolved**. Each fix is verified in the Incident Response Report (Section 7).
 
----
+Intentional vulnerabilities fixed:
+- **`/api/debug`** — endpoint removed; Flask debug mode disabled (`debug=False`).
+- **TOTP replay** — reused codes are now detected *and rejected* (401).
+- **IDOR** — `/api/v1/users/<id>/setup-status` now requires a valid
+  `X-Internal-Api-Key` header and returns 403 to unauthorized callers.
 
-## 7. Remediation applied in the patched build
+Additional finding fixed:
+- **`/api/profile`** — the hardcoded bearer token was removed; the endpoint now
+  authenticates via the user's session.
 
-The patched build fixes the three intentional vulnerabilities and the additional
-Red Team finding:
-
-- **Info disclosure (`/api/debug`)** — endpoint removed entirely; Flask debug
-  mode disabled (`debug=False`) so the Werkzeug debugger is never exposed.
-- **TOTP replay** — the MFA verification now rejects a reused code (detects *and*
-  blocks), returning an error instead of granting a session.
-- **IDOR (`/api/v1/users/<id>/setup-status`)** — the endpoint now requires a
-  valid shared-secret header and rejects unauthorized callers with 403, blocking
-  anonymous enumeration. A full production fix would additionally bind each
-  request to the authenticated user's own identity.
-- **Hardcoded token (`/api/profile`)** — the hardcoded bearer token was removed;
-  the endpoint now authenticates via the user's session and returns only their
-  own profile.
-- **Supporting fixes** — the `MASTER_KEY` fallback now fails closed; the replay
-  detector's memory-trim bug was corrected so detection stays reliable.
+Previously-accepted items resolved:
+- **Flask debug mode** — now `debug=False`; the Werkzeug debugger is not reachable.
+- **`MASTER_KEY` handling** — now fails closed if unset, preventing the failure
+  mode where a regenerated key made stored TOTP seeds undecryptable on restart.
+- **Replay detector trim bug** — corrected so detection stays reliable beyond the
+  first ten verifications.
 
 ---
 
-## 8. Residual risk and recommendations
+## 6. Residual risk and recommendations
 
 - Run behind a production WSGI server (e.g. gunicorn) rather than the Flask
   development server.
 - Enable HTTPS/TLS for all external traffic.
-- Move secrets from environment variables to a secret manager or file-based
-  Docker secrets.
-- Enable authentication on the ELK stack (currently disabled for the lab).
-- For the internal API, add per-user identity binding on top of the shared-secret
-  control, and prefer unguessable identifiers over sequential integer IDs.
+- Move secrets from environment variables to a secret manager or file-based Docker
+  secrets.
+- Enable authentication on the ELK stack (disabled for the lab).
+- For the internal API, add per-user identity binding and prefer unguessable
+  identifiers over sequential integer IDs.
