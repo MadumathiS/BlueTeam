@@ -131,6 +131,8 @@
         {% if is_logged_in %}
             <a href="{{ url_for('totp.authenticator') }}" class="top-auth-link">MFA</a>
             <span class="top-auth-separator">/</span>
+            <a href="{{ url_for('alerts.activity_alerts') }}" class="top-auth-link">ACTIVITY ALERTS</a>
+            <span class="top-auth-separator">/</span>
             <span class="top-auth-link" style="color: var(--market-text); cursor: default;">{{ current_username }}</span>
             <span class="top-auth-separator">/</span>
             <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
@@ -252,7 +254,7 @@
         </div>
         <div class="footer-col">
             <h3 class="text-market-gold font-bold text-lg mb-3">Contact</h3>
-            <p class="text-gray-400">Email: contact@driftlock.io</p>
+            <p class="text-gray-400">Email: support?@driftlock.io</p>
             <p class="text-gray-400">Phone: +33 1 23 45 67 89</p>
         </div>
     </div>

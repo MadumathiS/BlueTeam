@@ -17,6 +17,8 @@
         {% if is_logged_in %}
             <a href="{{ url_for('totp.authenticator') }}" class="top-auth-link">MFA</a>
             <span class="top-auth-separator">/</span>
+            <a href="{{ url_for('alerts.activity_alerts') }}" class="top-auth-link">ACTIVITY ALERTS</a>
+            <span class="top-auth-separator">/</span>
             <span class="top-auth-link" style="color: var(--market-text); cursor: default;">{{ current_username }}</span>
             <span class="top-auth-separator">/</span>
             <a href="{{ url_for('logout') }}" class="top-auth-link">LOGOUT</a>
