@@ -1503,3 +1503,10 @@ WHERE users.username = %(username_1)s OR users.email = %(email_1)s
 2026-07-27 13:15:02,985 | INFO | 172.19.0.1 | POST /verify-mfa
 2026-07-27 13:26:28,729 | WARNING | 172.19.0.1 | GET /api/debug
 2026-07-27 13:43:23,983 | INFO | 172.20.0.1 | GET /api/debug
+2026-07-28 20:20:37,971 | INFO | 172.18.0.1 | POST /register
+2026-07-28 20:20:38,180 | INFO | 172.18.0.1 | POST /register
+2026-07-28 20:20:52,234 | INFO | 172.18.0.1 | POST /register/confirm-mfa
+2026-07-28 20:20:56,192 | INFO | 172.18.0.1 | POST /api/login
+2026-07-28 20:20:56,571 | INFO | 172.18.0.1 | POST /api/login
+2026-07-28 20:20:56,571 | INFO | 172.18.0.1 | POST /api/login
+2026-07-28 20:21:10,605 | INFO | 172.18.0.1 | POST /verify-mfa

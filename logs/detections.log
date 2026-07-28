@@ -22,3 +22,5 @@
 {"timestamp": "2026-07-27T13:12:38.139317+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59505265, "source_ip": "172.19.0.1", "context": "mfa_setup"}
 {"timestamp": "2026-07-27T13:12:54.177989+00:00", "event": "mfa_replay_suspected", "user_id": 3, "counter": 59505265, "source_ip": "172.19.0.1", "context": "login", "severity": "HIGH", "details": "A one-time TOTP code was accepted more than once within the same time window \u2014 possible captured-code replay."}
 {"timestamp": "2026-07-27T13:15:02.984955+00:00", "event": "mfa_verify", "user_id": 3, "counter": 59505270, "source_ip": "172.19.0.1", "context": "login"}
+{"timestamp": "2026-07-28T20:20:52.232382+00:00", "event": "mfa_verify", "user_id": 9, "counter": 59509001, "source_ip": "172.18.0.1", "context": "mfa_setup"}
+{"timestamp": "2026-07-28T20:21:10.605040+00:00", "event": "mfa_verify", "user_id": 9, "counter": 59509002, "source_ip": "172.18.0.1", "context": "login"}
