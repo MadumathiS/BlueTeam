@@ -348,7 +348,9 @@ def confirm_mfa_setup():
 
     # Record detection event on setup verification
     client_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
-    record_totp_use(user.id, client_ip, context="mfa_setup")
+    if record_totp_use(user.id, client_ip, context="mfa_setup"):
+        current_app.logger.warning(f"BLOCKED TOTP replay at setup for user_id={user.id}")
+        return jsonify({"error": "Code already used"}), 401
 
     user.mfa_enabled = True
     db.session.commit()
