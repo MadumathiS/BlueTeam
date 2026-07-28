@@ -5,6 +5,7 @@ from crypto_utils import decrypt_secret
 from decorators import login_required
 import time
 import pyotp
+from utils import generate_qr_base64
 
 totp_bp = Blueprint('totp', __name__)
 
@@ -40,3 +41,19 @@ def current_code():
         "code": totp.now(),
         "time_remaining": totp.interval - (int(time.time()) % totp.interval)
     })
+
+@totp_bp.route('/api/mfa-qr')
+@login_required
+def mfa_qr():
+    user_id = session.get('user_id')
+    user = User.query.get(user_id)
+    if not user or not user.totp_seed:
+        return jsonify({"error": "No TOTP configured"}), 404
+
+    secret = decrypt_secret(user.totp_seed.encrypted_seed)
+    provisioning_uri = pyotp.totp.TOTP(secret).provisioning_uri(
+        name=user.username, issuer_name="DriftlockPortal"
+    )
+    qr_base64 = generate_qr_base64(provisioning_uri)
+
+    return jsonify({"qr_code": qr_base64})

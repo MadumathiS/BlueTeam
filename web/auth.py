@@ -8,9 +8,7 @@ import secrets
 import json
 import pyotp
 import re
-import qrcode
-import io
-import base64
+from utils import generate_qr_base64
 import os
 import redis
 
@@ -360,12 +358,6 @@ def confirm_mfa_setup():
 
     return jsonify({"message": "MFA setup complete. You can now log in."}), 200
 
-
-def generate_qr_base64(data: str) -> str:
-    img = qrcode.make(data)
-    buf = io.BytesIO()
-    img.save(buf, format='PNG')
-    return base64.b64encode(buf.getvalue()).decode()
 
 def resend_mfa():
     user_id = session.get('pending_mfa_user_id')
