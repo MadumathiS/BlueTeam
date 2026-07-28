@@ -1510,3 +1510,12 @@ WHERE users.username = %(username_1)s OR users.email = %(email_1)s
 2026-07-28 20:20:56,571 | INFO | 172.18.0.1 | POST /api/login
 2026-07-28 20:20:56,571 | INFO | 172.18.0.1 | POST /api/login
 2026-07-28 20:21:10,605 | INFO | 172.18.0.1 | POST /verify-mfa
+2026-07-28 20:27:22,961 | INFO | 172.18.0.1 | POST /api/login
+2026-07-28 20:27:23,328 | INFO | 172.18.0.1 | POST /api/login
+2026-07-28 20:27:23,328 | INFO | 172.18.0.1 | POST /api/login
+2026-07-28 20:27:34,406 | INFO | 172.18.0.1 | POST /verify-mfa
+2026-07-28 20:28:09,616 | INFO | 172.18.0.1 | POST /api/login
+2026-07-28 20:28:09,974 | INFO | 172.18.0.1 | POST /api/login
+2026-07-28 20:28:09,974 | INFO | 172.18.0.1 | POST /api/login
+2026-07-28 20:28:20,331 | WARNING | 172.18.0.1 | POST /verify-mfa
+2026-07-28 20:28:33,653 | INFO | 172.18.0.1 | POST /verify-mfa
