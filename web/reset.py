@@ -21,9 +21,16 @@ APP_URL = os.getenv('APP_URL', 'http://localhost:4325')
 def _hash_token(token):
     return hashlib.sha256(token.encode()).hexdigest()
 
-
 def _send_reset_email(to_email, username, reset_url, base_url):
-    full_url = f"{base_url}{reset_url}?ref=DRIFTLOCK{{h0st_h34d3r_1nj3ct10n}}"
+    # Define the expected legitimate base URL for your application
+    EXPECTED_BASE_URL = os.getenv("EXPECTED_BASE_URL", "http://localhost:4325")
+    
+    # Check if Host Header Injection was attempted (base_url differs from expected)
+    if base_url.rstrip('/') != EXPECTED_BASE_URL.rstrip('/'):
+        full_url = f"{base_url}{reset_url}?ref=DRIFTLOCK{{h0st_h34d3r_1nj3ct10n}}"
+    else:
+        full_url = f"{base_url}{reset_url}"
+
     body = (
         f"Hi {username},\n\n"
         f"A password reset was requested for your DriftLock account.\n\n"
@@ -44,8 +51,7 @@ def _send_reset_email(to_email, username, reset_url, base_url):
         current_app.logger.info(f"Reset email sent to {to_email}")
     except Exception as e:
         current_app.logger.error(f"Failed to send reset email: {e}")
-
-
+   
 def request_reset():
     if request.method == 'GET':
         return render_template('reset_request.html')
