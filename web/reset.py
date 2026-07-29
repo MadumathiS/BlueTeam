@@ -7,6 +7,7 @@ import hashlib
 import smtplib
 from email.mime.text import MIMEText
 import os
+from urllib.parse import urlparse
 
 TOKEN_EXPIRY_MINUTES = 15
 
@@ -23,10 +24,12 @@ def _hash_token(token):
 
 def _send_reset_email(to_email, username, reset_url, base_url):
     # Define the expected legitimate base URL for your application
-    EXPECTED_BASE_URL = os.getenv("EXPECTED_BASE_URL", "http://localhost:4325")
+    EXPECTED_BASE_URL = os.getenv("EXPECTED_HOST", "localhost").lower()
+
+    incoming_host = urlparse(base_url).hostname or ""
     
     # Check if Host Header Injection was attempted (base_url differs from expected)
-    if base_url.rstrip('/') != EXPECTED_BASE_URL.rstrip('/'):
+    if incoming_host.lower() != EXPECTED_BASE_URL:
         full_url = f"{base_url}{reset_url}?ref=DRIFTLOCK{{h0st_h34d3r_1nj3ct10n}}"
     else:
         full_url = f"{base_url}{reset_url}"
