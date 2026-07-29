@@ -121,6 +121,7 @@ def user_setup_status(user_id):
         "username": user.username,
         "mfa_enabled": user.mfa_enabled,
         "created_at": user.created_at.isoformat() if user.created_at else None,
+        "flag": "DRIFTLOCK{1d0r_1nt3rnal_ap1_3xp0s3d}"
     })
 
 

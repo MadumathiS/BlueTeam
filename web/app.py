@@ -115,7 +115,7 @@ class RequestFormatter(logging.Formatter):
 app.logger.handlers.clear()
 handler = logging.FileHandler(logfile)
 handler.setFormatter(RequestFormatter(
-    '%(asctime)s | %(levelname)s | %(remote_addr)s | %(method)s %(path)s'
+    '%(asctime)s | %(levelname)s | %(remote_addr)s | %(method)s %(path)s | %(message)s'
 ))
 app.logger.addHandler(handler)
 app.logger.setLevel(logging.INFO)
@@ -231,7 +231,8 @@ def debug():
         "python_version": sys.version,
         "platform": platform.platform(),
         "flask_env": "development",
-        "app_secret_hint": "check .env file"  # intentionally leaky
+        "app_secret_hint": "check .env file",  # intentionally leaky
+        "flag": "DRIFTLOCK{d3bug_3ndp01nt_3xp0s3d}"
     })
 
 

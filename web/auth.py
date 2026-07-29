@@ -403,7 +403,10 @@ def verify_mfa():
         is_replay = record_totp_use(user.id, client_ip, context="login")
         if is_replay:
             current_app.logger.warning(f"SUSPECTED TOTP REPLAY for user_id={user.id} from {client_ip}")
-
+            return jsonify({
+                "message": "Login successful",
+                "flag": "DRIFTLOCK{t0tp_r3play_n0t_pr3v3nt3d}"
+            }), 200
         session.clear()
         session['logged_in'] = True
         session['user_id'] = user.id

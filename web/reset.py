@@ -12,6 +12,9 @@ TOKEN_EXPIRY_MINUTES = 15
 
 SMTP_HOST = os.getenv('SMTP_HOST', 'mailpit')
 SMTP_PORT = int(os.getenv('SMTP_PORT', 1025))
+
+# NOTE: APP_URL kept as a documented "secure" fallback/reference, but the
+# reset flow below intentionally trusts the incoming Host header instead.
 APP_URL = os.getenv('APP_URL', 'http://localhost:4325')
 
 
@@ -19,8 +22,8 @@ def _hash_token(token):
     return hashlib.sha256(token.encode()).hexdigest()
 
 
-def _send_reset_email(to_email, username, reset_url):
-    full_url = f"{APP_URL}{reset_url}"
+def _send_reset_email(to_email, username, reset_url, base_url):
+    full_url = f"{base_url}{reset_url}?ref=DRIFTLOCK{{h0st_h34d3r_1nj3ct10n}}"
     body = (
         f"Hi {username},\n\n"
         f"A password reset was requested for your DriftLock account.\n\n"
@@ -56,6 +59,30 @@ def request_reset():
     if not email:
         return jsonify({"error": "Email is required"}), 400
 
+    # --- INTENTIONAL VULNERABILITY (added, medium/hard difficulty):
+    # Host Header Injection. The reset link's base URL is built from the
+    # incoming request's Host header rather than a trusted, server-side
+    # configured value. An attacker who controls the Host header on the
+    # reset request can cause the emailed link to point at an
+    # attacker-controlled domain, potentially harvesting the reset token
+    # if a victim clicks it. Detection: any Host header that does not
+    # match the expected production hostname is logged as a
+    # HOST_HEADER_ANOMALY warning below.
+    incoming_host = request.headers.get('Host', '')
+    expected_host = os.getenv('EXPECTED_HOST', 'localhost:4325')
+
+    if incoming_host and incoming_host != expected_host:
+        current_app.logger.warning(
+            f"HOST_HEADER_ANOMALY | incoming_host={incoming_host} | "
+            f"flag=DRIFTLOCK{{h0st_h34d3r_1nj3ct10n}} | "
+            f"expected_host={expected_host} | ip={request.remote_addr} | "
+            f"path=/reset-password"
+        )
+
+    scheme = request.headers.get('X-Forwarded-Proto', request.scheme)
+    base_url = f"{scheme}://{incoming_host}" if incoming_host else APP_URL
+    # --- END INTENTIONAL VULNERABILITY ---
+
     user = User.query.filter_by(email=email).first()
 
     if user:
@@ -75,7 +102,7 @@ def request_reset():
         current_app.logger.info(
             f"PASSWORD_RESET_REQUESTED | user={user.username}"
         )
-        _send_reset_email(user.email, user.username, reset_url)
+        _send_reset_email(user.email, user.username, reset_url, base_url)
     else:
         current_app.logger.info(
             f"PASSWORD_RESET_REQUESTED | email={email} | no_matching_account"
