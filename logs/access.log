@@ -1514,3 +1514,40 @@ WHERE users.username = %(username_1)s OR users.email = %(email_1)s
 2026-07-28 19:54:56,388 | WARNING | 172.18.0.1 | POST /verify-mfa
 2026-07-28 19:54:56,389 | INFO | 172.18.0.1 | POST /verify-mfa
 2026-07-28 19:55:47,958 | WARNING | 172.18.0.1 | GET /api/debug
+2026-07-29 09:44:35,547 | INFO | 172.19.0.1 | POST /api/login
+2026-07-29 09:44:35,754 | WARNING | 172.19.0.1 | POST /api/login
+2026-07-29 09:44:39,193 | INFO | 172.19.0.1 | POST /api/login
+2026-07-29 09:44:39,382 | WARNING | 172.19.0.1 | POST /api/login
+2026-07-29 09:44:41,303 | INFO | 172.19.0.1 | POST /api/login
+2026-07-29 09:44:41,492 | WARNING | 172.19.0.1 | POST /api/login
+2026-07-29 09:45:07,703 | INFO | 172.19.0.1 | POST /api/reset-password
+2026-07-29 09:45:07,708 | INFO | 172.19.0.1 | POST /api/reset-password
+2026-07-29 09:46:04,913 | INFO | 172.19.0.1 | POST /api/login
+2026-07-29 09:46:05,297 | INFO | 172.19.0.1 | POST /api/login
+2026-07-29 09:46:05,297 | INFO | 172.19.0.1 | POST /api/login
+2026-07-29 09:46:28,806 | INFO | 172.19.0.1 | POST /verify-mfa
+2026-07-29 09:49:15,592 | WARNING | 172.19.0.1 | GET /api/debug | Debug endpoint accessed by 172.19.0.1
+2026-07-29 10:18:09,013 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=172.18.0.1 | path=/reset-password
+2026-07-29 10:18:09,032 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=mast
+2026-07-29 10:18:09,037 | INFO | 172.18.0.1 | POST /api/reset-password | Reset email sent to mast@driftlock.com
+2026-07-29 10:18:38,802 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-29 10:18:38,999 | WARNING | 172.18.0.1 | POST /api/login | Login failed for maya from 172.18.0.1
+2026-07-29 10:18:40,863 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-29 10:18:41,049 | WARNING | 172.18.0.1 | POST /api/login | Login failed for maya from 172.18.0.1
+2026-07-29 10:18:45,980 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-29 10:18:46,174 | WARNING | 172.18.0.1 | POST /api/login | Login failed for maya from 172.18.0.1
+2026-07-29 10:19:07,513 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=localhost:4326 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=172.18.0.1 | path=/reset-password
+2026-07-29 10:19:07,518 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=maya
+2026-07-29 10:19:07,522 | INFO | 172.18.0.1 | POST /api/reset-password | Reset email sent to maya@driftlock.com
+2026-07-29 10:36:25,772 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-29 10:36:25,959 | WARNING | 172.18.0.1 | POST /api/login | Login failed for maya from 172.18.0.1
+2026-07-29 10:36:29,191 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-29 10:36:29,362 | WARNING | 172.18.0.1 | POST /api/login | Login failed for maya from 172.18.0.1
+2026-07-29 10:36:30,704 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-29 10:36:30,876 | WARNING | 172.18.0.1 | POST /api/login | Login failed for maya from 172.18.0.1
+2026-07-29 10:36:44,316 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=localhost:4326 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost | ip=172.18.0.1 | path=/reset-password
+2026-07-29 10:36:44,323 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=maya
+2026-07-29 10:36:44,326 | INFO | 172.18.0.1 | POST /api/reset-password | Reset email sent to maya@driftlock.com
+2026-07-29 10:37:18,352 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost | ip=172.18.0.1 | path=/reset-password
+2026-07-29 10:37:18,362 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=mast
+2026-07-29 10:37:18,367 | INFO | 172.18.0.1 | POST /api/reset-password | Reset email sent to mast@driftlock.com
