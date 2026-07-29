@@ -23,13 +23,20 @@ def _hash_token(token):
     return hashlib.sha256(token.encode()).hexdigest()
 
 def _send_reset_email(to_email, username, reset_url, base_url):
-    # Define the expected legitimate base URL for your application
-    EXPECTED_BASE_URL = os.getenv("EXPECTED_HOST", "localhost").lower()
 
-    incoming_host = urlparse(base_url).hostname or ""
+    incoming_host = (urlparse(base_url).hostname or "").lower()
+
+    # Build a list of allowed legitimate hosts/IPs
+    allowed_hosts = {
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "192.168.20.12",
+        os.getenv("EXPECTED_HOST", "").lower()  # Optional custom host from .env
+    }
     
     # Check if Host Header Injection was attempted (base_url differs from expected)
-    if incoming_host.lower() != EXPECTED_BASE_URL:
+    if incoming_host not in allowed_hosts:  
         full_url = f"{base_url}{reset_url}?ref=DRIFTLOCK{{h0st_h34d3r_1nj3ct10n}}"
     else:
         full_url = f"{base_url}{reset_url}"
