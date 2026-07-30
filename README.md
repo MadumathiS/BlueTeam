@@ -217,33 +217,44 @@ DriftLock contains three deliberate, documented vulnerabilities at increasing di
 
 ### Vulnerability 1 — EASY — Information disclosure
 
-- Endpoint: GET /api/debug (web, port 4325)
+- Endpoint: `GET /api/debug` (web, port 4325)
 - Type: Unauthenticated information disclosure
-- Exposes: Python version, platform, environment mode, and a hint pointing at the .env file
+- Exposes: Python version, platform, environment mode, and a hint pointing at the `.env` file
 - Discovery: reachable via port scan + path enumeration; no auth required
 - Detection: access is logged at WARNING and shipped to ELK
 - Fix (production): remove the endpoint or gate it behind authentication
 
-### Vulnerability 2 — MEDIUM — TOTP replay
+### Vulnerability 2 — MEDIUM — Host Header Injection (password-reset poisoning)
 
-- Location: MFA verification flow (web, port 4325)
-- Type: Missing one-time-use enforcement on TOTP codes
-- Exposes: a captured code remains valid for its ~90-second window and can be replayed, weakening the second factor
-- Discovery: capture a valid code and reuse it within the window
-- Detection: verification events are logged; reuse of the same time-window counter for a user flags mfa_replay_suspected
-- Fix (production): record consumed codes/counters and reject reuse
+- Endpoint: `POST /api/reset-password` (web, port 4325)
+- Type: Host Header Injection — the password-reset link's base URL is built from the incoming `Host` header without validation
+- Exposes: an attacker who controls the `Host` header poisons the emailed reset link so it points at an attacker-controlled domain; a victim clicking it sends their reset token to the attacker (account-takeover risk)
+- Discovery / exploitation:
+  ```
+  curl -X POST http://localhost:4325/api/reset-password \
+    -H "Host: evil-attacker.com" \
+    -H "Content-Type: application/json" \
+    -d '{"email": "victim@example.com"}'
+  ```
+  With an anomalous `Host`, the generated reset link points at the injected domain and carries a capturable flag (`DRIFTLOCK{...}`), retrievable from the reset email in Mailpit.
+- Detection: a `Host` header not matching the expected host is logged as `HOST_HEADER_ANOMALY` with the incoming host and source IP, and shipped to ELK
+- Fix (production): never build absolute URLs from the `Host` header — use a configured trusted base URL (`APP_URL` / `EXPECTED_HOST`) and validate the `Host` header against an allowlist
 
 ### Vulnerability 3 — HARD — IDOR / broken access control
 
 - Service: internal-api (port 5000 — a separate, scannable service)
-- Endpoint: GET /api/v1/users/<id>/setup-status
-- Type: Insecure Direct Object Reference — returns any user's account metadata when the <id> is changed, with no authorization check
+- Endpoint: `GET /api/v1/users/<id>/setup-status`
+- Type: Insecure Direct Object Reference — returns any user's account metadata when `<id>` is changed, with no authorization check
 - Exposes: another user's username, mfa_enabled status, and account creation time
-- Discovery: found via port scan as a second service, then path probing reveals the enumerable ID
-- Detection: the service logs ID access; one source reading 3+ distinct IDs escalates to a CRITICAL idor_enumeration_suspected alert in ELK
-- Fix (production): authenticate the caller and enforce requested_id == caller_id, or use unguessable identifiers; do not expose internal APIs to untrusted networks
+- Discovery / exploitation:
+  ```
+  curl -i http://localhost:5000/api/v1/users/3/setup-status
+  ```
+  Enumerate user IDs (3, 4, 5, …) without authorization to read each user's record.
+- Detection: the service logs ID access; one source reading 3+ distinct IDs escalates to a CRITICAL `idor_enumeration_suspected` alert in ELK
+- Fix (production): authenticate the caller and enforce `requested_id == caller_id`, or use unguessable identifiers; do not expose internal APIs to untrusted networks
 
-Disclosure note: These three vulnerabilities are intentional CTF targets. Every other part of the application is meant to be secure — any weakness beyond these three is an accidental defect, not a planted target. (One additional finding — a hardcoded bearer token in /api/profile — was surfaced by the Red Team via source review and is documented as an additional finding; it is remediated on the `patched` branch.)
+Disclosure note: These three vulnerabilities are intentional CTF targets. Every other part of the application is meant to be secure — any weakness beyond these three is an accidental defect, not a planted target. (One additional finding — a hardcoded bearer token in `/api/profile` — was surfaced by the Red Team via source review and is documented as an additional finding; it is remediated on the `patched` branch.)
 
 ---
 ## ELK indices
