@@ -6,6 +6,13 @@
 **System:** web app (port 4325), internal-api (port 5000)
 **Classification:** Lab exercise — Red vs Blue CTF
 
+> **Note:** The incident timeline and exploitation evidence below reflect the
+> activity observed to date. Sections 3–5 will be reconciled with the Red Team's
+> final report once received; in particular, Host Header Injection exploitation
+> evidence (`HOST_HEADER_ANOMALY` events on the `/api/reset-password` endpoint)
+> will be added to the timeline and log analysis when their report confirms the
+> requests they issued.
+
 ---
 
 ## 1. Executive summary
@@ -43,8 +50,10 @@ source(s) generating this activity, regardless of network path.
 | 15:03:26–15:03:49 | 172.18.0.1 | `/api/v1/users/1`, `/api/v1/ocean/1`, `/api/v1/admin/1` | IDOR enumeration | access.log |
 | 15:20:05 | 192.168.20.12 | GET `/nice ports,/Trinity.txt.bak` | Nmap signature | access.log |
 
-Follow-on activity (July 26) showed repeated `GET /api/debug` requests and further
-`/api/v1/users/<id>/setup-status` enumeration.
+Follow-on activity (July 26 onward) showed repeated `GET /api/debug` requests and
+further `/api/v1/users/<id>/setup-status` enumeration. Host Header Injection
+activity against `/api/reset-password` (`HOST_HEADER_ANOMALY`) will be added here
+once confirmed against the Red Team's report.
 
 ---
 
@@ -82,11 +91,19 @@ decoy; no real data was exposed.
 
 **IDOR enumeration.** The attacker requested `/api/v1/users/1`, then varied the
 path and ID (`/api/v1/ocean/1`, `/api/v1/admin/1`), then hit
-`/api/v1/users/1/setup-status` and `/users/2/setup-status` directly.
+`/api/v1/users/1/setup-status` and `/users/2/setup-status` directly. When a single
+source read three or more distinct IDs, the internal-api detection escalated to a
+CRITICAL `idor_enumeration_suspected` alert.
 
 **Information disclosure.** Repeated `GET /api/debug` requests (logged at WARNING)
 show the attacker located and repeatedly queried the unauthenticated debug
 endpoint.
+
+**Host Header Injection.** *(Pending Red Team report.)* Attempts to poison the
+password-reset link via a spoofed `Host` header on `POST /api/reset-password` are
+recorded as `HOST_HEADER_ANOMALY` events with the incoming host value and source
+IP. This section will be populated with the observed requests once reconciled with
+the Red Team's report.
 
 **Additional finding.** The Red Team also identified, via source review, a
 hardcoded bearer token in `/api/profile` (`valid-session-token-123`). This was not
@@ -101,10 +118,10 @@ finding.
   three CRITICAL alerts fired automatically with source IP, user-agent, and time.
 - **Access-log pattern analysis** — the one-second scanner burst is a recognizable
   reconnaissance signature, distinct from human-paced browsing.
-- **Application WARNING events** — `/api/debug` access and failed MFA attempts are
-  logged at WARNING.
-- **Independent service logs** — the internal-api service logged the Nmap probe,
-  corroborating a multi-port scan.
+- **Application WARNING events** — `/api/debug` access and Host-header anomalies on
+  `/api/reset-password` are logged at WARNING.
+- **Independent service logs** — the internal-api service logged the Nmap probe and
+  the IDOR enumeration, corroborating a multi-port scan and flagging enumeration.
 - **Centralized triage (ELK)** — all logs ship to Elasticsearch; Kibana allows
   correlating one source across the honeypot, access, and internal-api indices.
 
@@ -120,15 +137,17 @@ single source across multiple detections is what elevates an event from
 These vulnerabilities are intentional CTF targets on this branch. In a real
 deployment they would be remediated as follows (and are, on the `patched` branch):
 
-**Vulnerability 1 — `/api/debug`.** Remove the endpoint or gate it behind
+**Vulnerability 1 — IDOR.** Enforce authorization: verify the requested id matches
+the caller's identity (or an admin role); prefer unguessable identifiers; do not
+expose internal APIs to untrusted networks. On `patched`, the endpoint requires a
+valid `X-Internal-Api-Key` header.
+
+**Vulnerability 2 — `/api/debug`.** Remove the endpoint or gate it behind
 authentication and restrict to internal networks; disable Flask debug mode.
 
-**Vulnerability 2 — TOTP replay.** Record each consumed code/counter per user and
-reject reuse within the validity window.
-
-**Vulnerability 3 — IDOR.** Enforce authorization: verify the requested id matches
-the caller's identity (or an admin role); prefer unguessable identifiers; do not
-expose internal APIs to untrusted networks.
+**Vulnerability 3 — Host Header Injection.** Never build absolute URLs from the
+`Host` header — construct reset links from a configured trusted base URL
+(`APP_URL`) and validate the `Host` header against an allowlist (`EXPECTED_HOST`).
 
 **Additional finding — `/api/profile`.** Remove hardcoded credentials from source;
 authenticate via session or an environment-supplied secret.
@@ -144,4 +163,5 @@ The exercise demonstrated a complete detect-and-analyze cycle: reconnaissance,
 honeypot triggering, IDOR enumeration, and debug-endpoint access were all captured
 and attributed through layered logging, with the honeypot providing the earliest
 high-confidence alert. Remediation of all findings is demonstrated on the `patched`
-branch.
+branch. The incident timeline and exploitation evidence will be finalized once
+reconciled with the Red Team's report.

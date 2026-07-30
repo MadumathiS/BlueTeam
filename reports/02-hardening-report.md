@@ -64,8 +64,8 @@ encryption of TOTP seeds at rest; secrets supplied via environment/`.env`
 
 **Detective:** honeypot (`/backup_secrets/` via `robots.txt`) firing CRITICAL
 alerts; structured access/honeypot/internal-api logging; ELK pipeline for triage
-and single-source correlation; purpose-built TOTP-replay and IDOR-enumeration
-detections.
+and single-source correlation; purpose-built Host-Header-anomaly and
+IDOR-enumeration detections.
 
 ---
 
@@ -94,3 +94,5 @@ accepted items on this branch and are addressed on the `patched` branch:
 - Enable authentication on the ELK stack (disabled for the lab).
 - For the internal API, add per-user identity binding and prefer unguessable
   identifiers over sequential integer IDs.
+- For password reset, build absolute URLs from a configured trusted base URL and
+  validate the `Host` header against an allowlist.
