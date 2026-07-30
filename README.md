@@ -181,7 +181,7 @@ blue-team-mfa-portal/
 │   └── static/                   # css, images
 │
 ├── internal-api/                 # separate service, own port (5000) — scannable
-│   ├── api.py                    #   IDOR vuln (HARD): /api/v1/users/<id>/setup-status
+│   ├── api.py                    #   IDOR vuln (EASY): /api/v1/users/<id>/setup-status
 │   ├── requirements.txt
 │   └── Dockerfile
 │
@@ -202,8 +202,6 @@ blue-team-mfa-portal/
 │   ├── detections.log
 │   └── captures/                 # Wireshark .pcap files (scan_lo.pcap, legit.pcap)
 │
-├── ctf-challenges/               # standalone CTF challenges for the other team
-│   └── log-forensics/            #   (kept OUTSIDE logs/ — see CTF section)
 │
 └── reports/
     ├── 01-design-report.md
@@ -211,11 +209,26 @@ blue-team-mfa-portal/
     └── 03-incident-response.md
 ```
 ---
+
 ## Intentional vulnerabilities (disclosure)
 
 DriftLock contains three deliberate, documented vulnerabilities at increasing difficulty. All are intentional and disclosed here for grading.
 
-### Vulnerability 1 — EASY — Information disclosure
+### Vulnerability 1 — EASY — IDOR / broken access control
+
+- Service: internal-api (port 5000 — a separate, scannable service)
+- Endpoint: `GET /api/v1/users/<id>/setup-status`
+- Type: Insecure Direct Object Reference — returns any user's account metadata when `<id>` is changed, with no authorization check
+- Exposes: another user's username, mfa_enabled status, and account creation time
+- Discovery / exploitation:
+  ```
+  curl -i http://localhost:5000/api/v1/users/3/setup-status
+  ```
+  Enumerate user IDs (3, 4, 5, …) without authorization to read each user's record.
+- Detection: the service logs ID access; one source reading 3+ distinct IDs escalates to a CRITICAL `idor_enumeration_suspected` alert in ELK
+- Fix (production): authenticate the caller and enforce `requested_id == caller_id`, or use unguessable identifiers; do not expose internal APIs to untrusted networks
+
+### Vulnerability 2 — MEDIUM — Information disclosure
 
 - Endpoint: `GET /api/debug` (web, port 4325)
 - Type: Unauthenticated information disclosure
@@ -224,7 +237,7 @@ DriftLock contains three deliberate, documented vulnerabilities at increasing di
 - Detection: access is logged at WARNING and shipped to ELK
 - Fix (production): remove the endpoint or gate it behind authentication
 
-### Vulnerability 2 — MEDIUM — Host Header Injection (password-reset poisoning)
+### Vulnerability 3 — HARD — Host Header Injection (password-reset poisoning)
 
 - Endpoint: `POST /api/reset-password` (web, port 4325)
 - Type: Host Header Injection — the password-reset link's base URL is built from the incoming `Host` header without validation
@@ -240,19 +253,6 @@ DriftLock contains three deliberate, documented vulnerabilities at increasing di
 - Detection: a `Host` header not matching the expected host is logged as `HOST_HEADER_ANOMALY` with the incoming host and source IP, and shipped to ELK
 - Fix (production): never build absolute URLs from the `Host` header — use a configured trusted base URL (`APP_URL` / `EXPECTED_HOST`) and validate the `Host` header against an allowlist
 
-### Vulnerability 3 — HARD — IDOR / broken access control
-
-- Service: internal-api (port 5000 — a separate, scannable service)
-- Endpoint: `GET /api/v1/users/<id>/setup-status`
-- Type: Insecure Direct Object Reference — returns any user's account metadata when `<id>` is changed, with no authorization check
-- Exposes: another user's username, mfa_enabled status, and account creation time
-- Discovery / exploitation:
-  ```
-  curl -i http://localhost:5000/api/v1/users/3/setup-status
-  ```
-  Enumerate user IDs (3, 4, 5, …) without authorization to read each user's record.
-- Detection: the service logs ID access; one source reading 3+ distinct IDs escalates to a CRITICAL `idor_enumeration_suspected` alert in ELK
-- Fix (production): authenticate the caller and enforce `requested_id == caller_id`, or use unguessable identifiers; do not expose internal APIs to untrusted networks
 
 Disclosure note: These three vulnerabilities are intentional CTF targets. Every other part of the application is meant to be secure — any weakness beyond these three is an accidental defect, not a planted target. (One additional finding — a hardcoded bearer token in `/api/profile` — was surfaced by the Red Team via source review and is documented as an additional finding; it is remediated on the `patched` branch.)
 
@@ -263,48 +263,6 @@ Disclosure note: These three vulnerabilities are intentional CTF targets. Every 
 - driftlock-honeypot-* — high-priority honeypot alerts
 - driftlock-internal-api-* — internal-api requests + IDOR enumeration alerts
 - driftlock-detections-* — replay / enumeration detection events
-
----
-
-## CTF Challenges (for the other team)
-
-Separate from DriftLock's own intentional vulnerabilities, we author a set of **standalone CTF challenges** for another group working on a different application. These challenges are self-contained and are **not** derived from DriftLock's three planted vulnerabilities — they exercise general skills (log triage, forensics, decoding) that complement this project's recon-and-detect theme.
-
-### Log-forensics challenge set
-
-Three log-analysis challenges at increasing difficulty. Players search realistic, noisy server logs to recover a hidden flag — reinforcing the same Blue Team log-triage skills used in incident response.
-
-| Tier   | File                | Skill tested            | Flag                       |
-|--------|---------------------|-------------------------|----------------------------|
-| Easy   | detect_easy.log     | Basic log search (grep) | `CTF{L0G_GR3P_EASY}`       |
-| Medium | detect_medium.log   | Signal-in-noise triage  | `CTF{N015Y_L0G_M3D1UM}`    |
-| Hard   | detect_hard.log     | Correlation + decoding  | `CTF{L0G_F0R3N51C5_H4RD}`  |
-
-- **Easy** — the flag sits in plain text on an analyst-note line among normal access entries; solvable with a single targeted `grep`.
-- **Medium** — the flag is buried in ~500 noisy lines, with decoy brace tokens (`session={...}`) that defeat a lazy `grep '{'`; players must match the exact `CTF{...}` pattern.
-- **Hard** — the flag is base64-encoded and split into two labelled fragments far apart in a ~700-line file, with decoy base64 blobs as misdirection; players correlate the fragments, reassemble in order, then decode.
-
-Flag format across all tiers: `CTF{...}`
-
-### Challenge directory layout
-
-```
-ctf-challenges/
-└── log-forensics/
-    ├── README.md              # set overview + distribution instructions
-    ├── easy/     detect_easy.log     + README.md   (prompt + 1 reserved hint)
-    ├── medium/   detect_medium.log   + README.md   (prompt + 2 reserved hints)
-    ├── hard/     detect_hard.log     + README.md   (prompt + 3 reserved hints)
-    └── _graders/ answer_key.md        # flags + solve commands — KEEP PRIVATE
-```
-
-### Distribution rules
-
-- Hand each team **only** the tier folder(s) being released (the `.log` file + its player `README.md`).
-- **Never distribute `_graders/`** — it contains every flag and full solution.
-- Keep `ctf-challenges/` **outside** the app's live `logs/` directory. DriftLock's `app.py`, `honeypot.py`, `internal-api/api.py`, and `detections.py` actively write to `logs/`, and Logstash mounts `./logs:ro` and ingests everything it finds — dropping challenge logs there would pollute the Elasticsearch indices and the project's own incident-response evidence.
-- Player prompts point at the technique without naming the exact command; escalating hints are released only when a team is stuck (or as point-cost unlocks on a scoreboard such as CTFd).
-- All challenge material stays on the isolated lab network.
 
 ---
 
