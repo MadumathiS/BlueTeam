@@ -15,12 +15,11 @@ fixed and verified here.
 
 | Weakness (present in `main`) | Status in `patched` | Verified by |
 |---|---|---|
-| `/api/debug` info disclosure (EASY) | **Fixed** — endpoint removed; `debug=False` | `curl /api/debug` -> 404 |
-| TOTP replay (MEDIUM) | **Fixed** — reused codes rejected | reused code -> "Code already used" 401 |
-| IDOR `/api/v1/users/<id>/setup-status` (HARD) | **Fixed** — shared-secret header required | no key -> 403; with key -> 200 |
+| IDOR `/api/v1/users/<id>/setup-status` (EASY) | **Fixed** — shared-secret header required | no key -> 403; with key -> 200 |
+| `/api/debug` info disclosure (MEDIUM) | **Fixed** — endpoint removed; `debug=False` | `curl /api/debug` -> 404 |
+| Host Header Injection on `/api/reset-password` (HARD) | **Fixed** — reset URL built from a trusted base; `Host` validated against an allowlist | spoofed `Host` -> reset link uses trusted base; anomaly still logged |
 | Hardcoded token in `/api/profile` (Red Team find) | **Fixed** — session-based auth | old token -> 302/401 |
 | MASTER_KEY silent fallback (latent bug) | **Fixed** — fails closed | app refuses to start if unset |
-| Replay detector trim bug | **Fixed** — correct memory trim | detection reliable past 10 uses |
 
 ---
 
@@ -43,6 +42,7 @@ be supplied via the environment and the app **fails closed** if it is missing.
 Password hashing (bcrypt), encrypted TOTP seeds (Fernet, fail-closed key),
 two-step login with session-fixation protection, username-enumeration resistance,
 Redis-backed rate limiting, account lockout, anti-enumeration password reset,
+trusted-base-URL construction with `Host`-header allowlisting,
 `login_required` authorization, and container hardening (non-root user, dropped
 capabilities, no-new-privileges, network segmentation, localhost-only datastores).
 
@@ -81,6 +81,8 @@ DB_NAME=driftlock
 SECRET_KEY=<flask session key>
 MASTER_KEY=<Fernet key — MUST be persistent; do not regenerate>
 INTERNAL_API_KEY=<random secret for the internal-api; patched build only>
+APP_URL=<trusted base URL for building reset links, e.g. http://localhost:4325>
+EXPECTED_HOST=<allowlisted Host value, e.g. localhost:4325>
 ```
 
 Generate the internal API key:
@@ -113,21 +115,26 @@ Kibana `http://localhost:5601/` (host-only), MailHog `http://localhost:8025/`
 ## Verifying the fixes
 
 ```bash
-# 1. Debug endpoint removed
-curl -i http://localhost:4325/api/debug                       # -> 404
-
-# 2. IDOR requires the key (use a real user id, e.g. 3)
+# 1. IDOR requires the key (use a real user id, e.g. 3)
 curl -i http://localhost:5000/api/v1/users/3/setup-status     # -> 403 Forbidden
 curl -H "X-Internal-Api-Key: <key>" \
      http://localhost:5000/api/v1/users/3/setup-status        # -> 200
 
-# 3. Hardcoded token no longer works
+# 2. Debug endpoint removed
+curl -i http://localhost:4325/api/debug                       # -> 404
+
+# 3. Host Header Injection neutralised
+#    A spoofed Host no longer poisons the reset link; the link is built from the
+#    trusted base URL, and the anomalous Host is still logged as HOST_HEADER_ANOMALY.
+curl -X POST http://localhost:4325/api/reset-password \
+  -H "Host: evil-attacker.com" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "victim@example.com"}'
+#    -> emailed reset link points at the trusted base (not evil-attacker.com)
+
+# 4. Hardcoded token no longer works
 curl -i -H "Authorization: Bearer valid-session-token-123" \
      http://localhost:4325/api/profile                        # -> 302/401
-
-# 4. TOTP replay rejected
-#    Log in with a code, log out, log in again with the SAME code within its
-#    window -> "Code already used" (was accepted on main)
 ```
 
 ---
@@ -140,7 +147,7 @@ blue-team-mfa-portal/   (patched branch)
 ├── .env                     # secrets (gitignored)
 ├── README.md
 ├── web/                     # Flask app (debug route removed, profile fixed,
-│                            #   replay rejected, crypto fail-closed)
+│                            #   reset link built from trusted base, crypto fail-closed)
 ├── internal-api/            # IDOR endpoint now requires X-Internal-Api-Key
 ├── db/init.sql
 ├── elk/logstash/pipeline/
@@ -148,7 +155,7 @@ blue-team-mfa-portal/   (patched branch)
 └── reports/
     ├── 01-design-report.md
     ├── 02-hardening-report.md
-    └── 03-incident-response.md   # includes remediation verification (Section 7)
+    └── 03-incident-response.md   # includes remediation verification
 ```
 
 ---
@@ -160,7 +167,7 @@ blue-team-mfa-portal/   (patched branch)
 - `reports/02-hardening-report.md` — defense-in-depth; Section 5 lists resolved
   items
 - `reports/03-incident-response.md` — attack evidence, detection, and the applied
-  fixes with verification 
+  fixes with verification
 
 ---
 
