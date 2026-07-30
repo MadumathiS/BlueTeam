@@ -55,8 +55,9 @@ Security is applied in layers so no single control is the only barrier:
 **Application:** two-factor login (password + emailed OTP) enforced in sequence via
 a pending-session model; session-fixation protection; username-enumeration
 resistance (constant-time dummy hash, identical error messages); Redis-backed rate
-limiting; account lockout; anti-enumeration password reset; `login_required`
-authorization on sensitive routes.
+limiting; account lockout; anti-enumeration password reset with reset links built
+from a configured trusted base URL (not the request `Host` header);
+`login_required` authorization on sensitive routes.
 
 **Cryptographic:** bcrypt password hashing with per-password salt; Fernet
 encryption of TOTP seeds at rest; secrets supplied via environment/`.env`
@@ -64,8 +65,8 @@ encryption of TOTP seeds at rest; secrets supplied via environment/`.env`
 
 **Detective:** honeypot (`/backup_secrets/` via `robots.txt`) firing CRITICAL
 alerts; structured access/honeypot/internal-api logging; ELK pipeline for triage
-and single-source correlation; purpose-built TOTP-replay and IDOR-enumeration
-detections.
+and single-source correlation; purpose-built Host-Header-anomaly and
+IDOR-enumeration detections.
 
 ---
 
@@ -75,10 +76,12 @@ This `patched` branch has the vulnerabilities and previously-accepted items
 **resolved**. Each fix is verified in the Incident Response Report (Section 7).
 
 Intentional vulnerabilities fixed:
-- **`/api/debug`** — endpoint removed; Flask debug mode disabled (`debug=False`).
-- **TOTP replay** — reused codes are now detected *and rejected* (401).
 - **IDOR** — `/api/v1/users/<id>/setup-status` now requires a valid
   `X-Internal-Api-Key` header and returns 403 to unauthorized callers.
+- **`/api/debug`** — endpoint removed; Flask debug mode disabled (`debug=False`).
+- **Host Header Injection** — the password-reset link is now built from a configured
+  trusted base URL (`APP_URL`) instead of the incoming `Host` header, so a spoofed
+  `Host` can no longer poison the emailed reset link.
 
 Additional finding fixed:
 - **`/api/profile`** — the hardcoded bearer token was removed; the endpoint now
@@ -88,8 +91,6 @@ Previously-accepted items resolved:
 - **Flask debug mode** — now `debug=False`; the Werkzeug debugger is not reachable.
 - **`MASTER_KEY` handling** — now fails closed if unset, preventing the failure
   mode where a regenerated key made stored TOTP seeds undecryptable on restart.
-- **Replay detector trim bug** — corrected so detection stays reliable beyond the
-  first ten verifications.
 
 ---
 
@@ -103,3 +104,5 @@ Previously-accepted items resolved:
 - Enable authentication on the ELK stack (disabled for the lab).
 - For the internal API, add per-user identity binding and prefer unguessable
   identifiers over sequential integer IDs.
+- For password reset, additionally validate the `Host` header against an allowlist
+  (`EXPECTED_HOST`) as defense-in-depth alongside the trusted-base-URL construction.

@@ -69,7 +69,8 @@ This authenticates with two factors from distinct categories — a password
   code verification.
 - **Account lockout** — repeated failed logins temporarily lock the account.
 - **Password reset** — token-based, with a vague response to avoid email
-  enumeration.
+  enumeration, and reset links built from a configured trusted base URL rather than
+  the request `Host` header.
 - **Authorization** — `login_required` on sensitive routes.
 - **Container hardening** — non-root application user, dropped Linux capabilities,
   `no-new-privileges`, network segmentation, and localhost-only binding of the
@@ -83,20 +84,26 @@ Three vulnerabilities were planted deliberately, at increasing difficulty, each
 realistic and each leaving a detectable trail. All are documented so graders
 understand they are intentional; everything else is meant to be secure.
 
-**Vulnerability 1 — EASY — Information disclosure (`/api/debug`).** An
-unauthenticated endpoint leaks the Python version, platform, environment mode, and
-a hint pointing at the `.env` file. Chosen as an easy, scanner-discoverable
-foothold that also seeds the attack chain.
-
-**Vulnerability 2 — MEDIUM — TOTP replay.** MFA verification does not invalidate a
-code after use, so a captured code can be replayed within its window. On-theme for
-an MFA portal and tests understanding of one-time-password semantics.
-
-**Vulnerability 3 — HARD — IDOR (`/api/v1/users/<id>/setup-status`).** The internal
+**Vulnerability 1 — EASY — IDOR (`/api/v1/users/<id>/setup-status`).** The internal
 API returns any user's account metadata when the `id` is manipulated, with no
 authorization check. Hosted on a separate scannable service so the Red Team
 discovers it by port scan, then enumerates IDs. A realistic broken-access-control
 challenge with a clean enumeration signature to detect.
+
+**Vulnerability 2 — MEDIUM — Information disclosure (`/api/debug`).** An
+unauthenticated endpoint leaks the Python version, platform, environment mode, and
+a hint pointing at the `.env` file. A scanner-discoverable foothold that also seeds
+the attack chain by revealing environment details.
+
+**Vulnerability 3 — HARD — Host Header Injection (password-reset poisoning).** The
+password-reset endpoint (`POST /api/reset-password`) builds the emailed reset
+link's base URL from the incoming `Host` header without validation. An attacker who
+controls the `Host` header poisons the reset link so it points at an
+attacker-controlled domain; a victim who clicks it sends their reset token to the
+attacker, enabling account takeover. Chosen as the hardest challenge because it
+requires understanding how absolute URLs are constructed, crafting a spoofed header,
+and retrieving the poisoned link from the mail capture — and it leaves a clean
+`HOST_HEADER_ANOMALY` signal to detect.
 
 An additional finding — a hardcoded bearer token in `/api/profile` — was
 identified by the Red Team via source review. It was not one of the three primary
@@ -113,9 +120,10 @@ On this `patched` branch, all three vulnerabilities and the additional hardcoded
   are the highest-confidence indicator of compromise.
 - **Access logging** — every request is logged in a structured format; scan
   bursts are recognizable by pattern.
-- **Detection helpers** — TOTP replay is flagged (`mfa_replay_suspected`); IDOR
-  enumeration is flagged (`idor_enumeration_suspected`, escalating to CRITICAL when
-  one source reads three or more distinct IDs).
+- **Detection helpers** — Host Header Injection is flagged (`HOST_HEADER_ANOMALY`,
+  recording the anomalous host and source IP); IDOR enumeration is flagged
+  (`idor_enumeration_suspected`, escalating to CRITICAL when one source reads three
+  or more distinct IDs); `/api/debug` access is logged at WARNING.
 - **ELK pipeline** — Logstash ships logs into Elasticsearch; Kibana provides
   search and dashboards, allowing correlation of a single source across the
   honeypot, access, and internal-api indices.

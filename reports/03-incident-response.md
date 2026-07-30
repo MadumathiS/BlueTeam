@@ -6,6 +6,13 @@
 **System:** web app (port 4325), internal-api (port 5000)
 **Classification:** Lab exercise — Red vs Blue CTF
 
+> **Note:** The incident timeline and exploitation evidence below reflect the
+> activity observed to date. Sections 3–5 will be reconciled with the Red Team's
+> final report once received; in particular, Host Header Injection exploitation
+> evidence (`HOST_HEADER_ANOMALY` events on the `/api/reset-password` endpoint)
+> will be added to the timeline and log analysis when their report confirms the
+> requests they issued.
+
 ---
 
 ## 1. Executive summary
@@ -43,8 +50,10 @@ source(s) generating this activity, regardless of network path.
 | 15:03:26–15:03:49 | 172.18.0.1 | `/api/v1/users/1`, `/api/v1/ocean/1`, `/api/v1/admin/1` | IDOR enumeration | access.log |
 | 15:20:05 | 192.168.20.12 | GET `/nice ports,/Trinity.txt.bak` | Nmap signature | access.log |
 
-Follow-on activity (July 26) showed repeated `GET /api/debug` requests and further
-`/api/v1/users/<id>/setup-status` enumeration.
+Follow-on activity (July 26 onward) showed repeated `GET /api/debug` requests and
+further `/api/v1/users/<id>/setup-status` enumeration. Host Header Injection
+activity against `/api/reset-password` (`HOST_HEADER_ANOMALY`) will be added here
+once confirmed against the Red Team's report.
 
 ---
 
@@ -82,11 +91,19 @@ decoy; no real data was exposed.
 
 **IDOR enumeration.** The attacker requested `/api/v1/users/1`, then varied the
 path and ID (`/api/v1/ocean/1`, `/api/v1/admin/1`), then hit
-`/api/v1/users/1/setup-status` and `/users/2/setup-status` directly.
+`/api/v1/users/1/setup-status` and `/users/2/setup-status` directly. When a single
+source read three or more distinct IDs, the internal-api detection escalated to a
+CRITICAL `idor_enumeration_suspected` alert.
 
 **Information disclosure.** Repeated `GET /api/debug` requests (logged at WARNING)
 show the attacker located and repeatedly queried the unauthenticated debug
 endpoint.
+
+**Host Header Injection.** *(Pending Red Team report.)* Attempts to poison the
+password-reset link via a spoofed `Host` header on `POST /api/reset-password` are
+recorded as `HOST_HEADER_ANOMALY` events with the incoming host value and source
+IP. This section will be populated with the observed requests once reconciled with
+the Red Team's report.
 
 **Additional finding.** The Red Team also identified, via source review, a
 hardcoded bearer token in `/api/profile` (`valid-session-token-123`). This was not
@@ -101,10 +118,10 @@ finding.
   three CRITICAL alerts fired automatically with source IP, user-agent, and time.
 - **Access-log pattern analysis** — the one-second scanner burst is a recognizable
   reconnaissance signature, distinct from human-paced browsing.
-- **Application WARNING events** — `/api/debug` access and failed MFA attempts are
-  logged at WARNING.
-- **Independent service logs** — the internal-api service logged the Nmap probe,
-  corroborating a multi-port scan.
+- **Application WARNING events** — `/api/debug` access and Host-header anomalies on
+  `/api/reset-password` are logged at WARNING.
+- **Independent service logs** — the internal-api service logged the Nmap probe and
+  the IDOR enumeration, corroborating a multi-port scan and flagging enumeration.
 - **Centralized triage (ELK)** — all logs ship to Elasticsearch; Kibana allows
   correlating one source across the honeypot, access, and internal-api indices.
 
@@ -120,25 +137,7 @@ single source across multiple detections is what elevates an event from
 Unlike the vulnerable (`main`) build, this `patched` branch has the vulnerabilities
 remediated. Each fix and its verification is below.
 
-### 7.1 Vulnerability 1 — `/api/debug` (information disclosure)
-**Fix:** the endpoint was removed entirely and Flask debug mode disabled
-(`debug=False`).
-**Verification:**
-```
-$ curl -i http://localhost:4325/api/debug
-HTTP/1.1 404 NOT FOUND
-{"error":"Not found"}
-```
-The endpoint no longer exists; no system information is disclosed.
-
-### 7.2 Vulnerability 2 — TOTP replay
-**Fix:** MFA verification now detects *and rejects* a reused code, returning 401
-"Code already used" instead of establishing a session.
-**Verification:** logging in, then re-submitting the same code within its window,
-is rejected on the patched build (accepted on `main`). The attempt is also logged
-as `mfa_replay_suspected`.
-
-### 7.3 Vulnerability 3 — IDOR `/api/v1/users/<id>/setup-status`
+### 7.1 Vulnerability 1 — IDOR `/api/v1/users/<id>/setup-status`
 **Fix:** the endpoint now requires a valid `X-Internal-Api-Key` header and rejects
 unauthorized callers with 403, blocking anonymous enumeration.
 **Verification:**
@@ -156,6 +155,34 @@ Anonymous enumeration is blocked (403); only a caller presenting the shared secr
 can read data. A full production fix would additionally bind each request to the
 authenticated user's own identity.
 
+### 7.2 Vulnerability 2 — `/api/debug` (information disclosure)
+**Fix:** the endpoint was removed entirely and Flask debug mode disabled
+(`debug=False`).
+**Verification:**
+```
+$ curl -i http://localhost:4325/api/debug
+HTTP/1.1 404 NOT FOUND
+{"error":"Not found"}
+```
+The endpoint no longer exists; no system information is disclosed.
+
+### 7.3 Vulnerability 3 — Host Header Injection (password-reset poisoning)
+**Fix:** the emailed reset link is now built from a configured trusted base URL
+(`APP_URL`) instead of the incoming `Host` header, so a spoofed `Host` can no
+longer redirect the reset link to an attacker-controlled domain.
+**Verification:**
+```
+$ curl -X POST http://localhost:4325/api/reset-password \
+       -H "Host: evil-attacker.com" \
+       -H "Content-Type: application/json" \
+       -d '{"email": "victim@example.com"}'
+```
+On `main`, this poisoned the emailed reset link to point at `evil-attacker.com`.
+On `patched`, the reset link is built from the trusted `APP_URL`, so the emailed
+link points at the legitimate host regardless of the spoofed `Host` header. A full
+production fix additionally validates the `Host` header against an allowlist
+(`EXPECTED_HOST`) as defense-in-depth.
+
 ### 7.4 Additional finding — hardcoded token in `/api/profile`
 Identified by the Red Team via source review (not one of the three planted
 vulnerabilities).
@@ -171,12 +198,12 @@ HTTP/1.1 302 FOUND        (redirect to /login — old token no longer works)
 ### 7.5 Supporting hardening
 - `MASTER_KEY` now fails closed if unset, instead of silently generating a
   throwaway key that would render stored TOTP seeds undecryptable on restart.
-- The replay detector's memory-trim bug was corrected so detection stays reliable
-  beyond the first ten verifications.
 
 ### 7.6 Production recommendations (beyond the lab fixes)
 - IDOR: add per-user identity binding on top of the shared-secret control; prefer
   unguessable identifiers (UUIDs) over sequential integer IDs.
+- Host Header: validate `Host` against an allowlist in addition to the
+  trusted-base-URL construction.
 - Run behind a production WSGI server; enable HTTPS; move secrets to a secret
   manager; enable authentication on the ELK stack.
 
@@ -190,4 +217,5 @@ attributed through layered logging; and every finding — the three intentional
 vulnerabilities plus the additional hardcoded-token finding — has been remediated
 and verified. The honeypot provided the earliest high-confidence alert; the ELK
 pipeline enabled single-source correlation; and the patched build confirms each
-exploited weakness is now closed.
+exploited weakness is now closed. The incident timeline and exploitation evidence
+will be finalized once reconciled with the Red Team's report.
