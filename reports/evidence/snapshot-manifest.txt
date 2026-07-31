@@ -1,0 +1,9 @@
+   781 access.log
+    83 detections.log
+   285 honeypot.log
+   339 internal-api.log
+  1488 total
+8a9754ea9526afb077ab08c6cfafb75c4becaf9a3161ca15ead4c290ba75354d  access.log
+aaa1c834f2fa542c30333e73e9f7201842436f1ab9b2f83774a92679c50fcf7c  detections.log
+f019b9a2e5c231f2925fe3fae32b111f624de243c62f11bad1e36189cb458fb4  honeypot.log
+3d1bb957dab2ae799c77014ed955ab1340a8a8b1e0e0ce4e7053b81325c0e942  internal-api.log
