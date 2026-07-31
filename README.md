@@ -157,6 +157,7 @@ On Linux, Elasticsearch may require: sudo sysctl -w vm.max_map_count=262144
 ## Repository Structure
 
 ```
+```
 blue-team-mfa-portal/
 ├── docker-compose.yml            # web + db + redis + internal-api + ELK
 ├── .env                          # secrets (gitignored)
@@ -165,23 +166,33 @@ blue-team-mfa-portal/
 │
 ├── web/
 │   ├── app.py                    # Flask app, routes, logging, rate limiting;
-│   │                             #   /api/debug = intentional vuln (EASY)
+│   │                             #   /api/debug = intentional vuln (MEDIUM)
 │   ├── auth.py                   # registration, login, verify-mfa, logout
+│   ├── reset.py                  # password-reset flow; Host Header Injection
+│   │                             #   vuln (HARD) on main; fixed on patched
 │   ├── crypto_utils.py           # password hashing + TOTP seed encryption
-│   ├── mfa.py                    # TOTP blueprint (totp_bp): authenticator, current-code
+│   ├── mfa.py                    # TOTP blueprint (totp_bp): authenticator,
+│   │                             #   current-code, add-device QR flow
+│   ├── utils.py                  # QR code generation helpers (pyqrcode/qrcode);
+│   │                             #   used by mfa.py for add-another-device feature
 │   ├── decorators.py             # @login_required
-│   ├── models.py                 # DB models (User, TOTPSeed, etc.)
+│   ├── models.py                 # DB models (User, TOTPSeed,
+│   │                             #   PasswordResetToken, etc.)
 │   ├── honeypot.py               # honeypot blueprint: robots.txt bait +
 │   │                             #   /backup_secrets/ trap, embedded decoy
-│   ├── detections.py             # replay + enumeration detection helpers
+│   ├── detections.py             # TOTP replay + IDOR enumeration detection
+│   │                             #   helpers; writes to detections.log
 │   ├── robots.txt                # discloses /backup_secrets/ — bait
 │   ├── requirements.txt
 │   ├── Dockerfile
-│   ├── templates/                # index, login, register, mfa, mfa_verify, support, admin
+│   ├── templates/                # index, login, register, mfa, mfa_verify,
+│   │                             #   reset_request, reset_form, support, admin
 │   └── static/                   # css, images
 │
 ├── internal-api/                 # separate service, own port (5000) — scannable
-│   ├── api.py                    #   IDOR vuln (EASY): /api/v1/users/<id>/setup-status
+│   ├── api.py                    #   IDOR vuln (EASY): GET /api/v1/users/<id>/setup-status
+│   │                             #   no auth check; idor_enumeration_suspected
+│   │                             #   alert at 3+ distinct IDs from one source
 │   ├── requirements.txt
 │   └── Dockerfile
 │
@@ -193,20 +204,52 @@ blue-team-mfa-portal/
 │   └── logstash/
 │       └── pipeline/
 │           └── logstash.conf     # grok-parses access.log; JSON-parses
-│                                 #   honeypot.log + internal-api.log + detections.log
+│                                 #   honeypot.log + internal-api.log +
+│                                 #   detections.log; ships to ES indices
 │
 ├── logs/
-│   ├── access.log
-│   ├── honeypot.log
-│   ├── internal-api.log
-│   ├── detections.log
-│   └── captures/                 # Wireshark .pcap files (scan_lo.pcap, legit.pcap)
-│
+│   ├── access.log                # all HTTP requests; WARNING events include
+│   │                             #   debug hits, HOST_HEADER_ANOMALY,
+│   │                             #   login/MFA failures, honeypot alerts
+│   ├── honeypot.log              # structured JSON; honeypot_hit CRITICAL events
+│   ├── internal-api.log          # structured JSON; setup_status_access +
+│   │                             #   idor_enumeration_suspected events
+│   ├── detections.log            # structured JSON; HOST_HEADER_ANOMALY +
+│   │                             #   mfa_replay_suspected events
+│   └── captures/                 # Wireshark evidence
+│       ├── scan_lo.pcap          # port scan capture (loopback)
+│       ├── legit.pcap            # legitimate traffic for contrast
+│       ├── driftlock-attacks.pcap # IDOR + debug + host header exploit captures
+│       ├── wireshark-idor.png    # annotated screenshot — IDOR enumeration
+│       ├── wireshark-debug.png   # annotated screenshot — debug endpoint leak
+│       └── wireshark-host-header.png  # annotated screenshot — Host: injection
 │
 └── reports/
-    ├── 01-design-report.md
-    ├── 02-hardening-report.md
-    └── 03-incident-response.md
+    ├── 01-design-report.md       # architecture, controls, vulnerability
+    │                             #   rationale, Wireshark findings
+    ├── 02-hardening-report.md    # defense-in-depth, network/container/app
+    │                             #   hardening, known/accepted items
+    ├── 03-incident-response.md   # attack timeline, log evidence, detection
+    │                             #   analysis, remediation + verification
+    └── evidence/
+        └── snapshot-manifest.txt # SHA-256 checksums of log snapshot
+                                  #   (access, internal-api, honeypot,
+                                  #    detections) — integrity proof
+```
+
+### Branch differences
+
+| File | `main` (vulnerable) | `patched` (fixed) |
+|---|---|---|
+| `web/app.py` | `/api/debug` endpoint present | `/api/debug` removed; `debug=False` |
+| `web/reset.py` | builds reset URL from `Host` header (vuln) | builds from `APP_URL`; logs `HOST_HEADER_ANOMALY` to `detections.log` |
+| `internal-api/api.py` | no auth on `setup-status` | requires `X-Internal-Api-Key` header |
+| `web/utils.py` | present (QR feature) | present (QR feature) |
+| `web/auth.py` | email code single-use; no replay block | same |
+| `web/detections.py` | detection helpers active | detection helpers active |
+| `logs/` | gitignored (live logs on server) | gitignored (live logs on server) |
+| `logs/captures/` | committed — pcap + screenshots | committed — pcap + screenshots |
+| `reports/evidence/` | snapshot-manifest.txt committed | snapshot-manifest.txt committed |
 ```
 ---
 
