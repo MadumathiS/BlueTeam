@@ -1,10 +1,12 @@
 from flask import current_app, render_template, request, jsonify
 from crypto_utils import hash_password
 from models import db, User, PasswordResetToken
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 import secrets
 import hashlib
 import smtplib
+import json
 from email.mime.text import MIMEText
 import os
 
@@ -12,14 +14,39 @@ TOKEN_EXPIRY_MINUTES = 15
 
 SMTP_HOST = os.getenv('SMTP_HOST', 'mailpit')
 SMTP_PORT = int(os.getenv('SMTP_PORT', 1025))
+
+# SECURITY: reset links are always built from this trusted, server-side
+# configured base URL — never from the incoming request Host header. This is
+# the fix for the Host Header Injection vulnerability present on `main`.
 APP_URL = os.getenv('APP_URL', 'http://localhost:4325')
+
+# Detection log — structured JSON, same pattern as the internal-api and honeypot
+# detections. Logstash parses this file with `json { source => "message" }` and
+# ships it to the driftlock-detections-* index for Kibana.
+LOGS_DIR = Path(os.getenv("LOGS_DIR", "/app/logs"))
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+DETECT_LOG = LOGS_DIR / "detections.log"
 
 
 def _hash_token(token):
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+def _write_detection(entry: dict):
+    """Append a structured JSON detection event to detections.log.
+
+    Written directly to the file (not via current_app.logger) so it lands in the
+    file Logstash ships, independent of the app's logging configuration.
+    """
+    try:
+        with open(DETECT_LOG, "a") as f:
+            f.write(json.dumps(entry) + "\n")
+    except Exception as e:
+        current_app.logger.error(f"Failed writing detection event: {e}")
+
+
 def _send_reset_email(to_email, username, reset_url):
+    # The link base is APP_URL only; a spoofed Host header cannot influence it.
     full_url = f"{APP_URL}{reset_url}"
     body = (
         f"Hi {username},\n\n"
@@ -55,6 +82,27 @@ def request_reset():
     email = str(data.get('email', '')).strip().lower()
     if not email:
         return jsonify({"error": "Email is required"}), 400
+
+    # Defense-in-depth detection (patched build):
+    # The reset link is always built from the trusted APP_URL (see
+    # _send_reset_email), so a spoofed Host header cannot poison it. We still
+    # inspect and log an anomalous Host header for visibility/alerting, but the
+    # value is never used to construct the link. The event is written as
+    # structured JSON to detections.log so it reaches Kibana reliably. Unlike
+    # `main`, no flag is emitted.
+    incoming_host = request.headers.get('Host', '')
+    expected_host = os.getenv('EXPECTED_HOST', 'localhost:4325')
+    if incoming_host and incoming_host != expected_host:
+        _write_detection({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "event": "HOST_HEADER_ANOMALY",
+            "incoming_host": incoming_host,
+            "expected_host": expected_host,
+            "source_ip": request.headers.get("X-Forwarded-For", request.remote_addr),
+            "path": "/reset-password",
+            "note": "blocked_link_built_from_APP_URL",
+            "severity": "HIGH",
+        })
 
     user = User.query.filter_by(email=email).first()
 
