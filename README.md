@@ -157,7 +157,6 @@ On Linux, Elasticsearch may require: sudo sysctl -w vm.max_map_count=262144
 ## Repository Structure
 
 ```
-```
 blue-team-mfa-portal/
 ├── docker-compose.yml            # web + db + redis + internal-api + ELK
 ├── .env                          # secrets (gitignored)
@@ -238,7 +237,7 @@ blue-team-mfa-portal/
 ```
 
 ### Branch differences
-
+```
 | File | `main` (vulnerable) | `patched` (fixed) |
 |---|---|---|
 | `web/app.py` | `/api/debug` endpoint present | `/api/debug` removed; `debug=False` |
