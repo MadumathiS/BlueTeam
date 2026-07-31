@@ -1,0 +1,781 @@
+2026-07-29 14:04:23,321 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-29 14:04:23,753 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to aaa@gmail.com
+2026-07-29 14:04:23,754 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: kien
+2026-07-29 14:14:05,313 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-29 14:14:05,740 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to aaa@gmail.com
+2026-07-29 14:14:05,740 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: kien
+2026-07-29 14:14:17,990 | INFO | 192.168.20.1 | POST /verify-mfa | MFA verify success: kien
+2026-07-29 14:14:50,752 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-29 14:14:51,177 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to aaa@gmail.com
+2026-07-29 14:14:51,178 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: kien
+2026-07-29 14:14:59,067 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for kien from 192.168.20.1
+2026-07-29 14:22:51,131 | INFO | 192.168.20.1 | GET /favicon.ico | 404 hit: /favicon.ico from 192.168.20.1
+2026-07-30 07:54:41,618 | INFO | 172.18.0.1 | GET /favicon.ico | 404 hit: /favicon.ico from 172.18.0.1
+2026-07-30 07:55:31,351 | INFO | 172.18.0.1 | POST /register | Register endpoint hit
+2026-07-30 07:55:31,577 | INFO | 172.18.0.1 | POST /register | New user registered: Madus
+2026-07-30 07:55:47,427 | INFO | 172.18.0.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=2
+2026-07-30 07:55:54,831 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-30 07:55:55,257 | INFO | 172.18.0.1 | POST /api/login | MFA code sent to madus@driftlock.com
+2026-07-30 07:55:55,257 | INFO | 172.18.0.1 | POST /api/login | Password OK, login code emailed: Madus
+2026-07-30 07:56:16,407 | INFO | 172.18.0.1 | POST /verify-mfa | MFA verify success: Madus
+2026-07-30 07:57:24,317 | INFO | 172.18.0.1 | POST /register | Register endpoint hit
+2026-07-30 07:57:24,533 | INFO | 172.18.0.1 | POST /register | New user registered: admin
+2026-07-30 07:57:44,158 | INFO | 172.18.0.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=3
+2026-07-30 07:58:02,035 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-30 07:58:02,467 | INFO | 172.18.0.1 | POST /api/login | MFA code sent to admin@driftlock.com
+2026-07-30 07:58:02,467 | INFO | 172.18.0.1 | POST /api/login | Password OK, login code emailed: admin
+2026-07-30 07:58:18,103 | INFO | 172.18.0.1 | POST /verify-mfa | MFA verify success: admin
+2026-07-30 08:00:28,163 | INFO | 172.18.0.1 | POST /register | Register endpoint hit
+2026-07-30 08:00:28,379 | INFO | 172.18.0.1 | POST /register | New user registered: Madu
+2026-07-30 08:01:08,396 | INFO | 172.18.0.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=4
+2026-07-30 08:01:19,890 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-30 08:01:20,319 | INFO | 172.18.0.1 | POST /api/login | MFA code sent to madu@driftlock.com
+2026-07-30 08:01:20,319 | INFO | 172.18.0.1 | POST /api/login | Password OK, login code emailed: Madu
+2026-07-30 08:01:36,611 | INFO | 172.18.0.1 | POST /verify-mfa | MFA verify success: Madu
+2026-07-30 08:05:43,785 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-30 08:05:44,210 | INFO | 172.18.0.1 | POST /api/login | MFA code sent to admin@driftlock.com
+2026-07-30 08:05:44,211 | INFO | 172.18.0.1 | POST /api/login | Password OK, login code emailed: admin
+2026-07-30 08:06:02,703 | INFO | 172.18.0.1 | POST /verify-mfa | MFA verify success: admin
+2026-07-30 08:10:22,866 | WARNING | 172.18.0.1 | GET /api/debug | Debug endpoint accessed by 172.18.0.1
+2026-07-30 08:20:34,572 | INFO | 172.18.0.1 | POST /register | Register endpoint hit
+2026-07-30 08:20:34,796 | INFO | 172.18.0.1 | POST /register | New user registered: terminator
+2026-07-30 08:21:35,103 | INFO | 172.18.0.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=5
+2026-07-30 08:25:36,470 | INFO | 172.18.0.1 | GET /favicon.ico | 404 hit: /favicon.ico from 172.18.0.1
+2026-07-30 08:27:35,921 | WARNING | 172.18.0.1 | GET /api/debug | Debug endpoint accessed by 172.18.0.1
+2026-07-30 08:30:42,578 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-30 08:30:43,005 | INFO | 172.18.0.1 | POST /api/login | MFA code sent to terminator@gmail.com
+2026-07-30 08:30:43,005 | INFO | 172.18.0.1 | POST /api/login | Password OK, login code emailed: terminator@gmail.com
+2026-07-30 08:31:01,210 | INFO | 172.18.0.1 | POST /verify-mfa | MFA verify success: terminator
+2026-07-30 08:38:41,397 | WARNING | 172.18.0.1 | GET /api/debug | Debug endpoint accessed by 172.18.0.1
+2026-07-30 08:38:41,494 | INFO | 172.18.0.1 | GET /favicon.ico | 404 hit: /favicon.ico from 172.18.0.1
+2026-07-30 08:53:15,752 | WARNING | 172.18.0.1 | GET /api/debug | Debug endpoint accessed by 172.18.0.1
+2026-07-30 08:59:43,044 | INFO | 172.18.0.1 | GET /favicon.ico | 404 hit: /favicon.ico from 172.18.0.1
+2026-07-30 09:03:14,071 | WARNING | 172.18.0.1 | GET /api/debug | Debug endpoint accessed by 172.18.0.1
+2026-07-30 09:03:14,111 | INFO | 172.18.0.1 | GET /favicon.ico | 404 hit: /favicon.ico from 172.18.0.1
+2026-07-30 09:04:06,400 | WARNING | 192.168.20.1 | GET /api/debug | Debug endpoint accessed by 192.168.20.1
+2026-07-30 09:05:24,364 | INFO | 192.168.20.1 | GET /favicon.ico | 404 hit: /favicon.ico from 192.168.20.1
+2026-07-30 09:05:38,265 | INFO | 192.168.20.1 | GET /favicon.ico | 404 hit: /favicon.ico from 192.168.20.1
+2026-07-30 09:11:01,862 | WARNING | 192.168.20.1 | GET /api/debug | Debug endpoint accessed by 192.168.20.1
+2026-07-30 09:11:50,992 | WARNING | 192.168.20.1 | GET /api/debug | Debug endpoint accessed by 192.168.20.1
+2026-07-30 09:44:58,355 | INFO | 192.168.20.1 | GET /accounts | 404 hit: /accounts from 192.168.20.1
+2026-07-30 09:44:58,360 | INFO | 192.168.20.1 | GET /export | 404 hit: /export from 192.168.20.1
+2026-07-30 09:44:58,360 | INFO | 192.168.20.1 | GET /profile | 404 hit: /profile from 192.168.20.1
+2026-07-30 09:44:58,362 | INFO | 192.168.20.1 | GET /logs | 404 hit: /logs from 192.168.20.1
+2026-07-30 09:44:58,363 | INFO | 192.168.20.1 | GET /dump | 404 hit: /dump from 192.168.20.1
+2026-07-30 09:44:58,364 | INFO | 192.168.20.1 | GET /sql | 404 hit: /sql from 192.168.20.1
+2026-07-30 09:44:58,365 | INFO | 192.168.20.1 | GET /db | 404 hit: /db from 192.168.20.1
+2026-07-30 09:44:58,366 | INFO | 192.168.20.1 | GET /flag | 404 hit: /flag from 192.168.20.1
+2026-07-30 09:44:58,367 | INFO | 192.168.20.1 | GET /flags | 404 hit: /flags from 192.168.20.1
+2026-07-30 09:44:58,367 | INFO | 192.168.20.1 | GET /verify | 404 hit: /verify from 192.168.20.1
+2026-07-30 09:44:58,369 | INFO | 192.168.20.1 | GET /secrets | 404 hit: /secrets from 192.168.20.1
+2026-07-30 09:44:58,370 | INFO | 192.168.20.1 | GET /auth | 404 hit: /auth from 192.168.20.1
+2026-07-30 09:44:58,371 | INFO | 192.168.20.1 | GET /dashboard | 404 hit: /dashboard from 192.168.20.1
+2026-07-30 09:44:58,375 | INFO | 192.168.20.1 | GET /settings | 404 hit: /settings from 192.168.20.1
+2026-07-30 09:44:58,395 | INFO | 192.168.20.1 | GET /config | 404 hit: /config from 192.168.20.1
+2026-07-30 09:44:58,395 | INFO | 192.168.20.1 | GET /health | 404 hit: /health from 192.168.20.1
+2026-07-30 09:44:58,395 | INFO | 192.168.20.1 | GET /refresh | 404 hit: /refresh from 192.168.20.1
+2026-07-30 09:44:58,396 | INFO | 192.168.20.1 | GET /token | 404 hit: /token from 192.168.20.1
+2026-07-30 09:44:58,396 | INFO | 192.168.20.1 | GET /users | 404 hit: /users from 192.168.20.1
+2026-07-30 09:44:58,396 | INFO | 192.168.20.1 | GET /metrics | 404 hit: /metrics from 192.168.20.1
+2026-07-30 09:44:58,396 | INFO | 192.168.20.1 | GET /api | 404 hit: /api from 192.168.20.1
+2026-07-30 09:44:58,397 | INFO | 192.168.20.1 | GET /backups | 404 hit: /backups from 192.168.20.1
+2026-07-30 09:44:58,397 | INFO | 192.168.20.1 | GET /backup | 404 hit: /backup from 192.168.20.1
+2026-07-30 09:44:58,397 | INFO | 192.168.20.1 | GET /v1 | 404 hit: /v1 from 192.168.20.1
+2026-07-30 09:44:58,397 | INFO | 192.168.20.1 | GET /internal | 404 hit: /internal from 192.168.20.1
+2026-07-30 09:44:58,398 | INFO | 192.168.20.1 | GET /secret | 404 hit: /secret from 192.168.20.1
+2026-07-30 09:44:58,398 | INFO | 192.168.20.1 | GET /roles | 404 hit: /roles from 192.168.20.1
+2026-07-30 09:44:58,398 | INFO | 192.168.20.1 | GET /status | 404 hit: /status from 192.168.20.1
+2026-07-30 09:44:58,399 | INFO | 192.168.20.1 | GET /admin | 404 hit: /admin from 192.168.20.1
+2026-07-30 09:44:58,399 | INFO | 192.168.20.1 | GET /test | 404 hit: /test from 192.168.20.1
+2026-07-30 09:44:58,400 | INFO | 192.168.20.1 | GET /mfa | 404 hit: /mfa from 192.168.20.1
+2026-07-30 09:44:58,401 | INFO | 192.168.20.1 | GET /totp | 404 hit: /totp from 192.168.20.1
+2026-07-30 09:44:58,401 | INFO | 192.168.20.1 | GET /debug | 404 hit: /debug from 192.168.20.1
+2026-07-30 09:44:58,401 | INFO | 192.168.20.1 | GET /setup-status | 404 hit: /setup-status from 192.168.20.1
+2026-07-30 09:44:58,401 | INFO | 192.168.20.1 | GET /v2 | 404 hit: /v2 from 192.168.20.1
+2026-07-30 09:44:58,402 | INFO | 192.168.20.1 | GET /files | 404 hit: /files from 192.168.20.1
+2026-07-30 09:44:58,494 | INFO | 192.168.20.1 | GET /download | 404 hit: /download from 192.168.20.1
+2026-07-30 09:44:58,511 | INFO | 192.168.20.1 | GET /upload | 404 hit: /upload from 192.168.20.1
+2026-07-30 09:44:58,512 | INFO | 192.168.20.1 | GET /static | 404 hit: /static from 192.168.20.1
+2026-07-30 09:44:58,549 | INFO | 192.168.20.1 | GET /system | 404 hit: /system from 192.168.20.1
+2026-07-30 09:44:58,550 | INFO | 192.168.20.1 | GET /test | 404 hit: /test from 192.168.20.1
+2026-07-30 09:44:58,552 | INFO | 192.168.20.1 | GET /api | 404 hit: /api from 192.168.20.1
+2026-07-30 09:44:58,554 | INFO | 192.168.20.1 | GET /env | 404 hit: /env from 192.168.20.1
+2026-07-30 09:44:58,561 | INFO | 192.168.20.1 | GET /api/users | 404 hit: /api/users from 192.168.20.1
+2026-07-30 09:44:58,580 | INFO | 192.168.20.1 | GET /version | 404 hit: /version from 192.168.20.1
+2026-07-30 09:44:58,581 | INFO | 192.168.20.1 | GET /info | 404 hit: /info from 192.168.20.1
+2026-07-30 09:44:58,581 | INFO | 192.168.20.1 | GET /help | 404 hit: /help from 192.168.20.1
+2026-07-30 09:44:58,633 | WARNING | 192.168.20.1 | GET /api/debug | Debug endpoint accessed by 192.168.20.1
+2026-07-30 09:44:58,639 | INFO | 192.168.20.1 | GET /api/docs | 404 hit: /api/docs from 192.168.20.1
+2026-07-30 09:44:58,649 | INFO | 192.168.20.1 | GET /api/admin | 404 hit: /api/admin from 192.168.20.1
+2026-07-30 09:44:58,661 | INFO | 192.168.20.1 | GET /echo | 404 hit: /echo from 192.168.20.1
+2026-07-30 09:44:58,685 | INFO | 192.168.20.1 | GET /api/auth | 404 hit: /api/auth from 192.168.20.1
+2026-07-30 09:44:58,686 | INFO | 192.168.20.1 | GET /api/health | 404 hit: /api/health from 192.168.20.1
+2026-07-30 09:44:58,687 | INFO | 192.168.20.1 | GET /api/metrics | 404 hit: /api/metrics from 192.168.20.1
+2026-07-30 09:44:58,693 | INFO | 192.168.20.1 | GET /api/test | 404 hit: /api/test from 192.168.20.1
+2026-07-30 09:44:58,699 | INFO | 192.168.20.1 | GET /api/v2/... | 404 hit: /api/v2/... from 192.168.20.1
+2026-07-30 09:44:58,700 | INFO | 192.168.20.1 | GET /api/v1/... | 404 hit: /api/v1/... from 192.168.20.1
+2026-07-30 09:44:58,700 | INFO | 192.168.20.1 | GET /api/v3/... | 404 hit: /api/v3/... from 192.168.20.1
+2026-07-30 09:44:58,701 | INFO | 192.168.20.1 | GET /api/swagger (API dokümantasyonunu bulan en kritik yollardan biridir) | 404 hit: /api/swagger (API dokümantasyonunu bulan en kritik yollardan biridir) from 192.168.20.1
+2026-07-30 09:50:34,909 | INFO | 192.168.20.1 | GET /nmaplowercheck1785405034 | 404 hit: /nmaplowercheck1785405034 from 192.168.20.1
+2026-07-30 09:50:34,911 | INFO | 192.168.20.1 | POST /sdk | 404 hit: /sdk from 192.168.20.1
+2026-07-30 09:50:34,960 | INFO | 192.168.20.1 | GET /evox/about | 404 hit: /evox/about from 192.168.20.1
+2026-07-30 09:50:34,983 | INFO | 192.168.20.1 | GET /HNAP1 | 404 hit: /HNAP1 from 192.168.20.1
+2026-07-30 09:53:41,418 | INFO | 192.168.20.1 | POST /register | Register endpoint hit
+2026-07-30 09:53:41,654 | INFO | 192.168.20.1 | POST /register | New user registered: torvallds
+2026-07-30 09:54:41,374 | INFO | 192.168.20.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=6
+2026-07-30 09:54:58,975 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 09:54:59,494 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to tr@gmail.com
+2026-07-30 09:54:59,494 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: tr@gmail.com
+2026-07-30 09:55:23,247 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 09:55:32,975 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 09:55:42,214 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 09:55:46,838 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 09:55:50,674 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code sent to tr@gmail.com
+2026-07-30 09:55:50,675 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code resent to tr@gmail.com
+2026-07-30 09:56:58,717 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 09:57:00,623 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code sent to tr@gmail.com
+2026-07-30 09:57:00,624 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code resent to tr@gmail.com
+2026-07-30 09:57:20,194 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 09:57:23,156 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:00:14,267 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:00:16,430 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:00:18,976 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:01:08,686 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:01:13,557 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:01:56,829 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:02:17,592 | INFO | 192.168.20.1 | GET /favicon.ico | 404 hit: /favicon.ico from 192.168.20.1
+2026-07-30 10:02:32,595 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 10:02:32,807 | WARNING | 192.168.20.1 | POST /api/login | Login failed (no such user) from 192.168.20.1
+2026-07-30 10:02:36,396 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:02:38,188 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:02:40,468 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:02:42,836 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 10:02:44,391 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code sent to tr@gmail.com
+2026-07-30 10:02:44,391 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code resent to tr@gmail.com
+2026-07-30 10:03:13,357 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 10:03:13,569 | WARNING | 192.168.20.1 | POST /api/login | Login failed (no such user) from 192.168.20.1
+2026-07-30 10:03:21,238 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 10:03:21,451 | WARNING | 192.168.20.1 | POST /api/login | Login failed (no such user) from 192.168.20.1
+2026-07-30 10:03:43,184 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 10:03:43,398 | WARNING | 192.168.20.1 | POST /api/login | Login failed (no such user) from 192.168.20.1
+2026-07-30 10:21:52,727 | WARNING | 192.168.20.1 | GET /api/debug | Debug endpoint accessed by 192.168.20.1
+2026-07-30 10:27:02,467 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 10:27:44,983 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 10:27:45,197 | WARNING | 192.168.20.1 | POST /api/login | Login failed for admin from 192.168.20.1
+2026-07-30 11:05:44,290 | INFO | 192.168.20.1 | GET /.git/HEAD | 404 hit: /.git/HEAD from 192.168.20.1
+2026-07-30 11:06:54,756 | INFO | 192.168.20.1 | GET /v1 | 404 hit: /v1 from 192.168.20.1
+2026-07-30 11:06:54,757 | INFO | 192.168.20.1 | GET /debug | 404 hit: /debug from 192.168.20.1
+2026-07-30 11:06:54,757 | INFO | 192.168.20.1 | GET /refresh | 404 hit: /refresh from 192.168.20.1
+2026-07-30 11:06:54,814 | INFO | 192.168.20.1 | GET /admin | 404 hit: /admin from 192.168.20.1
+2026-07-30 11:06:54,814 | INFO | 192.168.20.1 | GET /test | 404 hit: /test from 192.168.20.1
+2026-07-30 11:06:54,814 | INFO | 192.168.20.1 | GET /v2 | 404 hit: /v2 from 192.168.20.1
+2026-07-30 11:06:54,815 | INFO | 192.168.20.1 | GET /status | 404 hit: /status from 192.168.20.1
+2026-07-30 11:06:54,815 | INFO | 192.168.20.1 | GET /profile | 404 hit: /profile from 192.168.20.1
+2026-07-30 11:06:54,815 | INFO | 192.168.20.1 | GET /accounts | 404 hit: /accounts from 192.168.20.1
+2026-07-30 11:06:54,815 | INFO | 192.168.20.1 | GET /mfa | 404 hit: /mfa from 192.168.20.1
+2026-07-30 11:06:54,816 | INFO | 192.168.20.1 | GET /setup-status | 404 hit: /setup-status from 192.168.20.1
+2026-07-30 11:06:54,816 | INFO | 192.168.20.1 | GET /totp | 404 hit: /totp from 192.168.20.1
+2026-07-30 11:06:54,816 | INFO | 192.168.20.1 | GET /files | 404 hit: /files from 192.168.20.1
+2026-07-30 11:06:54,816 | INFO | 192.168.20.1 | GET /verify | 404 hit: /verify from 192.168.20.1
+2026-07-30 11:06:54,817 | INFO | 192.168.20.1 | GET /api | 404 hit: /api from 192.168.20.1
+2026-07-30 11:06:54,817 | INFO | 192.168.20.1 | GET /token | 404 hit: /token from 192.168.20.1
+2026-07-30 11:06:54,817 | INFO | 192.168.20.1 | GET /secret | 404 hit: /secret from 192.168.20.1
+2026-07-30 11:06:54,818 | INFO | 192.168.20.1 | GET /roles | 404 hit: /roles from 192.168.20.1
+2026-07-30 11:06:54,818 | INFO | 192.168.20.1 | GET /secrets | 404 hit: /secrets from 192.168.20.1
+2026-07-30 11:06:54,819 | INFO | 192.168.20.1 | GET /flag | 404 hit: /flag from 192.168.20.1
+2026-07-30 11:06:54,820 | INFO | 192.168.20.1 | GET /flags | 404 hit: /flags from 192.168.20.1
+2026-07-30 11:06:54,821 | INFO | 192.168.20.1 | GET /sql | 404 hit: /sql from 192.168.20.1
+2026-07-30 11:06:54,821 | INFO | 192.168.20.1 | GET /dump | 404 hit: /dump from 192.168.20.1
+2026-07-30 11:06:54,822 | INFO | 192.168.20.1 | GET /db | 404 hit: /db from 192.168.20.1
+2026-07-30 11:06:54,823 | INFO | 192.168.20.1 | GET /export | 404 hit: /export from 192.168.20.1
+2026-07-30 11:06:54,828 | INFO | 192.168.20.1 | GET /internal | 404 hit: /internal from 192.168.20.1
+2026-07-30 11:06:54,830 | INFO | 192.168.20.1 | GET /users | 404 hit: /users from 192.168.20.1
+2026-07-30 11:06:54,831 | INFO | 192.168.20.1 | GET /backup | 404 hit: /backup from 192.168.20.1
+2026-07-30 11:06:54,832 | INFO | 192.168.20.1 | GET /metrics | 404 hit: /metrics from 192.168.20.1
+2026-07-30 11:06:54,833 | INFO | 192.168.20.1 | GET /config | 404 hit: /config from 192.168.20.1
+2026-07-30 11:06:54,833 | INFO | 192.168.20.1 | GET /health | 404 hit: /health from 192.168.20.1
+2026-07-30 11:06:54,834 | INFO | 192.168.20.1 | GET /settings | 404 hit: /settings from 192.168.20.1
+2026-07-30 11:06:54,866 | INFO | 192.168.20.1 | GET /auth | 404 hit: /auth from 192.168.20.1
+2026-07-30 11:06:54,983 | INFO | 192.168.20.1 | GET /logs | 404 hit: /logs from 192.168.20.1
+2026-07-30 11:06:54,985 | INFO | 192.168.20.1 | GET /backups | 404 hit: /backups from 192.168.20.1
+2026-07-30 11:06:54,986 | INFO | 192.168.20.1 | GET /dashboard | 404 hit: /dashboard from 192.168.20.1
+2026-07-30 11:06:54,987 | INFO | 192.168.20.1 | GET /upload | 404 hit: /upload from 192.168.20.1
+2026-07-30 11:06:54,989 | INFO | 192.168.20.1 | GET /static | 404 hit: /static from 192.168.20.1
+2026-07-30 11:06:54,991 | INFO | 192.168.20.1 | GET /system | 404 hit: /system from 192.168.20.1
+2026-07-30 11:06:54,997 | INFO | 192.168.20.1 | GET /version | 404 hit: /version from 192.168.20.1
+2026-07-30 11:06:54,998 | INFO | 192.168.20.1 | GET /.env | 404 hit: /.env from 192.168.20.1
+2026-07-30 11:06:54,999 | INFO | 192.168.20.1 | GET /info | 404 hit: /info from 192.168.20.1
+2026-07-30 11:06:55,000 | INFO | 192.168.20.1 | GET /echo | 404 hit: /echo from 192.168.20.1
+2026-07-30 11:06:55,002 | INFO | 192.168.20.1 | GET /test | 404 hit: /test from 192.168.20.1
+2026-07-30 11:06:55,003 | INFO | 192.168.20.1 | GET /help | 404 hit: /help from 192.168.20.1
+2026-07-30 11:06:55,018 | INFO | 192.168.20.1 | GET /api/v1/... | 404 hit: /api/v1/... from 192.168.20.1
+2026-07-30 11:06:55,018 | INFO | 192.168.20.1 | GET /api/metrics | 404 hit: /api/metrics from 192.168.20.1
+2026-07-30 11:06:55,019 | INFO | 192.168.20.1 | GET /api/health | 404 hit: /api/health from 192.168.20.1
+2026-07-30 11:06:55,020 | INFO | 192.168.20.1 | GET /api/docs | 404 hit: /api/docs from 192.168.20.1
+2026-07-30 11:06:55,020 | INFO | 192.168.20.1 | GET /api/auth | 404 hit: /api/auth from 192.168.20.1
+2026-07-30 11:06:55,021 | INFO | 192.168.20.1 | GET /api/test | 404 hit: /api/test from 192.168.20.1
+2026-07-30 11:06:55,026 | INFO | 192.168.20.1 | GET /api | 404 hit: /api from 192.168.20.1
+2026-07-30 11:06:55,022 | INFO | 192.168.20.1 | GET /api/admin | 404 hit: /api/admin from 192.168.20.1
+2026-07-30 11:06:55,023 | INFO | 192.168.20.1 | GET /download | 404 hit: /download from 192.168.20.1
+2026-07-30 11:06:55,023 | INFO | 192.168.20.1 | GET /api/users | 404 hit: /api/users from 192.168.20.1
+2026-07-30 11:06:55,024 | INFO | 192.168.20.1 | GET /api/v3/... | 404 hit: /api/v3/... from 192.168.20.1
+2026-07-30 11:06:55,026 | WARNING | 192.168.20.1 | GET /api/debug | Debug endpoint accessed by 192.168.20.1
+2026-07-30 11:06:55,021 | INFO | 192.168.20.1 | GET /api/swagger (API dokümantasyonunu bulan en kritik yollardan biridir) | 404 hit: /api/swagger (API dokümantasyonunu bulan en kritik yollardan biridir) from 192.168.20.1
+2026-07-30 11:06:55,028 | INFO | 192.168.20.1 | GET /api/v2/... | 404 hit: /api/v2/... from 192.168.20.1
+2026-07-30 11:27:49,003 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 11:27:49,429 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to tr@gmail.com
+2026-07-30 11:27:49,429 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: tr@gmail.com
+2026-07-30 11:27:57,383 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:28:09,480 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:28:16,006 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:28:28,545 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:28:52,893 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:29:09,658 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:29:13,928 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:29:14,371 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:29:14,665 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:29:27,740 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code sent to tr@gmail.com
+2026-07-30 11:29:27,740 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code resent to tr@gmail.com
+2026-07-30 11:34:40,620 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:34:42,100 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:37:45,240 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 11:37:52,522 | INFO | 192.168.20.1 | GET /api/ | 404 hit: /api/ from 192.168.20.1
+2026-07-30 11:38:02,077 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 11:38:07,664 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 11:38:58,968 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 11:39:21,999 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 11:39:49,352 | INFO | 192.168.20.1 | GET /api/users | 404 hit: /api/users from 192.168.20.1
+2026-07-30 11:40:24,998 | INFO | 192.168.20.1 | GET /api/v1/users | 404 hit: /api/v1/users from 192.168.20.1
+2026-07-30 11:40:36,519 | INFO | 192.168.20.1 | GET /api/v1/user=1 | 404 hit: /api/v1/user=1 from 192.168.20.1
+2026-07-30 11:40:57,856 | INFO | 192.168.20.1 | GET /api/users | 404 hit: /api/users from 192.168.20.1
+2026-07-30 11:41:27,965 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 11:41:28,174 | WARNING | 192.168.20.1 | POST /api/login | Login failed for admin from 192.168.20.1
+2026-07-30 11:43:13,290 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:43:15,482 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:44:28,095 | INFO | 172.18.0.1 | GET /nice ports,/Trinity.txt.bak | 404 hit: /nice ports,/Trinity.txt.bak from 172.18.0.1
+2026-07-30 11:45:47,296 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:49:02,713 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:50:56,309 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 11:50:56,732 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to aaa@gmail.com
+2026-07-30 11:50:56,732 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: kien
+2026-07-30 11:51:08,751 | INFO | 192.168.20.1 | POST /verify-mfa | MFA verify success: kien
+2026-07-30 11:55:23,102 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:55:36,861 | INFO | 192.168.20.1 | POST /register | Register endpoint hit
+2026-07-30 11:55:37,169 | INFO | 192.168.20.1 | POST /register | New user registered: 4Derya
+2026-07-30 11:55:38,791 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:55:40,390 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:55:48,980 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:56:01,490 | INFO | 192.168.20.1 | POST /register | Register endpoint hit
+2026-07-30 11:56:01,704 | INFO | 192.168.20.1 | POST /register | New user registered: Red
+2026-07-30 11:56:28,172 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 11:56:47,360 | INFO | 192.168.20.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=8
+2026-07-30 11:56:53,502 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 11:56:53,925 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to red@red.com
+2026-07-30 11:56:53,925 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: Red
+2026-07-30 11:57:13,939 | INFO | 192.168.20.1 | POST /register | Register endpoint hit
+2026-07-30 11:57:14,153 | INFO | 192.168.20.1 | POST /register | New user registered: BarackObama
+2026-07-30 11:57:14,660 | INFO | 192.168.20.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=7
+2026-07-30 11:57:26,646 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 11:57:27,072 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to random@add.co
+2026-07-30 11:57:27,072 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: 4Derya
+2026-07-30 11:58:42,840 | INFO | 192.168.20.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=9
+2026-07-30 11:58:51,931 | WARNING | 192.168.20.1 | POST /verify-mfa | MFA verify failed for torvallds from 192.168.20.1
+2026-07-30 12:00:49,504 | INFO | 192.168.20.1 | POST /verify-mfa | MFA verify success: 4Derya
+2026-07-30 12:33:57,243 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 12:33:57,692 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to br@gmail.com
+2026-07-30 12:33:57,692 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: br@gmail.com
+2026-07-30 12:34:16,993 | INFO | 192.168.20.1 | POST /verify-mfa | MFA verify success: BarackObama
+2026-07-30 12:40:11,882 | INFO | 192.168.20.1 | GET /favicon.ico | 404 hit: /favicon.ico from 192.168.20.1
+2026-07-30 12:43:54,341 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-30 12:43:54,765 | INFO | 172.18.0.1 | POST /api/login | MFA code sent to madus@driftlock.com
+2026-07-30 12:43:54,765 | INFO | 172.18.0.1 | POST /api/login | Password OK, login code emailed: Madus
+2026-07-30 12:44:08,239 | INFO | 172.18.0.1 | POST /verify-mfa | MFA verify success: Madus
+2026-07-30 13:12:11,858 | INFO | 192.168.20.1 | GET /nmaplowercheck1785417117 | 404 hit: /nmaplowercheck1785417117 from 192.168.20.1
+2026-07-30 13:12:11,868 | INFO | 192.168.20.1 | POST /sdk | 404 hit: /sdk from 192.168.20.1
+2026-07-30 13:12:11,896 | INFO | 192.168.20.1 | GET /evox/about | 404 hit: /evox/about from 192.168.20.1
+2026-07-30 13:12:11,908 | INFO | 192.168.20.1 | GET /HNAP1 | 404 hit: /HNAP1 from 192.168.20.1
+2026-07-30 13:26:18,960 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=172.18.0.1 | path=/reset-password
+2026-07-30 13:26:18,962 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | email=victim@example.com | no_matching_account
+2026-07-30 13:28:15,992 | INFO | 192.168.20.1 | GET /api/v1/profile | 404 hit: /api/v1/profile from 192.168.20.1
+2026-07-30 13:29:09,803 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:45,667 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:45,836 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,109 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,152 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,232 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,261 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,299 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,330 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,449 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,504 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,580 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,604 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,631 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,658 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,683 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,720 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,751 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,775 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,807 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,840 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,922 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,951 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:46,984 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,011 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,039 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,081 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,114 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,148 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,178 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,206 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,240 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,275 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,301 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,325 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,349 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,379 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,407 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,432 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,464 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,489 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,513 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,542 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,566 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,599 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,624 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,647 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,681 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,702 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,729 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,751 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,802 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,824 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,854 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,877 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,924 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,950 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:47,977 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:48,000 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:48,025 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:48,055 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:48,076 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:48,102 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 13:29:48,129 | INFO | 192.168.20.1 | GET /api/user | 404 hit: /api/user from 192.168.20.1
+2026-07-30 14:14:03,993 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 14:14:04,202 | WARNING | 192.168.20.1 | POST /api/login | Login failed for madus@driftlock.com from 192.168.20.1
+2026-07-30 14:14:08,447 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 14:14:08,656 | WARNING | 192.168.20.1 | POST /api/login | Login failed for madus@driftlock.com from 192.168.20.1
+2026-07-30 14:14:09,041 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 14:14:09,253 | WARNING | 192.168.20.1 | POST /api/login | Login failed for madus@driftlock.com from 192.168.20.1
+2026-07-30 14:14:39,373 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-30 14:14:39,375 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | email=madus@driftlock.io | no_matching_account
+2026-07-30 14:15:03,797 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-30 14:15:03,807 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=Madus
+2026-07-30 14:15:03,810 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to madus@driftlock.com
+2026-07-30 14:15:27,139 | INFO | 192.168.20.1 | POST /api/reset-password/zI3q41k6wo-4F8lN7GSG90p0IEr6GII1fROZPwl-n0c | PASSWORD_RESET_COMPLETE | user=Madus
+2026-07-30 14:15:52,027 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 14:15:52,450 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to madus@driftlock.com
+2026-07-30 14:15:52,450 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: madus@driftlock.com
+2026-07-30 14:16:20,294 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code sent to madus@driftlock.com
+2026-07-30 14:16:20,294 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code resent to madus@driftlock.com
+2026-07-30 14:32:02,503 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 14:32:02,922 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to random@add.co
+2026-07-30 14:32:02,923 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: 4Derya
+2026-07-30 14:32:21,315 | INFO | 192.168.20.1 | POST /verify-mfa | MFA verify success: 4Derya
+2026-07-30 14:42:04,919 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 14:42:05,139 | WARNING | 192.168.20.1 | POST /api/login | Login failed for 4Derya from 192.168.20.1
+2026-07-30 14:42:15,015 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 14:42:15,232 | WARNING | 192.168.20.1 | POST /api/login | Login failed for 4Derya from 192.168.20.1
+2026-07-30 14:42:16,124 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-30 14:42:16,337 | WARNING | 192.168.20.1 | POST /api/login | Login failed for 4Derya from 192.168.20.1
+2026-07-30 14:42:35,347 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-30 14:42:35,353 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-30 14:42:35,357 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-30 14:43:07,073 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-30 14:43:07,078 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=Madus
+2026-07-30 14:43:07,081 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to madus@driftlock.com
+2026-07-30 14:46:21,307 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code sent to madus@driftlock.com
+2026-07-30 14:46:21,307 | INFO | 192.168.20.1 | POST /api/resend-mfa | MFA code resent to madus@driftlock.com
+2026-07-30 14:46:38,456 | INFO | 192.168.20.1 | POST /verify-mfa | MFA verify success: Madus
+2026-07-30 14:56:16,447 | INFO | 172.19.0.1 | GET /nice ports,/Trinity.txt.bak | 404 hit: /nice ports,/Trinity.txt.bak from 172.19.0.1
+2026-07-30 15:02:44,125 | INFO | 172.18.0.1 | GET /nice ports,/Trinity.txt.bak | 404 hit: /nice ports,/Trinity.txt.bak from 172.18.0.1
+2026-07-30 15:04:29,149 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-30 15:04:29,155 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-30 15:04:29,158 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-30 15:04:31,959 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-30 15:04:31,964 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-30 15:04:31,966 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-30 15:04:35,785 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-30 15:04:35,790 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-30 15:04:35,793 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-30 15:05:10,605 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-30 15:05:10,610 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-30 15:05:10,613 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 08:06:29,427 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:06:29,843 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to random@add.co
+2026-07-31 08:06:29,843 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: 4Derya
+2026-07-31 08:07:06,819 | INFO | 192.168.20.1 | POST /verify-mfa | MFA verify success: 4Derya
+2026-07-31 08:07:20,067 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:07:20,275 | WARNING | 192.168.20.1 | POST /api/login | Login failed (no such user) from 192.168.20.1
+2026-07-31 08:07:21,650 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:07:21,859 | WARNING | 192.168.20.1 | POST /api/login | Login failed (no such user) from 192.168.20.1
+2026-07-31 08:08:27,805 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:08:28,026 | WARNING | 192.168.20.1 | POST /api/login | Login failed (no such user) from 192.168.20.1
+2026-07-31 08:08:30,645 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:08:30,851 | WARNING | 192.168.20.1 | POST /api/login | Login failed (no such user) from 192.168.20.1
+2026-07-31 08:08:30,925 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:08:31,134 | WARNING | 192.168.20.1 | POST /api/login | Login failed (no such user) from 192.168.20.1
+2026-07-31 08:15:46,915 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 08:15:46,920 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 08:15:46,923 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 08:15:57,947 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 08:15:57,948 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | email=random@add.com | no_matching_account
+2026-07-31 08:16:01,436 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 08:16:01,437 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | email=random@add.com | no_matching_account
+2026-07-31 08:16:34,780 | INFO | 192.168.20.1 | POST /api/reset-password/0AywsX6QLLinBD3jAiIsrLiTdMaxzRoSVGzPYFoK4QU | PASSWORD_RESET_COMPLETE | user=4Derya
+2026-07-31 08:17:07,693 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:17:08,116 | INFO | 192.168.20.1 | POST /api/login | MFA code sent to random@add.co
+2026-07-31 08:17:08,116 | INFO | 192.168.20.1 | POST /api/login | Password OK, login code emailed: 4Derya
+2026-07-31 08:17:24,741 | INFO | 192.168.20.1 | POST /verify-mfa | MFA verify success: 4Derya
+2026-07-31 08:19:59,912 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:20:00,120 | WARNING | 192.168.20.1 | POST /api/login | Login failed for 4Derya from 192.168.20.1
+2026-07-31 08:20:00,540 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:20:00,681 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:20:00,749 | WARNING | 192.168.20.1 | POST /api/login | Login failed for 4Derya from 192.168.20.1
+2026-07-31 08:20:00,824 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 08:20:00,903 | WARNING | 192.168.20.1 | POST /api/login | Login failed for 4Derya from 192.168.20.1
+2026-07-31 08:20:01,039 | WARNING | 192.168.20.1 | POST /api/login | Login failed for 4Derya from 192.168.20.1
+2026-07-31 08:20:21,260 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 08:20:21,265 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 08:20:21,268 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 08:36:22,404 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 08:36:22,409 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 08:36:22,412 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 08:36:26,726 | INFO | 192.168.20.1 | POST /forgot-password | 404 hit: /forgot-password from 192.168.20.1
+2026-07-31 08:36:53,838 | INFO | 192.168.20.1 | POST /forgot-password | 404 hit: /forgot-password from 192.168.20.1
+2026-07-31 08:37:34,247 | INFO | 192.168.20.1 | POST /api/forgot-password | 404 hit: /api/forgot-password from 192.168.20.1
+2026-07-31 08:38:15,221 | INFO | 192.168.20.1 | POST /recover | 404 hit: /recover from 192.168.20.1
+2026-07-31 08:45:45,675 | INFO | 192.168.20.1 | POST /forgot-password | 404 hit: /forgot-password from 192.168.20.1
+2026-07-31 08:47:08,197 | INFO | 192.168.20.1 | POST /forgot-password | 404 hit: /forgot-password from 192.168.20.1
+2026-07-31 08:51:31,580 | INFO | 192.168.20.1 | POST /forgot-password | 404 hit: /forgot-password from 192.168.20.1
+2026-07-31 08:51:52,024 | INFO | 192.168.20.1 | POST /forgot-password | 404 hit: /forgot-password from 192.168.20.1
+2026-07-31 08:52:12,488 | INFO | 192.168.20.1 | POST /forgot-password | 404 hit: /forgot-password from 192.168.20.1
+2026-07-31 08:58:13,037 | INFO | 192.168.20.1 | POST /forgot-password | 404 hit: /forgot-password from 192.168.20.1
+2026-07-31 09:20:29,007 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 09:20:29,012 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 09:20:29,015 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 09:20:30,512 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 09:20:30,516 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 09:20:30,519 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 09:20:31,920 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 09:20:31,923 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 09:20:31,926 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 09:41:53,380 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-31 09:41:53,764 | WARNING | 172.18.0.1 | POST /api/login | Login failed for kien from 172.18.0.1
+2026-07-31 09:41:54,591 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-31 09:41:54,866 | WARNING | 172.18.0.1 | POST /api/login | Login failed for kien from 172.18.0.1
+2026-07-31 09:41:55,354 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-31 09:41:55,607 | WARNING | 172.18.0.1 | POST /api/login | Login failed for kien from 172.18.0.1
+2026-07-31 09:41:58,948 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=localhost:4326 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=172.18.0.1 | path=/reset-password
+2026-07-31 09:41:58,962 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=kien
+2026-07-31 09:41:58,975 | INFO | 172.18.0.1 | POST /api/reset-password | Reset email sent to aaa@gmail.com
+2026-07-31 09:42:06,514 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 09:42:06,724 | WARNING | 192.168.20.1 | POST /api/login | Login failed for br@gmail.com from 192.168.20.1
+2026-07-31 09:42:13,681 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 09:42:13,896 | WARNING | 192.168.20.1 | POST /api/login | Login failed for br@gmail.com from 192.168.20.1
+2026-07-31 09:42:17,513 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 09:42:17,726 | WARNING | 192.168.20.1 | POST /api/login | Login failed for br@gmail.com from 192.168.20.1
+2026-07-31 09:43:20,974 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 09:43:20,980 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=BarackObama
+2026-07-31 09:43:20,983 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to br@gmail.com
+2026-07-31 09:48:55,643 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 09:48:55,649 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 09:48:55,651 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 09:50:12,978 | INFO | 172.18.0.1 | GET /favicon.ico | 404 hit: /favicon.ico from 172.18.0.1
+2026-07-31 10:06:04,739 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 10:06:04,744 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=BarackObama
+2026-07-31 10:06:04,749 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to br@gmail.com
+2026-07-31 10:10:57,302 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 10:10:57,307 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=BarackObama
+2026-07-31 10:10:57,310 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to br@gmail.com
+2026-07-31 10:11:14,748 | INFO | 192.168.20.1 | POST /api/reset-password/2r33JMbxy7gArtD8svM1S4lkaY0Q_IHOagv7-kHZUCQ | PASSWORD_RESET_COMPLETE | user=BarackObama
+2026-07-31 10:13:25,384 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 10:13:25,390 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=BarackObama
+2026-07-31 10:13:25,392 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to br@gmail.com
+2026-07-31 10:14:21,190 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=172.18.0.1 | path=/reset-password
+2026-07-31 10:14:21,196 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=kien
+2026-07-31 10:14:21,199 | INFO | 172.18.0.1 | POST /api/reset-password | Reset email sent to aaa@gmail.com
+2026-07-31 10:19:49,590 | INFO | 192.168.20.1 | POST /api/reset-password/-FRRoqXx8buF9wkpgeTPmYwxdPiPMzuPP-9YlmFQc50 | PASSWORD_RESET_COMPLETE | user=BarackObama
+2026-07-31 10:20:38,375 | INFO | 192.168.20.1 | POST /forgot-password | 404 hit: /forgot-password from 192.168.20.1
+2026-07-31 10:22:47,254 | INFO | 192.168.20.1 | POST /api/forgot-password | 404 hit: /api/forgot-password from 192.168.20.1
+2026-07-31 10:24:48,397 | WARNING | 192.168.20.1 | POST /reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 10:24:48,399 | INFO | 192.168.20.1 | POST /reset-password | PASSWORD_RESET_REQUESTED | email=barack@driftlock.io | no_matching_account
+2026-07-31 10:34:12,547 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 10:34:12,553 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=BarackObama
+2026-07-31 10:34:12,556 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to br@gmail.com
+2026-07-31 10:37:52,175 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 10:37:52,180 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=BarackObama
+2026-07-31 10:37:52,182 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to br@gmail.com
+2026-07-31 10:38:26,705 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 10:38:26,711 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=BarackObama
+2026-07-31 10:38:26,714 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to br@gmail.com
+2026-07-31 11:58:17,637 | INFO | 192.168.20.1 | GET /reset-passwd/2aRO8q-Qbzsro5r-H1YWKVQE0Pb3b2KNFoJk9FDWqtE | 404 hit: /reset-passwd/2aRO8q-Qbzsro5r-H1YWKVQE0Pb3b2KNFoJk9FDWqtE from 192.168.20.1
+2026-07-31 12:00:21,722 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 12:00:21,733 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=BarackObama
+2026-07-31 12:00:21,737 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to br@gmail.com
+2026-07-31 12:38:01,900 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 12:38:01,905 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 12:38:01,908 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 12:38:06,826 | INFO | 192.168.20.1 | GET /favicon.ico | 404 hit: /favicon.ico from 192.168.20.1
+2026-07-31 12:38:26,916 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=kien.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=172.18.0.1 | path=/reset-password
+2026-07-31 12:38:26,921 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=kien
+2026-07-31 12:38:26,924 | INFO | 172.18.0.1 | POST /api/reset-password | Reset email sent to aaa@gmail.com
+2026-07-31 12:42:13,867 | INFO | 192.168.20.1 | GET /backups_secret | 404 hit: /backups_secret from 192.168.20.1
+2026-07-31 12:48:13,904 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 12:48:13,908 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 12:48:13,911 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 12:49:47,557 | INFO | 192.168.20.1 | GET /api/v1/messages | 404 hit: /api/v1/messages from 192.168.20.1
+2026-07-31 12:49:52,713 | INFO | 192.168.20.1 | GET /api/v1/messages | 404 hit: /api/v1/messages from 192.168.20.1
+2026-07-31 12:50:40,954 | WARNING | 172.18.0.1 | GET /backup_secrets/ | HONEYPOT ALERT: {"timestamp": "2026-07-31T12:50:40.954Z", "event": "honeypot_hit", "severity": "CRITICAL", "source_ip": "172.18.0.1", "path": "/backup_secrets/", "user_agent": "curl/7.81.0", "details": "Request for disallowed path listed in robots.txt: /backup_secrets/"}
+2026-07-31 12:50:56,710 | WARNING | 172.18.0.1 | GET /backup_secrets/ | HONEYPOT ALERT: {"timestamp": "2026-07-31T12:50:56.710Z", "event": "honeypot_hit", "severity": "CRITICAL", "source_ip": "172.18.0.1", "path": "/backup_secrets/", "user_agent": "curl/7.81.0", "details": "Request for disallowed path listed in robots.txt: /backup_secrets/"}
+2026-07-31 12:51:51,983 | WARNING | 192.168.20.12 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.12 | path=/reset-password
+2026-07-31 12:51:51,993 | INFO | 192.168.20.12 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=kien
+2026-07-31 12:51:51,997 | INFO | 192.168.20.12 | POST /api/reset-password | Reset email sent to aaa@gmail.com
+2026-07-31 12:53:39,791 | INFO | 192.168.20.1 | POST /reset-password/ | 404 hit: /reset-password/ from 192.168.20.1
+2026-07-31 12:53:48,015 | WARNING | 172.18.0.1 | GET /backup_secrets/ | HONEYPOT ALERT: {"timestamp": "2026-07-31T12:53:48.015Z", "event": "honeypot_hit", "severity": "CRITICAL", "source_ip": "172.18.0.1", "path": "/backup_secrets/", "user_agent": "curl/7.81.0", "details": "Request for disallowed path listed in robots.txt: /backup_secrets/"}
+2026-07-31 12:53:51,263 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 12:53:51,272 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 12:53:51,277 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 12:54:04,936 | INFO | 192.168.20.1 | POST /reset-password/ | 404 hit: /reset-password/ from 192.168.20.1
+2026-07-31 12:55:19,581 | INFO | 172.18.0.1 | GET /favicon.ico | 404 hit: /favicon.ico from 172.18.0.1
+2026-07-31 12:55:46,213 | INFO | 192.168.20.1 | POST /reset-password/ | 404 hit: /reset-password/ from 192.168.20.1
+2026-07-31 12:56:22,774 | INFO | 192.168.20.1 | POST /reset-password/ | 404 hit: /reset-password/ from 192.168.20.1
+2026-07-31 12:56:32,994 | INFO | 192.168.20.1 | POST /reset-password/ | 404 hit: /reset-password/ from 192.168.20.1
+2026-07-31 12:56:59,535 | INFO | 192.168.20.1 | POST /reset-password/ | 404 hit: /reset-password/ from 192.168.20.1
+2026-07-31 13:02:11,770 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=172.18.0.1 | path=/reset-password
+2026-07-31 13:02:11,776 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=kien
+2026-07-31 13:02:11,778 | INFO | 172.18.0.1 | POST /api/reset-password | Reset email sent to aaa@gmail.com
+2026-07-31 13:04:12,597 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 13:04:12,601 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=kien
+2026-07-31 13:04:12,603 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to aaa@gmail.com
+2026-07-31 13:04:20,865 | WARNING | 192.168.20.1 | GET /backup_secrets/ | HONEYPOT ALERT: {"timestamp": "2026-07-31T13:04:20.865Z", "event": "honeypot_hit", "severity": "CRITICAL", "source_ip": "192.168.20.1", "path": "/backup_secrets/", "user_agent": "curl/8.18.0", "details": "Request for disallowed path listed in robots.txt: /backup_secrets/"}
+2026-07-31 13:04:57,115 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 13:04:57,120 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 13:04:57,122 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 13:05:55,772 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 13:05:55,773 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | email=madeup@add.co | no_matching_account
+2026-07-31 13:06:36,602 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=amimean.enough | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 13:06:36,607 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 13:06:36,609 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 13:07:06,127 | WARNING | 192.168.20.1 | GET /backup_secrets/db_backup_2024.sql.bak | HONEYPOT ALERT: {"timestamp": "2026-07-31T13:07:06.127Z", "event": "honeypot_hit", "severity": "CRITICAL", "source_ip": "192.168.20.1", "path": "/backup_secrets/db_backup_2024.sql.bak", "user_agent": "curl/8.18.0", "details": "Request for disallowed path listed in robots.txt: /backup_secrets/db_backup_2024.sql.bak"}
+2026-07-31 13:08:16,958 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=amimean.enough | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 13:08:16,963 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=4Derya
+2026-07-31 13:08:16,965 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to random@add.co
+2026-07-31 13:15:56,093 | WARNING | 192.168.20.1 | GET /backup_secrets/ | HONEYPOT ALERT: {"timestamp": "2026-07-31T13:15:56.092Z", "event": "honeypot_hit", "severity": "CRITICAL", "source_ip": "192.168.20.1", "path": "/backup_secrets/", "user_agent": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0", "details": "Request for disallowed path listed in robots.txt: /backup_secrets/"}
+2026-07-31 13:17:04,973 | WARNING | 192.168.20.1 | GET /backup_secrets/db_backup_2024.sql.bak | HONEYPOT ALERT: {"timestamp": "2026-07-31T13:17:04.973Z", "event": "honeypot_hit", "severity": "CRITICAL", "source_ip": "192.168.20.1", "path": "/backup_secrets/db_backup_2024.sql.bak", "user_agent": "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0", "details": "Request for disallowed path listed in robots.txt: /backup_secrets/db_backup_2024.sql.bak"}
+2026-07-31 14:07:41,672 | WARNING | 172.18.0.1 | GET /backup_secrets/ | HONEYPOT ALERT: {"timestamp": "2026-07-31T14:07:41.672Z", "event": "honeypot_hit", "severity": "CRITICAL", "source_ip": "172.18.0.1", "path": "/backup_secrets/", "user_agent": "curl/7.81.0", "details": "Request for disallowed path listed in robots.txt: /backup_secrets/"}
+2026-07-31 19:25:15,083 | INFO | 192.168.20.1 | GET /r | 404 hit: /r from 192.168.20.1
+2026-07-31 19:28:53,155 | WARNING | 172.18.0.1 | GET /backup_secrets/ | HONEYPOT ALERT: {"timestamp": "2026-07-31T19:28:53.155Z", "event": "honeypot_hit", "severity": "CRITICAL", "source_ip": "172.18.0.1", "path": "/backup_secrets/", "user_agent": "curl/7.81.0", "details": "Request for disallowed path listed in robots.txt: /backup_secrets/"}
+2026-07-31 19:37:22,502 | INFO | 192.168.20.1 | POST /register | Register endpoint hit
+2026-07-31 19:37:22,735 | INFO | 192.168.20.1 | POST /register | New user registered: TestBurpSuite
+2026-07-31 19:50:53,213 | INFO | 172.18.0.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:50:53,651 | INFO | 172.18.0.1 | POST /api/login | MFA code sent to admin@driftlock.com
+2026-07-31 19:50:53,651 | INFO | 172.18.0.1 | POST /api/login | Password OK, login code emailed: admin
+2026-07-31 19:51:06,962 | INFO | 172.18.0.1 | POST /verify-mfa | MFA verify success: admin
+2026-07-31 19:51:56,084 | INFO | 192.168.20.1 | POST /register | Register endpoint hit
+2026-07-31 19:51:56,086 | INFO | 192.168.20.1 | POST /register | Register endpoint hit
+2026-07-31 19:51:56,087 | INFO | 192.168.20.1 | POST /register | Register endpoint hit
+2026-07-31 19:51:56,390 | INFO | 192.168.20.1 | POST /register | New user registered: test
+2026-07-31 19:51:56,401 | ERROR | 192.168.20.1 | POST /register | Error during registration: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "users_username_key"
+DETAIL:  Key (username)=(test) already exists.
+
+[SQL: INSERT INTO users (username, email, password_hash, mfa_enabled, role, verification_code, code_expires_at, created_at) VALUES (%(username)s, %(email)s, %(password_hash)s, %(mfa_enabled)s, %(role)s, %(verification_code)s, %(code_expires_at)s, %(created_at)s) RETURNING users.id]
+[parameters: {'username': 'test', 'email': 'test@gmail.com', 'password_hash': '$2b$12$LX0iFHS.rVnlb6bqb.QCSuKpmjC4Np8QTnmnftoImZYMRRj2G0.aG', 'mfa_enabled': False, 'role': 'U', 'verification_code': None, 'code_expires_at': None, 'created_at': datetime.datetime(2026, 7, 31, 19, 51, 56, 398372)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "users_username_key"
+DETAIL:  Key (username)=(test) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/auth.py", line 163, in register
+    db.session.flush()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 923, in flush
+    return self._proxied.flush(objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4353, in flush
+    self._flush(objects)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4488, in _flush
+    with util.safe_reraise():
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4449, in _flush
+    flush_context.execute()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 465, in execute
+    rec.execute(self)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 641, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 94, in save_obj
+    _emit_insert_statements(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1234, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "users_username_key"
+DETAIL:  Key (username)=(test) already exists.
+
+[SQL: INSERT INTO users (username, email, password_hash, mfa_enabled, role, verification_code, code_expires_at, created_at) VALUES (%(username)s, %(email)s, %(password_hash)s, %(mfa_enabled)s, %(role)s, %(verification_code)s, %(code_expires_at)s, %(created_at)s) RETURNING users.id]
+[parameters: {'username': 'test', 'email': 'test@gmail.com', 'password_hash': '$2b$12$LX0iFHS.rVnlb6bqb.QCSuKpmjC4Np8QTnmnftoImZYMRRj2G0.aG', 'mfa_enabled': False, 'role': 'U', 'verification_code': None, 'code_expires_at': None, 'created_at': datetime.datetime(2026, 7, 31, 19, 51, 56, 398372)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2026-07-31 19:51:56,458 | ERROR | 192.168.20.1 | POST /register | Error during registration: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "users_username_key"
+DETAIL:  Key (username)=(test) already exists.
+
+[SQL: INSERT INTO users (username, email, password_hash, mfa_enabled, role, verification_code, code_expires_at, created_at) VALUES (%(username)s, %(email)s, %(password_hash)s, %(mfa_enabled)s, %(role)s, %(verification_code)s, %(code_expires_at)s, %(created_at)s) RETURNING users.id]
+[parameters: {'username': 'test', 'email': 'test@gmail.com', 'password_hash': '$2b$12$RWKBF.1RKbYv7./kCSSBqOjY7CsOTLN5255Z0XErdG0WIAkyaUsem', 'mfa_enabled': False, 'role': 'U', 'verification_code': None, 'code_expires_at': None, 'created_at': datetime.datetime(2026, 7, 31, 19, 51, 56, 457411)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.errors.UniqueViolation: duplicate key value violates unique constraint "users_username_key"
+DETAIL:  Key (username)=(test) already exists.
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/app/auth.py", line 163, in register
+    db.session.flush()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/scoping.py", line 923, in flush
+    return self._proxied.flush(objects=objects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4353, in flush
+    self._flush(objects)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4488, in _flush
+    with util.safe_reraise():
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/session.py", line 4449, in _flush
+    flush_context.execute()
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 465, in execute
+    rec.execute(self)
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/unitofwork.py", line 641, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 94, in save_obj
+    _emit_insert_statements(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/orm/persistence.py", line 1234, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1421, in execute
+    return meth(
+           ^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1643, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1848, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1988, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 2365, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/base.py", line 1969, in _exec_single_context
+    self.dialect.do_execute(
+  File "/usr/local/lib/python3.11/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.IntegrityError: (psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "users_username_key"
+DETAIL:  Key (username)=(test) already exists.
+
+[SQL: INSERT INTO users (username, email, password_hash, mfa_enabled, role, verification_code, code_expires_at, created_at) VALUES (%(username)s, %(email)s, %(password_hash)s, %(mfa_enabled)s, %(role)s, %(verification_code)s, %(code_expires_at)s, %(created_at)s) RETURNING users.id]
+[parameters: {'username': 'test', 'email': 'test@gmail.com', 'password_hash': '$2b$12$RWKBF.1RKbYv7./kCSSBqOjY7CsOTLN5255Z0XErdG0WIAkyaUsem', 'mfa_enabled': False, 'role': 'U', 'verification_code': None, 'code_expires_at': None, 'created_at': datetime.datetime(2026, 7, 31, 19, 51, 56, 457411)}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+2026-07-31 19:53:31,750 | INFO | 192.168.20.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=11
+2026-07-31 19:53:31,750 | INFO | 192.168.20.1 | POST /register/confirm-mfa | MFA setup confirmed for user_id=11
+2026-07-31 19:54:33,052 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,052 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,066 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,078 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,081 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,092 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,109 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,123 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,143 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,149 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,161 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,175 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,190 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:33,207 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 19:54:34,350 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,398 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,434 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,510 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,515 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,538 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,550 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,573 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,588 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,615 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,625 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,638 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,650 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:54:34,661 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 19:55:44,270 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 19:55:44,276 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=test
+2026-07-31 19:55:44,278 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to test@gmail.com
+2026-07-31 20:02:57,893 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=test.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 20:02:57,899 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=test
+2026-07-31 20:02:57,902 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to test@gmail.com
+2026-07-31 20:10:19,953 | INFO | 192.168.20.1 | GET /api/ | 404 hit: /api/ from 192.168.20.1
+2026-07-31 20:12:39,703 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 20:12:39,912 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 20:12:43,428 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 20:12:43,637 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 20:12:45,575 | INFO | 192.168.20.1 | POST /api/login | Login endpoint hit
+2026-07-31 20:12:45,783 | WARNING | 192.168.20.1 | POST /api/login | Login failed for test@gmail.com from 192.168.20.1
+2026-07-31 20:13:06,800 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 20:13:06,805 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=test
+2026-07-31 20:13:06,807 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to test@gmail.com
+2026-07-31 20:13:33,806 | INFO | 192.168.20.1 | GET /api/ | 404 hit: /api/ from 192.168.20.1
+2026-07-31 20:14:03,297 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=test.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 20:14:03,303 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=test
+2026-07-31 20:14:03,305 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to test@gmail.com
+2026-07-31 20:18:28,419 | INFO | 192.168.20.1 | POST /api/ | 404 hit: /api/ from 192.168.20.1
+2026-07-31 20:19:04,359 | WARNING | 192.168.20.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=192.168.20.12:4325 | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=192.168.20.1 | path=/reset-password
+2026-07-31 20:19:04,363 | INFO | 192.168.20.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | user=test
+2026-07-31 20:19:04,365 | INFO | 192.168.20.1 | POST /api/reset-password | Reset email sent to test@gmail.com
+2026-07-31 20:19:42,042 | INFO | 192.168.20.1 | POST /api/ | 404 hit: /api/ from 192.168.20.1
+2026-07-31 20:28:05,139 | INFO | 192.168.20.1 | GET /api/v1/message/13tPTW15qPxbHFdnzRQpgsbmnFTpQnFoIjn1M4e2kWk | 404 hit: /api/v1/message/13tPTW15qPxbHFdnzRQpgsbmnFTpQnFoIjn1M4e2kWk from 192.168.20.1
+2026-07-31 20:28:10,560 | INFO | 192.168.20.1 | GET /api/v1/message | 404 hit: /api/v1/message from 192.168.20.1
+2026-07-31 20:28:33,605 | INFO | 192.168.20.1 | GET /api/v1/messages | 404 hit: /api/v1/messages from 192.168.20.1
+2026-07-31 20:40:50,165 | WARNING | 172.18.0.1 | GET /api/debug | Debug endpoint accessed by 172.18.0.1
+2026-07-31 20:40:50,195 | WARNING | 172.18.0.1 | POST /api/reset-password | HOST_HEADER_ANOMALY | incoming_host=evil-attacker.com | flag=DRIFTLOCK{h0st_h34d3r_1nj3ct10n} | expected_host=localhost:4325 | ip=172.18.0.1 | path=/reset-password
+2026-07-31 20:40:50,196 | INFO | 172.18.0.1 | POST /api/reset-password | PASSWORD_RESET_REQUESTED | email=<real-user>@driftlock.com | no_matching_account
