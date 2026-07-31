@@ -1,4 +1,0 @@
-{"timestamp": "2026-07-29T10:06:17.583104+00:00", "event": "request", "source_ip": "172.18.0.1", "method": "GET", "path": "/api/users", "user_agent": "curl/8.18.0"}
-{"timestamp": "2026-07-29T10:09:04.671908+00:00", "event": "request", "source_ip": "172.18.0.1", "method": "GET", "path": "/api/users", "user_agent": "curl/8.18.0"}
-{"timestamp": "2026-07-29T10:09:51.908821+00:00", "event": "request", "source_ip": "172.18.0.1", "method": "GET", "path": "/api/v1/users/3/setup-status", "user_agent": "curl/8.18.0"}
-{"timestamp": "2026-07-29T10:09:51.931687+00:00", "event": "setup_status_access", "source_ip": "172.18.0.1", "requested_id": 3, "distinct_ids_seen": 1}
