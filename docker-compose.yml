@@ -17,6 +17,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
+      - frontend
       - backend
     security_opt:
       - no-new-privileges:true

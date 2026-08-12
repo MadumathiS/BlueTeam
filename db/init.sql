@@ -35,6 +35,7 @@ CREATE TABLE activity_logs (
     session_id VARCHAR(128),
     timestamp TIMESTAMP DEFAULT NOW()
 );
+
 CREATE TABLE IF NOT EXISTS honeypot_logs (
     id          BIGSERIAL PRIMARY KEY,
     "timestamp" TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -47,3 +48,18 @@ CREATE TABLE IF NOT EXISTS honeypot_logs (
 
 CREATE INDEX IF NOT EXISTS idx_honeypot_logs_timestamp
     ON honeypot_logs ("timestamp" DESC);
+
+-- CTF Flag Submission Tracking (Red Team progress monitoring)
+CREATE TABLE ctf_submissions (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    level VARCHAR(50) NOT NULL,
+    timestamp TIMESTAMP DEFAULT NOW(),
+    ip_address INET,
+    user_agent TEXT,
+    UNIQUE(username, level)
+);
+
+CREATE INDEX idx_ctf_submissions_timestamp ON ctf_submissions(timestamp DESC);
+CREATE INDEX idx_ctf_submissions_username ON ctf_submissions(username);
+CREATE INDEX idx_ctf_submissions_level ON ctf_submissions(level);

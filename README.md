@@ -82,11 +82,44 @@ flowchart LR
     ES --> Kibana
 ```
 ---
+### CTF Flag Submission & Leaderboard System
+
+DriftLock includes a built-in CTF flag submission system with real-time leaderboard tracking, user progress management, and comprehensive audit logging. This allows Red Team members to submit captured flags, track their progress, and view rankings — while the Blue Team monitors all submission activity in ELK.
+
+#### Features
+
+- Timestamp-based tracking: Every flag submission records the exact date and time
+- User progress history: Track which challenges each user has solved and when
+- Real-time leaderboard: Rank users by challenges solved, with per-challenge submission times
+- Submission timeline: Chronological feed of all flag submissions across all users
+- JSON API: Machine-readable submission data for custom dashboards
+- Audit logging: All submissions logged to access.log and detections.log for forensic analysis
+
+#### Endpoints
+
+Endpoint	Method	Purpose
+/submit	GET, POST	Flag submission form + personal progress
+/leaderboard	GET	User rankings and submission history
+/api/submissions	GET	All submissions as JSON
+#### Quick Examples
+```
+# Submit a flag
+curl -X POST http://localhost:4325/submit \
+  -d "flag=FLAG{34sy_f1l3_r34d}"
+
+# View leaderboard
+curl http://localhost:4325/leaderboard
+
+# Get JSON submissions
+curl http://localhost:4325/api/submissions | jq
+
+```
+
 ### Components
 
 | Component | Port (host to container) | Role |
 |-----------|----------------------|------|
-| web (Flask) | 4325 | Main portal: registration, login, MFA, support, honeypot, `/api/debug` |
+| web (Flask) | 4325 | Main portal: registration, login, MFA, support, honeypot, `/api/debug`, CTF submission & leaderboard |
 | internal-api (Flask) | 5000 | Separate scannable service; hosts the IDOR vulnerability |
 | db (PostgreSQL 16) | 5433 to 5432 (localhost only) | Shared database for both app services |
 | redis | 6379 (localhost only) | Rate-limit counters + login-lockout tracking |
@@ -138,13 +171,30 @@ docker compose up -d elasticsearch
 docker compose up -d kibana logstash
 ```
 
-Key endpoints once running:
+#### Key endpoints once running:
 
 - App: `http://localhost:4325/`
 - Internal API: `http://localhost:5000/`
 - Kibana: `http://localhost:5601/` (host-only)
 - Elasticsearch: `http://localhost:9200/` (host-only)
 - MailHog `http://localhost:8025/` (host-only)
+
+#### CTF Submission Endpoints
+- Endpoint	Method	Purpose
+- /submit	GET, POST	Flag submission form + personal progress
+- /leaderboard	GET	User rankings and submission history
+- /api/submissions	GET	All submissions (JSON)
+
+Example
+```
+# Submit a flag
+curl -X POST http://localhost:4325/submit \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "flag=FLAG{34sy_f1l3_r34d}"
+
+# Get JSON submissions
+curl http://localhost:4325/api/submissions | jq '.submissions[] | select(.level=="Hard")'
+```
 
 On Linux, Elasticsearch may require: sudo sysctl -w vm.max_map_count=262144
 
@@ -165,7 +215,8 @@ blue-team-mfa-portal/
 │
 ├── web/
 │   ├── app.py                    # Flask app, routes, logging, rate limiting;
-│   │                             #   /api/debug = intentional vuln (MEDIUM)
+│   │                             #   /api/debug = intentional vuln (MEDIUM);
+│   │                             #   /submit + /leaderboard = CTF submission system
 │   ├── auth.py                   # registration, login, verify-mfa, logout
 │   ├── reset.py                  # password-reset flow; Host Header Injection
 │   │                             #   vuln (HARD) on main; fixed on patched
@@ -176,16 +227,17 @@ blue-team-mfa-portal/
 │   │                             #   used by mfa.py for add-another-device feature
 │   ├── decorators.py             # @login_required
 │   ├── models.py                 # DB models (User, TOTPSeed,
-│   │                             #   PasswordResetToken, etc.)
+│   │                             #   PasswordResetToken, CTFSubmission, etc.)
 │   ├── honeypot.py               # honeypot blueprint: robots.txt bait +
 │   │                             #   /backup_secrets/ trap, embedded decoy
-│   ├── detections.py             # TOTP replay + IDOR enumeration detection
+│   ├── detections.py             #  IDOR enumeration detection
 │   │                             #   helpers; writes to detections.log
 │   ├── robots.txt                # discloses /backup_secrets/ — bait
 │   ├── requirements.txt
 │   ├── Dockerfile
 │   ├── templates/                # index, login, register, mfa, mfa_verify,
-│   │                             #   reset_request, reset_form, support, admin
+│   │                             #   reset_request, reset_form, support, admin,
+│   │                             #   submit, leaderboard
 │   └── static/                   # css, images
 │
 ├── internal-api/                 # separate service, own port (5000) — scannable
@@ -235,6 +287,49 @@ blue-team-mfa-portal/
                                   #   (access, internal-api, honeypot,
                                   #    detections) — integrity proof
 ```
+#### CTF Submission System Configuration
+##### Environment Variables
+
+Add to .env file:
+```
+bash
+# CTF Configuration
+CTF_ENABLED=true                  # Enable/disable CTF submission system
+CTF_PERSIST_TO_DB=false          # Store submissions in database (requires schema)
+CTF_ALLOW_ANONYMOUS=true         # Allow submissions without authentication
+```
+##### Valid Flags
+
+Edit web/app.py to configure valid flags:
+```
+python
+VALID_FLAGS = {
+    "FLAG{34sy_f1l3_r34d}": "Easy",
+    "FLAG{m3d1um_tot13_q3p0q3q}": "Medium",
+    "FLAG{h4rd_c11_p1p3l1n3_m4st3r}": "Hard"
+}
+```
+##### Database Schema (Optional)
+
+To persist submissions to PostgreSQL instead of in-memory storage, add to db/init.sql:
+```
+sql
+CREATE TABLE ctf_submissions (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL,
+    level VARCHAR(50) NOT NULL,
+    timestamp TIMESTAMP DEFAULT NOW(),
+    ip_address INET,
+    user_agent TEXT,
+    UNIQUE(username, level)
+);
+
+CREATE INDEX idx_ctf_submissions_timestamp ON ctf_submissions(timestamp DESC);
+CREATE INDEX idx_ctf_submissions_username ON ctf_submissions(username);
+CREATE INDEX idx_ctf_submissions_level ON ctf_submissions(level);
+```
+
+Then set CTF_PERSIST_TO_DB=true in .env.
 
 ### Branch differences
 ```
@@ -306,6 +401,22 @@ Disclosure note: These three vulnerabilities are intentional CTF targets. Every 
 - driftlock-internal-api-* — internal-api requests + IDOR enumeration alerts
 - driftlock-detections-* — replay / enumeration detection events
 
+### Monitoring CTF Submissions in Kibana
+
+Search driftlock-access-* for CTF activity:
+```
+# All flag submissions
+path:/submit AND method:POST
+
+# Leaderboard views
+path:/leaderboard
+
+# Duplicate attempts
+"already submitted"
+
+# Submissions by source IP
+path:/submit | stats count by source_ip
+```
 ---
 
 ## Reports
@@ -321,7 +432,11 @@ Disclosure note: These three vulnerabilities are intentional CTF targets. Every 
 Complete: the defensive infrastructure (honeypot, request logging, the ELK monitoring pipeline, the internal-api service, and the Docker deployment); the two-step login flow (password -> emailed OTP) with enumeration and session-fixation protections; and session-based authorization on sensitive endpoints. The three intentional vulnerabilities are in place and documented. Remediation is demonstrated on the `patched` branch.
 
 ---
-
+## CTF Submission System
+- Flag submissions are logged to access.log and available in Kibana for forensic analysis
+- By default, submissions are stored in-memory and lost on app restart; enable CTF_PERSIST_TO_DB for production use
+- All timestamps are in UTC; templates format for human display with strftime()
+- Disable the submission system by setting CTF_ENABLED=false in .env
 ## Notes
 
 All testing and scanning must occur only within the isolated lab environment.
