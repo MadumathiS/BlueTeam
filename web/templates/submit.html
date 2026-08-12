@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Capture the Bandit - Flag Submission</title>
+</head>
+<body>
+    <h1>Submit Your Flags</h1>
+    
+    {% if message %}
+        <p style="color: {{ 'green' if success else 'red' }};"><strong>{{ message }}</strong></p>
+    {% endif %}
+
+    <form method="POST" action="/submit">
+        <label for="flag">Enter Flag:</label>
+        <input type="text" id="flag" name="flag" placeholder="FLAG{...}" required style="width: 300px;">
+        <button type="submit">Submit</button>
+    </form>
+
+    <h2>Your Solved Challenges:</h2>
+    <ul>
+        {% for solved in user_solved %}
+            <li>{{ solved }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

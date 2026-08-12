@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 import psycopg2
 import time
 from urllib.parse import quote_plus
+from datetime import datetime
 
 from auth import (
     register as register_handler,
@@ -23,6 +24,7 @@ from auth import (
 from mfa import totp_bp
 from reset import request_reset, reset_password as reset_password_handler
 from admindashboard import admin_bp, alerts_bp
+
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
@@ -233,6 +235,127 @@ def debug():
         "flask_env": "development",
         "app_secret_hint": "check .env file",  # intentionally leaky
         "flag": "DRIFTLOCK{d3bug_3ndp01nt_3xp0s3d}"
+    })
+
+
+
+# Define the valid flags and their respective levels
+VALID_FLAGS = {
+    "FLAG{34sy_f1l3_r34d}": "Easy",
+    "FLAG{m3d1um_tot13_q3p0q3q}": "Medium",
+    "FLAG{h4rd_c11_p1p3l1n3_m4st3r}": "Hard"
+}
+
+# Enhanced data tracking with timestamps
+# Format: {username: {'Easy': datetime, 'Medium': datetime, 'Hard': datetime}}
+USER_PROGRESS = {}
+
+# Track all submissions with timestamps and usernames
+# Format: [{'username': str, 'level': str, 'timestamp': datetime}, ...]
+ALL_SUBMISSIONS = []
+
+
+@app.route('/submit', methods=['GET', 'POST'])
+def submit_flag():
+    """Handle flag submission with timestamp tracking."""
+    # Ensure user is logged in (using your existing auth mechanism)
+    username = session.get('username', 'redteam_guest')
+    
+    if username not in USER_PROGRESS:
+        USER_PROGRESS[username] = {}
+
+    message = ""
+    success = False
+
+    if request.method == 'POST':
+        submitted_flag = request.form.get('flag', '').strip()
+        
+        if submitted_flag in VALID_FLAGS:
+            level = VALID_FLAGS[submitted_flag]
+            
+            # Check if user already solved this level
+            if level not in USER_PROGRESS[username]:
+                # Record timestamp for this submission
+                submission_time = datetime.now()
+                USER_PROGRESS[username][level] = submission_time
+                
+                # Add to global submissions list
+                ALL_SUBMISSIONS.append({
+                    'username': username,
+                    'level': level,
+                    'timestamp': submission_time
+                })
+                
+                # TODO: Save USER_PROGRESS[username] and ALL_SUBMISSIONS to your persistent database here
+                message = f"Correct! You solved the {level} challenge."
+                success = True
+                
+                # Log the submission
+                app.logger.info(f"Flag submitted by {username}: {level} at {submission_time}")
+            else:
+                existing_time = USER_PROGRESS[username][level].strftime('%Y-%m-%d %H:%M:%S')
+                message = f"You already submitted the {level} flag on {existing_time}!"
+        else:
+            message = "Invalid flag. Try again!"
+
+    return render_template(
+        'submit.html', 
+        message=message, 
+        success=success, 
+        user_solved=USER_PROGRESS[username]
+    )
+
+
+@app.route('/leaderboard')
+def leaderboard():
+    """Display all users who have submitted flags and their submission times."""
+    # Sort submissions by timestamp (most recent first)
+    sorted_submissions = sorted(ALL_SUBMISSIONS, key=lambda x: x['timestamp'], reverse=True)
+    
+    # Get unique users with their progress
+    user_stats = {}
+    for username in USER_PROGRESS:
+        solved_count = len(USER_PROGRESS[username])
+        # Get the most recent submission time for this user
+        user_submissions = [s for s in ALL_SUBMISSIONS if s['username'] == username]
+        last_submission = max([s['timestamp'] for s in user_submissions]) if user_submissions else None
+        
+        user_stats[username] = {
+            'solved_count': solved_count,
+            'last_submission': last_submission,
+            'challenges': USER_PROGRESS[username]
+        }
+    
+    # Sort users by number of challenges solved (descending), then by last submission time
+    sorted_users = sorted(
+        user_stats.items(),
+        key=lambda x: (x[1]['solved_count'], x[1]['last_submission'] or datetime.min),
+        reverse=True
+    )
+    
+    return render_template(
+        'leaderboard.html',
+        user_stats=sorted_users,
+        all_submissions=sorted_submissions
+    )
+
+
+@app.route('/api/submissions')
+def api_submissions():
+    """API endpoint to get all submissions as JSON."""
+    # Convert datetime objects to strings for JSON serialization
+    submissions = [
+        {
+            'username': s['username'],
+            'level': s['level'],
+            'timestamp': s['timestamp'].isoformat()
+        }
+        for s in sorted(ALL_SUBMISSIONS, key=lambda x: x['timestamp'], reverse=True)
+    ]
+    
+    return jsonify({
+        'total_submissions': len(ALL_SUBMISSIONS),
+        'submissions': submissions
     })
 
 
